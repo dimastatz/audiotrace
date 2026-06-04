@@ -9,13 +9,13 @@
 </kbd>
 </div>
 
-A purpose-built observability platform that sits on top of any voice agent stack and turns raw call data into structured, actionable intelligence.
-
 ---
 
 ## System Architecture
 
-```
+A purpose-built observability platform that sits on top of any voice agent stack and turns raw call data into structured, actionable intelligence.
+
+``` Bash
 ┌─────────────────────────────────────────────────────────────────┐
 │                     Voice Agent Providers                       │
 │         Vapi · Retell · ElevenLabs · Twilio · Custom            │
