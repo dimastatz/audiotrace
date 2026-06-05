@@ -1,11 +1,11 @@
 <div align="center">
-<h1 align="center"> LangVox </h1> 
+<h1 align="center"> AudioTrace </h1> 
 <h3>CI/CD for voice AI</br></h3>
 <img src="https://img.shields.io/badge/Progress-10%25-red"> <img src="https://img.shields.io/badge/Feedback-Welcome-green">
 </br>
 </br>
 <kbd>
-<img src="./docs/Langvox.png?raw=true" width="256px"> 
+<img src="./docs/auditrace.png?raw=true" width="256px"> 
 </kbd>
 </div>
 
