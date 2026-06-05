@@ -9,241 +9,245 @@
 </kbd>
 </div>
 
----
+## What is AudioTrace?
 
-## System Architecture
+AudioTrace is a Python framework that takes a raw audio file from a voice AI agent call and returns a fully structured `CallReport` — every quality signal, sentiment shift, latency breakdown, cost figure, and compliance flag extracted and normalized into a single object.
 
-A purpose-built observability platform that sits on top of any voice agent stack and turns raw call data into structured, actionable intelligence.
+It is **not** a dashboard. It is **not** a SaaS product. It is the open-source infrastructure layer that any team building voice agent tooling can build on top of.
 
-``` Bash
-┌─────────────────────────────────────────────────────────────────┐
-│                     Voice Agent Providers                       │
-│         Vapi · Retell · ElevenLabs · Twilio · Custom            │
-└────────┬───────────┬──────────────┬──────────────┬─────────────-┘
-         │           │              │              │
-         ▼           ▼              ▼              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      Ingestion Layer                            │
-│           Webhooks · SDK · REST API · Streaming                 │
-└─────────────────────────────┬───────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Processing Pipeline                          │
-│  ┌─────────────┐ ┌──────────────┐ ┌────────────┐ ┌──────────-┐  │
-│  │Transcription│ │Latency Audit │ │  Quality   │ │  Cost     │  │
-│  │+ Diarization│ │STT/LLM/TTS   │ │  Scoring   │ │Attribution│  │
-│  └─────────────┘ └──────────────┘ └────────────┘ └──────────-┘  │
-└─────────────────────────────┬───────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   Structured Data Store                         │
-│       Transcripts · Metrics · Events · Cost Records             │
-└──────────┬──────────────┬──────────────┬────────────────────────┘
-           │              │              │
-           ▼              ▼              ▼
-    ┌────────────┐ ┌────────────┐ ┌────────────────┐
-    │  Engineer  │ │  PM / QA   │ │      Exec      │
-    │ Dashboard  │ │ Dashboard  │ │   Dashboard    │
-    └────────────┘ └────────────┘ └────────────────┘
-                              │
-                              ▼
-               ┌──────────────────────────┐
-               │    Alerts & Integrations │
-               │  Slack · PagerDuty · API │
-               └──────────────────────────┘
+```python
+import audiotrace
+
+report = audiotrace.analyze(
+    audio    = "call_recording.wav",
+    metadata = {"agent_version": "v2.1", "provider": "vapi"}
+)
+
+print(report.quality.overall_score)        # 0.87
+print(report.sentiment.caller_frustration) # False
+print(report.latency.llm_first_token_ms)   # 420
+print(report.events.drop_off)              # False
+print(report.cost.total_usd)               # 0.063
 ```
 
 ---
 
-## How It Works
+## Why AudioTrace?
 
-### 1. Ingestion Layer
+Every team building voice agents faces the same problem: raw audio is a black box. You can listen to recordings manually, or you can build your own signal extraction pipeline from scratch — but no open-source framework normalizes the full call into a structured, queryable object.
 
-LangVox connects to any voice agent provider via webhooks, SDK, REST API, or streaming connectors. Supported out of the box: **Vapi, Retell, ElevenLabs, Twilio, Deepgram**, and custom LLM-powered telephony stacks.
+AudioTrace exists to be that shared layer. It handles the hard parts so you can focus on what you're building:
 
-The platform is fully stack-agnostic — it does not care which LLM, STT, or TTS provider runs underneath.
+- Transcription with speaker diarization
+- Silence gaps, interruptions, speaking pace, and pitch analysis
+- Per-turn sentiment tracking and frustration detection
+- Per-stage latency breakdown (STT → LLM → TTS → telephony)
+- Unified cost calculation across any provider mix
+- Compliance flag detection (PII leakage, consent gaps)
 
+---
+
+## Installation
+
+```bash
+pip install audiotrace
+
+# With specific provider adapter
+pip install audiotrace[vapi]
+pip install audiotrace[retell]
+pip install audiotrace[twilio]
+
+# Full install
+pip install audiotrace[all]
 ```
-  Vapi ──┐
-Retell ──┤
-         ├──► Webhook / SDK / REST ──► LangVox Ingestion
- Twilio ─┤
-Custom ──┘
+
+**Requirements:** Python 3.9+, FFmpeg installed on system
+
+---
+
+## Quick start
+
+### Analyze a single call
+
+```python
+import audiotrace
+
+report = audiotrace.analyze(
+    audio    = "call.wav",
+    metadata = {
+        "call_id":       "abc123",
+        "agent_version": "v2.1",
+        "provider":      "vapi",
+        "campaign":      "healthcare_intake"
+    }
+)
+
+# Transcript
+print(report.transcript.full_text)
+for turn in report.transcript.turns:
+    print(f"{turn.speaker}: {turn.text}")
+
+# Quality
+print(report.quality.overall_score)       # float 0.0–1.0
+print(report.quality.interruptions)       # int
+print(report.quality.silence_gaps)        # List[Gap]
+print(report.quality.speaking_pace_wpm)   # float
+
+# Sentiment
+print(report.sentiment.overall)           # float -1.0 to 1.0
+print(report.sentiment.shift_points)      # List[int] — turn indices
+print(report.sentiment.caller_frustration)# bool
+
+# Latency
+print(report.latency.stt_ms)             # int
+print(report.latency.llm_first_token_ms) # int
+print(report.latency.tts_ms)             # int
+print(report.latency.total_ms)           # int
+
+# Cost
+print(report.cost.stt_usd)               # float
+print(report.cost.llm_usd)               # float
+print(report.cost.total_usd)             # float
+
+# Events
+print(report.events.outcome)             # "completed" | "dropped" | "failed"
+print(report.events.drop_off_turn)       # int | None
+print(report.events.compliance_flags)    # List[str]
+```
+
+### Analyze at scale
+
+```python
+reports = audiotrace.batch(
+    audio_files = ["call1.wav", "call2.wav", "call3.wav"],
+    concurrency = 50
+)
+
+summary = reports.summary()
+print(summary.avg_quality_score)   # float
+print(summary.drop_off_rate)       # float
+print(summary.avg_cost_usd)        # float
+print(summary.top_failure_types)   # List[str]
+```
+
+### Use provider adapters
+
+```python
+from audiotrace.adapters import VapiAdapter
+
+adapter = VapiAdapter(api_key="...")
+call    = adapter.fetch_call(call_id="abc123")
+report  = audiotrace.analyze(call.audio, call.metadata)
 ```
 
 ---
 
-### 2. Processing Pipeline
-
-Once call data is ingested, four processing modules run in parallel:
+## Output — CallReport
 
 ```
-                    ┌─────────────────────┐
-                    │   Raw Call Data     │
-                    └──────────┬──────────┘
-                               │
-           ┌───────────────────┼───────────────────┐───────────────────┐
-           │                   │                   │                   │
-           ▼                   ▼                   ▼                   ▼
-  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-  │  Transcription  │ │  Latency Audit  │ │ Quality Scoring │ │Cost Attribution │
-  │                 │ │                 │ │                 │ │                 │
-  │ · Diarization   │ │ · STT timing    │ │ · Interruptions │ │ · Per-provider  │
-  │ · Intent tags   │ │ · LLM latency   │ │ · Silence gaps  │ │ · Per-call      │
-  │ · Outcome tags  │ │ · TTS render    │ │ · Sentiment     │ │ · Per-outcome   │
-  │ · Full-text idx │ │ · P50/P95/P99   │ │ · Speaking pace │ │ · Budget alerts │
-  └─────────────────┘ └─────────────────┘ └─────────────────┘ └─────────────────┘
+CallReport
+├── transcript
+│   ├── full_text: str
+│   ├── turns: List[Turn]   # speaker · text · start_ms · end_ms
+│   └── language: str
+├── quality
+│   ├── overall_score: float
+│   ├── interruptions: int
+│   ├── silence_gaps: List[Gap]
+│   ├── speaking_pace_wpm: float
+│   ├── pitch_variance: float
+│   └── turn_length_avg_ms: float
+├── sentiment
+│   ├── by_turn: List[float]
+│   ├── overall: float
+│   ├── shift_points: List[int]
+│   └── caller_frustration: bool
+├── latency
+│   ├── stt_ms: int
+│   ├── llm_first_token_ms: int
+│   ├── llm_full_response_ms: int
+│   ├── tts_ms: int
+│   ├── total_ms: int
+│   └── waterfall: List[LatencySpan]
+├── cost
+│   ├── stt_usd: float
+│   ├── llm_usd: float
+│   ├── tts_usd: float
+│   ├── telephony_usd: float
+│   └── total_usd: float
+└── events
+    ├── outcome: str
+    ├── drop_off: bool
+    ├── drop_off_turn: int | None
+    ├── intent_detected: str
+    ├── failure_type: str | None
+    └── compliance_flags: List[str]
 ```
 
-#### Transcription
+---
 
-- Speaker-diarized transcripts for every call
-- Full-text search across the call library
-- Tagging by outcome, intent, or failure type
+## Provider support
 
-#### Latency Audit
+| Provider | Adapter | Status |
+|---|---|---|
+| Vapi | `audiotrace[vapi]` | Stable |
+| Retell | `audiotrace[retell]` | Stable |
+| Twilio | `audiotrace[twilio]` | Stable |
+| ElevenLabs | `audiotrace[elevenlabs]` | Beta |
+| Deepgram | `audiotrace[deepgram]` | Stable |
+| Custom webhook | `CustomAdapter` | Stable |
 
-``` Bash
-  Call start
+---
+
+## How it works
+
+AudioTrace builds on top of best-in-class audio libraries so you don't have to:
+
+```
+Raw audio file
       │
-      ├──► STT          [~120ms] ──────────────────────────┐
-      │                                                    │
-      ├──► LLM first token  [~400ms] ─────────────────-─┐  │
-      │                                                 │  │  Waterfall
-      ├──► LLM full response [~650ms] ─────────────-─┐  │  │  view per
-      │                                              │  │  │  call
-      ├──► TTS render    [~200ms] ────────────────┐  │  │  │
-      │                                           │  │  │  │
-      └──► Telephony handoff [~80ms] ──────────┐  │  │  │  │
-                                               ▼  ▼  ▼  ▼  ▼
-                                            Total end-to-end latency
-```
-
-- Per-call breakdown of time spent in each pipeline stage
-- P50 / P95 / P99 views
-- Configurable threshold alerting per stage
-
-#### Quality Scoring
-
-- Automated detection of interruptions, silence gaps, speaking pace, and turn length
-- Caller sentiment shift tracking across the conversation
-- Aggregate scores per agent version for prompt/persona comparison
-
-#### Cost Attribution
-
-``` Bash
-  One call =
-    STT cost   ($/min)
-  + LLM cost   ($/1k tokens)
-  + TTS cost   ($/character)
-  + Telephony  ($/min)
-  ─────────────────────────
-  = Cost per call
-  = Cost per successful outcome
-```
-
-- Unified cost-per-call breakdown across all providers
-- Itemized by STT, LLM, TTS, and telephony
-- Cost-per-successful-outcome and budget alerting
-
----
-
-### 3. Structured Data Store
-
-All processed outputs are normalized into a consistent schema and indexed for:
-
-- Full-text transcript search
-- Filtering by date, agent version, campaign, or phone number
-- Historical trend analysis and anomaly detection
-- Cross-version funnel comparison
-
-``` Bash
-  ┌──────────────────────────────────────────────────┐
-  │              Structured Data Store               │
-  │                                                  │
-  │  calls          metrics         events           │
-  │  ├─ call_id     ├─ latency_ms   ├─ drop_off      │
-  │  ├─ transcript  ├─ quality_score├─ interruption  │
-  │  ├─ duration    ├─ cost_usd     ├─ silence_gap   │
-  │  ├─ agent_ver   ├─ sentiment    └─ intent_tag    │
-  │  └─ outcome     └─ p95_latency                   │
-  └──────────────────────────────────────────────────┘
+      ▼
+  FFmpeg              — format normalization, turn splitting
+      │
+      ├── Whisper     — transcription
+      ├── pyannote    — speaker diarization
+      ├── Librosa     — silence gaps, pace, pitch, energy
+      └── Transformers — sentiment, intent detection
+      │
+      ▼
+  CallReport (Pydantic)
 ```
 
 ---
 
-### 4. Dashboards & Alerts
+## Part of the Lang ecosystem
 
-The same data surfaces through role-appropriate views — no log reading required.
+AudioTrace is the open-source foundation that powers two commercial products:
 
-```
-  ┌─────────────────────────────────────────────────────────┐
-  │                  Structured Data Store                  │
-  └───────────┬──────────────────┬──────────────────────────┘
-              │                  │                  │
-              ▼                  ▼                  ▼
-  ┌───────────────────┐ ┌────────────────┐ ┌────────────────┐
-  │    Engineer       │ │    PM / QA     │ │      Exec      │
-  │                   │ │                │ │                │
-  │ Latency waterfall │ │ Drop-off funnel│ │ Call volume    │
-  │ Pipeline errors   │ │ Quality scores │ │ Cost trends    │
-  │ P50/P95/P99       │ │ A/B comparison │ │ CSAT proxy     │
-  └───────────────────┘ └────────────────┘ └────────────────┘
-              │                  │                  │
-              └──────────────────┼──────────────────┘
-                                 ▼
-              ┌──────────────────────────────────────┐
-              │         Alerts & Integrations        │
-              │   Slack · PagerDuty · Email · API    │
-              └──────────────────────────────────────┘
-```
+| Product | What it does | Built on |
+|---|---|---|
+| **[LangTrace](https://langtrace.io)** | Live call observability & analytics dashboards | AudioTrace |
+| **[LangGate](https://langgate.io)** | Pre-deploy simulation & CI/CD quality gate | AudioTrace |
 
-| Role | Key metrics |
-|---|---|
-| Engineer | Latency waterfall, pipeline errors, P95/P99 breakdowns |
-| PM / QA | Drop-off funnels, quality scores, A/B script comparison |
-| Exec | Call volume, cost trends, CSAT proxy scores |
-
-Alerts fire to **Slack, PagerDuty, or email** when latency, error rate, cost, or quality thresholds are breached. Webhook support is available for custom workflows.
+AudioTrace is free and MIT-licensed. The commercial products are optional hosted layers on top.
 
 ---
 
-## Architecture Principle
+## Contributing
 
-The key architectural bet is the normalization layer: by converting data from any provider into a consistent internal schema, LangVox becomes the **persistent observability layer** even as teams swap out LLMs, TTS engines, or telephony stacks.
+Contributions are welcome — especially new provider adapters, persona definitions for simulation, and compliance rule sets.
 
-``` Bash
-  Without LangVox:          With LangVox:
-
-  Vapi ──► your app         Vapi ──┐
-  Retell ──► ??? logs               ├──► LangVox ──► consistent schema
-  Twilio ──► silence        Twilio ─┘              ──► your dashboards
+```bash
+git clone https://github.com/audiotrace/audiotrace
+cd audiotrace
+pip install -e ".[dev]"
+pytest
 ```
 
-This means:
-
-- No re-instrumentation when switching providers
-- Call history, quality benchmarks, and alert thresholds survive stack migrations
-- Switching costs compound over time as data accumulates
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Integrations
+## License
 
-| Category | Providers |
-|---|---|
-| Telephony / voice agents | Vapi, Retell, Twilio, ElevenLabs |
-| STT | Deepgram, and any webhook-compatible provider |
-| Alerting | Slack, PagerDuty, email, custom webhooks |
-| Deployment | Cloud SaaS, on-prem / VPC (Enterprise) |
-
----
-
-## Compliance & Security
-
-- SOC 2 Type II certification (roadmap: Phase 3)
-- HIPAA-compliant tier for healthcare and financial services (roadmap: Phase 4)
-- On-premises / VPC deployment available on Enterprise plan
-- Role-based access control with SSO support (Scale tier and above)
+MIT — see [LICENSE](LICENSE)
