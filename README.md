@@ -11,7 +11,7 @@
 
 ## What is AudioTrace?
 
-A voice AI plumbing tool every team rebuilds from scratch — until now.
+Voice Agents AI plumbing tool every team rebuilds from scratch — until now.
 Drop in a call recording. Get back everything: transcript, quality scores, sentiment shifts, latency breakdown, cost attribution, compliance flags. Normalized. Structured. Queryable. Works with any provider, any stack.
 One integration. Zero plumbing. Ship faster.
 
