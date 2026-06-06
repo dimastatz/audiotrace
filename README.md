@@ -4,9 +4,7 @@
 <img src="https://img.shields.io/badge/Progress-10%25-red"> <img src="https://img.shields.io/badge/Feedback-Welcome-green">
 </br>
 </br>
-<kbd>
-<img src="./docs/auditrace.png?raw=true" width="256px"> 
-</kbd>
+<img src="./docs/imgs/auditrace.png?raw=true" width="256px"> 
 </div>
 
 ## What is AudioTrace?
@@ -45,6 +43,9 @@ AudioTrace exists to be that shared layer. It handles the hard parts so you can 
 - Unified cost calculation across any provider mix
 - Compliance flag detection (PII leakage, consent gaps)
 
+<div align="center">
+<img src="./docs/imgs/dashboard.png?raw=true"> 
+</div>
 ---
 
 ## Installation
