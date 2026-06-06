@@ -43,9 +43,8 @@ AudioTrace exists to be that shared layer. It handles the hard parts so you can 
 - Unified cost calculation across any provider mix
 - Compliance flag detection (PII leakage, consent gaps)
 
-<div align="center">
 <img src="./docs/imgs/dashboard.png?raw=true"> 
-</div>
+
 ---
 
 ## Installation
