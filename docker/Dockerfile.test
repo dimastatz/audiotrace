@@ -13,8 +13,9 @@ RUN apt-get update \
 WORKDIR /app
 
 # Install dependencies first (cached unless packaging or source-layout changes).
-# README is referenced by pyproject's `readme`, so it must be present at install.
-COPY pyproject.toml README.md ./
+# pyproject references README.md (`readme`) and LICENSE (`license`), so both
+# must be present at install time.
+COPY pyproject.toml README.md LICENSE ./
 COPY src ./src
 RUN pip install --no-cache-dir -e ".[dev]"
 
