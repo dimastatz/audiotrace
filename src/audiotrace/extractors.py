@@ -49,14 +49,16 @@ def extract_media_info(audio_path: str | Path) -> MediaInfo:
 
     fmt = data.get("format", {})
     streams = data.get("streams", [])
-    audio_stream = next((s for s in streams if s.get("codec_type") == "audio"), {})
+    audio_stream: dict[str, object] = next(
+        (s for s in streams if s.get("codec_type") == "audio"), {}
+    )
 
     return MediaInfo(
-        duration_ms=int(float(fmt.get("duration", 0)) * 1000),
-        sample_rate_hz=int(audio_stream.get("sample_rate", 0)),
-        channels=int(audio_stream.get("channels", 0)),
-        codec=audio_stream.get("codec_name", "unknown"),
-        file_size_bytes=int(fmt.get("size", 0)),
-        file_format=fmt.get("format_name", "unknown"),
-        bitrate_kbps=float(fmt.get("bit_rate", 0)) / 1000,
+        duration_ms=int(float(str(fmt.get("duration", 0))) * 1000),
+        sample_rate_hz=int(str(audio_stream.get("sample_rate", 0))),
+        channels=int(str(audio_stream.get("channels", 0))),
+        codec=str(audio_stream.get("codec_name", "unknown")),
+        file_size_bytes=int(str(fmt.get("size", 0))),
+        file_format=str(fmt.get("format_name", "unknown")),
+        bitrate_kbps=float(str(fmt.get("bit_rate", 0))) / 1000,
     )

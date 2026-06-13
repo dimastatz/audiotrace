@@ -40,7 +40,11 @@ ruff format --check .
 echo "Running linter..."
 ruff check .
 
-# 3. Unit tests with coverage
+# 3. Type checking (Mypy)
+echo "Running type checker..."
+mypy src/audiotrace
+
+# 4. Unit tests with coverage
 echo "Running unit tests with coverage..."
 pytest --cov=audiotrace --cov-report=term-missing --cov-fail-under=95
 
