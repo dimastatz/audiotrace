@@ -6,17 +6,22 @@
 
 ## Summary
 
-Implement `audiotrace.analyze(audio, metadata)` so it turns a single audio file
-into a fully populated `CallReport`. This is the foundation every other feature
-(batch, adapters, dashboards) builds on.
+Implement `audiotrace.analyze(audio, metadata)` to extract structured data from
+audio recordings. Delivery is phased: **Milestone 1 focuses exclusively on
+`MediaInfo` extraction** (duration, codec, bitrate) to establish the base
+pipeline before adding heavy extractors (Whisper, Librosa).
 
 ## Goals
 
-- Accept an audio file path (any format FFmpeg can read) plus optional metadata.
-- Normalize audio with FFmpeg, then extract every section of `CallReport`:
+### Milestone 1 (Current)
+- Establish the `analyze()` entry point and FFmpeg-based preprocessing.
+- **Extract and return `MediaInfo` only**: duration, sample rate, channels, codec, file size, format, and bitrate.
+- Ensure `CallReport` validates with only the `media` field populated (others use defaults).
+
+### Milestone 2
+- Integrate heavy extractors for the remaining `CallReport` sections:
   transcript, quality, sentiment, latency, cost, events.
-- Return a validated `CallReport` (the contract already defined in
-  `src/audiotrace/models.py`).
+- Full extraction using Whisper, Librosa, and Transformers.
 
 ## Non-goals
 
@@ -24,7 +29,13 @@ into a fully populated `CallReport`. This is the foundation every other feature
 - Provider-specific fetching — covered by adapter PRDs.
 - Live/streaming analysis — file-based only for now.
 
-## Proposed pipeline
+## Proposed pipeline (Milestone 1)
+
+```
+audio file → FFmpeg (ffprobe) → parse MediaInfo → CallReport
+```
+
+## Proposed pipeline (Full)
 
 ```
 audio file → FFmpeg normalize → Whisper (transcript)
@@ -45,9 +56,9 @@ answer: for audio file alone
 - How is cost computed when provider/pricing metadata is absent?
 answer: show N/A in a meantime
 
-## Acceptance criteria
+## Acceptance criteria (Milestone 1)
 
-- `analyze("call.wav")` returns a `CallReport` with a non-empty transcript.
-- All `CallReport` sections populate for a representative sample call.
-- Unit tests cover each extractor with fixture audio.
-- `pytest`, `ruff check .`, and `mypy src/audiotrace` all pass.
+- `analyze("call.wav")` returns a `CallReport` where `report.media` is fully populated.
+- `report.media.duration_ms` is accurate within 100ms.
+- FFmpeg/ffprobe dependency is verified and handled gracefully.
+- `./scripts/test_local.sh test` passes (covers formatting, linting, and coverage).
