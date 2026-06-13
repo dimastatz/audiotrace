@@ -38,9 +38,12 @@ audio file → FFmpeg normalize → Whisper (transcript)
 ## Open questions
 
 - Which Whisper implementation (faster-whisper vs openai-whisper)?
+answer: openai-whisper
 - Are latency fields derivable from audio alone, or do they require
   provider-supplied timing metadata?
+answer: for audio file alone
 - How is cost computed when provider/pricing metadata is absent?
+answer: show N/A in a meantime
 
 ## Acceptance criteria
 
