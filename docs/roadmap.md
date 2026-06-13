@@ -8,10 +8,11 @@ this file answers *what's next and in what order*.
 
 - [x] Repo scaffolding: packaging, `src/` layout, tests, CI, Docker
 - [x] Public data contract: `CallReport` Pydantic models
-- [ ] Core `analyze()` pipeline — [PRD 0001](./prd/0001-core-analyze.md)
+- [ ] Core `analyze()` pipeline (MediaInfo) — [PRD 0001](./prd/0001-core-analyze.md)
 
 ## Phase 1 — Single-call analysis
 
+- [ ] Core `analyze()` full extractors (Whisper, Librosa)
 - [ ] Transcription + speaker diarization (Whisper + pyannote)
 - [ ] Quality signals (silence gaps, interruptions, pace, pitch — Librosa)
 - [ ] Latency waterfall extraction
