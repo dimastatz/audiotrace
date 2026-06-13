@@ -65,7 +65,7 @@ pip install audiotrace[all]
 
 ---
 
-## Quick start
+# Quick start
 
 ### Analyze a single call
 
@@ -81,6 +81,10 @@ report = audiotrace.analyze(
         "campaign":      "healthcare_intake"
     }
 )
+
+# Media
+print(report.media.duration_ms)          # int
+print(report.media.codec)                # str
 
 # Transcript
 print(report.transcript.full_text)
@@ -146,6 +150,14 @@ report  = audiotrace.analyze(call.audio, call.metadata)
 
 ```
 CallReport
+├── media
+│   ├── duration_ms: int
+│   ├── sample_rate_hz: int
+│   ├── channels: int
+│   ├── codec: str
+│   ├── file_size_bytes: int
+│   ├── file_format: str
+│   └── bitrate_kbps: float
 ├── transcript
 │   ├── full_text: str
 │   ├── turns: List[Turn]   # speaker · text · start_ms · end_ms
