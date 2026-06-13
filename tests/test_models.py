@@ -1,4 +1,4 @@
-from audiotrace import CallReport, Transcript, Turn
+from audiotrace import CallReport, MediaInfo, Transcript, Turn
 
 
 def test_callreport_defaults():
@@ -7,6 +7,22 @@ def test_callreport_defaults():
     assert report.events.outcome == "completed"
     assert report.events.drop_off_turn is None
     assert report.transcript.turns == []
+    assert report.media is None
+
+
+def test_callreport_media():
+    media = MediaInfo(
+        duration_ms=1000,
+        sample_rate_hz=44100,
+        channels=2,
+        codec="mp3",
+        file_size_bytes=1024,
+        file_format="mp3",
+        bitrate_kbps=128.0,
+    )
+    report = CallReport(media=media)
+    assert report.media.duration_ms == 1000
+    assert report.media.codec == "mp3"
 
 
 def test_callreport_roundtrip():

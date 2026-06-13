@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+
 class MediaInfo(BaseModel):
     """Metadata about the media file containing the call recording."""
 
@@ -96,6 +97,7 @@ class Events(BaseModel):
 class CallReport(BaseModel):
     """The full structured analysis of a single call."""
 
+    media: MediaInfo | None = None
     transcript: Transcript = Field(default_factory=Transcript)
     quality: Quality = Field(default_factory=Quality)
     sentiment: Sentiment = Field(default_factory=Sentiment)
