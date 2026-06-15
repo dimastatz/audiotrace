@@ -19,6 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2,<3",
+    "rich>=13",
 ]
 
 [project.optional-dependencies]

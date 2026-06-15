@@ -1,10 +1,32 @@
 #!/bin/bash
 # AudioTrace runner script
 
-# Ensure virtual environment is used
+# Colors for output
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+# 1. Activate venv if it exists
 if [ -d ".venv" ]; then
     source .venv/bin/activate
 fi
 
-# Run the boot script from its new location
+# 2. Dependency Validation
+MISSING_DEPS=()
+python3 -c "import pydantic" 2>/dev/null || MISSING_DEPS+=("pydantic")
+python3 -c "import rich" 2>/dev/null || MISSING_DEPS+=("rich")
+
+if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
+    echo "Missing dependencies: ${MISSING_DEPS[*]}"
+    echo -n "Would you like to install them now? (y/n) "
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        pip install -r requirements.txt
+    else
+        echo "Please install missing dependencies manually: pip install ${MISSING_DEPS[*]}"
+        exit 1
+    fi
+fi
+
+# 3. Run
 python3 src/audiotrace/boot.py "$@"
