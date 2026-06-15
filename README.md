@@ -61,6 +61,12 @@ pip install audiotrace[twilio]
 pip install audiotrace[all]
 ```
 
+### Docker
+```bash
+docker build -f docker/Dockerfile -t audiotrace .
+docker run -it audiotrace
+```
+
 **Requirements:** Python 3.9+, FFmpeg installed on system
 
 ---
