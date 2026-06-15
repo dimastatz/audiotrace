@@ -15,7 +15,8 @@ def test_analyze_media_info():
 
     assert report.media is not None
     assert report.media.codec == "mp3"
-    assert report.media.duration_ms == 30012
+    # Allow 100ms tolerance for different FFmpeg versions (PRD requirement)
+    assert abs(report.media.duration_ms - 30012) <= 100
     assert report.media.sample_rate_hz == 48000
     assert report.media.channels == 2
     assert report.media.file_format == "mp3"
