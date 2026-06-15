@@ -245,6 +245,27 @@ AudioTrace is free and MIT-licensed. The commercial products are optional hosted
 
 ---
 
+## Running locally
+
+For quick testing or interactive analysis, you can use the provided runner script. It automatically handles virtual environment setup and dependency validation.
+
+```bash
+# Analyze default golden data fixture
+./run.sh
+
+# Analyze a specific file
+./run.sh path/to/your/audio.wav
+```
+
+### Development & Validation
+Before submitting changes, ensure everything passes the local validation suite (formatting, linting, type-checking, and tests):
+
+```bash
+./scripts/test_local.sh test
+```
+
+---
+
 ## Contributing
 
 Contributions are welcome — especially new provider adapters, persona definitions for simulation, and compliance rule sets.
@@ -252,8 +273,7 @@ Contributions are welcome — especially new provider adapters, persona definiti
 ```bash
 git clone https://github.com/audiotrace/audiotrace
 cd audiotrace
-pip install -e ".[dev]"
-pytest
+./scripts/test_local.sh test  # Run all checks (formatting, lint, types, tests)
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.

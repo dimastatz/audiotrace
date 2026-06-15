@@ -19,6 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2,<3",
+    "rich>=13",
 ]
 
 [project.optional-dependencies]
@@ -59,6 +60,7 @@ addopts = "-q --cov=audiotrace --cov-report=term-missing --cov-fail-under=95"
 [tool.coverage.run]
 source = ["audiotrace"]
 branch = true
+omit = ["src/audiotrace/boot.py"]
 
 [tool.coverage.report]
 show_missing = true
