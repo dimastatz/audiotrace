@@ -9,6 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Union
 
+from audiotrace.extractors import extract_media_info
 from audiotrace.models import CallReport
 
 AudioInput = Union[str, Path]
@@ -27,9 +28,8 @@ def analyze(
     Returns:
         A populated :class:`~audiotrace.models.CallReport`.
     """
-    raise NotImplementedError(
-        "audiotrace.analyze is not implemented yet — see docs/prd/0001-core-analyze.md"
-    )
+    media = extract_media_info(audio)
+    return CallReport(media=media)
 
 
 def batch(
@@ -37,13 +37,14 @@ def batch(
     concurrency: int = 10,
 ) -> list[CallReport]:
     """Analyze many recordings concurrently.
+    ...
 
-    Args:
-        audio_files: Audio file paths to analyze.
-        concurrency: Maximum number of concurrent analyses.
+        Args:
+            audio_files: Audio file paths to analyze.
+            concurrency: Maximum number of concurrent analyses.
 
-    Returns:
-        One :class:`~audiotrace.models.CallReport` per input, in order.
+        Returns:
+            One :class:`~audiotrace.models.CallReport` per input, in order.
     """
     raise NotImplementedError(
         "audiotrace.batch is not implemented yet — see docs/prd/0001-core-analyze.md"

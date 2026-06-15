@@ -10,6 +10,11 @@ MODE=${1:-"test"}
 VENV_DIR=".venv"
 
 function setup_venv() {
+    if [ "$MODE" == "no-venv" ]; then
+        echo "Skipping virtual environment setup (no-venv mode)..."
+        return
+    fi
+
     if [ "$MODE" == "clean-test" ]; then
         echo "Cleaning existing virtual environment..."
         rm -rf "$VENV_DIR"
@@ -40,7 +45,11 @@ ruff format --check .
 echo "Running linter..."
 ruff check .
 
-# 3. Unit tests with coverage
+# 3. Type checking (Mypy)
+echo "Running type checker..."
+mypy src/audiotrace
+
+# 4. Unit tests with coverage
 echo "Running unit tests with coverage..."
 pytest --cov=audiotrace --cov-report=term-missing --cov-fail-under=95
 
