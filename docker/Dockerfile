@@ -1,5 +1,5 @@
 # AudioTrace CLI Application Dockerfile
-#   Build:  docker build -t audiotrace .
+#   Build:  docker build -f docker/Dockerfile -t audiotrace .
 #   Run:    docker run -it audiotrace [file_path]
 
 FROM python:3.12-slim-bookworm
