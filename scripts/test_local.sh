@@ -10,6 +10,11 @@ MODE=${1:-"test"}
 VENV_DIR=".venv"
 
 function setup_venv() {
+    if [ "$MODE" == "no-venv" ]; then
+        echo "Skipping virtual environment setup (no-venv mode)..."
+        return
+    fi
+
     if [ "$MODE" == "clean-test" ]; then
         echo "Cleaning existing virtual environment..."
         rm -rf "$VENV_DIR"
