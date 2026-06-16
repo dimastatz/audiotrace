@@ -20,6 +20,8 @@ classifiers = [
 dependencies = [
     "pydantic>=2,<3",
     "rich>=13",
+    "openai-whisper",
+    "pyannote.audio",
 ]
 
 [project.optional-dependencies]

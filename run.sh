@@ -14,6 +14,8 @@ fi
 MISSING_DEPS=()
 python3 -c "import pydantic" 2>/dev/null || MISSING_DEPS+=("pydantic")
 python3 -c "import rich" 2>/dev/null || MISSING_DEPS+=("rich")
+python3 -c "import whisper" 2>/dev/null || MISSING_DEPS+=("openai-whisper")
+python3 -c "import pyannote.audio" 2>/dev/null || MISSING_DEPS+=("pyannote.audio")
 
 if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
     echo "Missing dependencies: ${MISSING_DEPS[*]}"
