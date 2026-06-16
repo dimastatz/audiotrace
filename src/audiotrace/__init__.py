@@ -8,7 +8,7 @@ The extraction pipeline is not implemented yet; the data contract
 (:class:`CallReport` and friends) is stable and lives in ``audiotrace.models``.
 """
 
-from audiotrace.core import analyze, batch
+from audiotrace.core import analyze
 from audiotrace.models import (
     CallReport,
     Cost,
@@ -27,7 +27,6 @@ __version__ = "0.1.0"
 
 __all__ = [
     "analyze",
-    "batch",
     "CallReport",
     "Cost",
     "Events",
