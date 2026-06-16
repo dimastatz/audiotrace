@@ -15,3 +15,4 @@ of truth Claude Code and contributors build against.
 | # | Title | Status |
 |---|-------|--------|
 | [0001](./0001-core-analyze.md) | Core `analyze()` pipeline | Draft |
+| [0002](./0002-transcript.md) | Transcript and Diarization pipeline | Draft |

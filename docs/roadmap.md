@@ -13,7 +13,7 @@ this file answers *what's next and in what order*.
 ## Phase 1 — Single-call analysis
 
 - [ ] Core `analyze()` full extractors (Whisper, Librosa)
-- [ ] Transcription + speaker diarization (Whisper + pyannote)
+- [ ] Transcription + speaker diarization (Whisper + pyannote) — [PRD 0002](./prd/0002-transcript.md)
 - [ ] Quality signals (silence gaps, interruptions, pace, pitch — Librosa)
 - [ ] Latency waterfall extraction
 - [ ] Cost attribution model
