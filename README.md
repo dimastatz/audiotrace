@@ -125,21 +125,6 @@ print(report.events.drop_off_turn)       # int | None
 print(report.events.compliance_flags)    # List[str]
 ```
 
-### Analyze at scale
-
-```python
-reports = audiotrace.batch(
-    audio_files = ["call1.wav", "call2.wav", "call3.wav"],
-    concurrency = 50
-)
-
-summary = reports.summary()
-print(summary.avg_quality_score)   # float
-print(summary.drop_off_rate)       # float
-print(summary.avg_cost_usd)        # float
-print(summary.top_failure_types)   # List[str]
-```
-
 ### Use provider adapters
 
 ```python

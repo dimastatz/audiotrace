@@ -25,7 +25,6 @@ pipeline before adding heavy extractors (Whisper, Librosa).
 
 ## Non-goals
 
-- Concurrency / batching — covered by `batch()` (later PRD).
 - Provider-specific fetching — covered by adapter PRDs.
 - Live/streaming analysis — file-based only for now.
 

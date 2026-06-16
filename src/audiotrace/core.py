@@ -30,22 +30,3 @@ def analyze(
     """
     media = extract_media_info(audio)
     return CallReport(media=media)
-
-
-def batch(
-    audio_files: list[AudioInput],
-    concurrency: int = 10,
-) -> list[CallReport]:
-    """Analyze many recordings concurrently.
-    ...
-
-        Args:
-            audio_files: Audio file paths to analyze.
-            concurrency: Maximum number of concurrent analyses.
-
-        Returns:
-            One :class:`~audiotrace.models.CallReport` per input, in order.
-    """
-    raise NotImplementedError(
-        "audiotrace.batch is not implemented yet — see docs/prd/0001-core-analyze.md"
-    )

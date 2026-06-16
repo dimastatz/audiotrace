@@ -12,8 +12,8 @@ stub. Most work right now is building that pipeline and provider adapters.
 
 ```
 src/audiotrace/        # the library (src layout)
-  __init__.py          # public API: analyze(), batch(), models, __version__
-  core.py              # analyze() / batch() entry points
+  __init__.py          # public API: analyze(), models, __version__
+  core.py              # analyze() entry point
   extractors.py        # FFmpeg/ffprobe extraction logic
   models.py            # Pydantic CallReport and sub-models — the stable contract
 tests/                 # pytest suite

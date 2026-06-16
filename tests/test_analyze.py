@@ -32,8 +32,3 @@ def test_analyze_ffprobe_error(tmp_path):
     invalid_file.write_text("not an audio file")
     with pytest.raises(RuntimeError, match="ffprobe failed"):
         audiotrace.analyze(invalid_file)
-
-
-def test_batch_not_implemented():
-    with pytest.raises(NotImplementedError):
-        audiotrace.batch(["call1.wav", "call2.wav"])
