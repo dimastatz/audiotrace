@@ -19,10 +19,10 @@ console = Console()
 
 
 def print_report_json(report: audiotrace.models.CallReport) -> None:
-    """Print the CallReport as prettified JSON."""
-    # Convert Pydantic model to dict, then to pretty JSON string
+    """Print the CallReport as prettified and colorized JSON."""
+    # Rich's print_json handles Pydantic models (via dict) with beautiful highlighting
     report_dict = report.model_dump()
-    print(json.dumps(report_dict, indent=2))
+    console.print_json(data=report_dict)
 
 
 def run_analysis(file_path: str | Path) -> None:
@@ -32,7 +32,6 @@ def run_analysis(file_path: str | Path) -> None:
         return
 
     try:
-        # We don't use console.status here to keep stdout clean for JSON
         report = audiotrace.analyze(path)
         print_report_json(report)
     except Exception as e:
@@ -53,10 +52,6 @@ def main() -> None:
 
     # Run analysis
     run_analysis(args.file_path)
-
-
-if __name__ == "__main__":
-    main()
 
 
 if __name__ == "__main__":
