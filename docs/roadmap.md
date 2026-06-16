@@ -18,9 +18,8 @@ this file answers *what's next and in what order*.
 - [ ] Latency waterfall extraction
 - [ ] Cost attribution model
 
-## Phase 2 — Scale & providers
+## Phase 2 — Providers & Intelligence
 
-- [ ] `batch()` concurrent analysis + `summary()`
 - [ ] Provider adapters: Vapi, Retell, Twilio, Deepgram, ElevenLabs
 - [ ] Sentiment & intent detection (Transformers)
 

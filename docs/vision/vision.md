@@ -212,23 +212,6 @@ from audiotrace.sim        import SimCaller, CallerPersona
 from audiotrace.eval       import EvalSuite, QualityGate
 ```
 
-### Batch Mode
-
-```python
-reports = audiotrace.batch(
-    audio_files = ["call1.wav", "call2.wav", ...],
-    concurrency = 50
-)
-
-reports.summary()
-# ├── total_calls: int
-# ├── avg_quality_score: float
-# ├── drop_off_rate: float
-# ├── avg_cost_usd: float
-# ├── sentiment_distribution: dict
-# └── top_failure_types: List[str]
-```
-
 ---
 
 ## Layer 2 — LangTrace
@@ -532,12 +515,12 @@ Deploy blocked. Full diff at: https://langgate.io/reports/abc123
 ### How LangGate consumes AudioTrace
 
 ```python
-from audiotrace import batch_analyze
+from audiotrace import analyze
 from langgate   import evaluate
 
 # Run sim → analyze → gate in one pipeline
 sim_calls  = runner.run(personas, n=1000)
-reports    = batch_analyze(sim_calls)        # AudioTrace does the work
+reports    = [analyze(c.audio, c.metadata) for c in sim_calls]
 verdict    = evaluate(reports, gate, baseline)
 ```
 
