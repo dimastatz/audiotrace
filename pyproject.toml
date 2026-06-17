@@ -22,6 +22,7 @@ dependencies = [
     "rich>=13",
     "openai-whisper",
     "pyannote.audio",
+    "librosa",
 ]
 
 [project.optional-dependencies]
