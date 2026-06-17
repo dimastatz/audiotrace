@@ -12,7 +12,9 @@ of truth Claude Code and contributors build against.
 
 ## Index
 
-| # | Title | Status |
-|---|-------|--------|
-| [0001](./0001-core-analyze.md) | Core `analyze()` pipeline | Draft |
-| [0002](./0002-transcript.md) | Transcript and Diarization pipeline | Draft |
+| #                              | Title                               | Status |
+|--------------------------------|-------------------------------------|--------|
+| [0001](./0001-mediainfo.md)    | MediaInfo extraction                | Draft  |
+| [0002](./0002-transcript.md)   | Transcript and diarization pipeline | Draft  |
+| [0003](./0003-quality.md)      | Quality extraction pipeline         | Draft  |
+| [0004](./0004-sentiment.md)    | Sentiment extraction pipeline       | Draft  |
