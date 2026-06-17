@@ -8,7 +8,7 @@ this file answers *what's next and in what order*.
 
 - [x] Repo scaffolding: packaging, `src/` layout, tests, CI, Docker
 - [x] Public data contract: `CallReport` Pydantic models
-- [ ] Core `analyze()` pipeline (MediaInfo) — [PRD 0001](./prd/0001-core-analyze.md)
+- [ ] Core `analyze()` pipeline (MediaInfo) — [PRD 0001](./prd/0001-mediainfo.md)
 
 ## Phase 1 — Single-call analysis
 
