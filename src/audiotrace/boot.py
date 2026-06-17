@@ -100,6 +100,10 @@ def print_report(report: audiotrace.models.CallReport) -> None:
             if len(report.transcript.turns) > 5:
                 console.print(f"... and {len(report.transcript.turns) - 5} more turns.")
 
+    # 4. Full Report as prettified, colorized JSON
+    console.print("\n[section]Full Report (JSON)[/]")
+    console.print_json(report.model_dump_json())
+
 
 def run_analysis(file_path: str | Path) -> None:
     path = Path(file_path)
