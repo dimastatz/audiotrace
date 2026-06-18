@@ -43,7 +43,7 @@ def get_diarization_pipeline(
             # Note: from_pretrained checks local cache first.
             # Passing use_auth_token is required for gated models on first download.
             logger.info(f"Loading diarization pipeline: {model_name}")
-            pipeline = Pipeline.from_pretrained(model_name, use_auth_token=use_auth_token)  # type: ignore
+            pipeline = Pipeline.from_pretrained(model_name, token=use_auth_token)
             if pipeline is not None:
                 _MODELS[key] = pipeline
             else:

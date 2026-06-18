@@ -24,11 +24,11 @@ def clear_model_cache() -> None:
 
 def get_sentiment_pipeline(model_name: str = SENTIMENT_MODEL) -> Any:
     """Load and cache a HuggingFace sentiment-analysis pipeline."""
-    from transformers import pipeline  # type: ignore
+    from transformers import pipeline
 
     if model_name not in _MODELS:
         logger.info("Loading sentiment model: %s", model_name)
-        _MODELS[model_name] = pipeline("sentiment-analysis", model=model_name)
+        _MODELS[model_name] = pipeline("text-classification", model=model_name)
     return _MODELS[model_name]
 
 
