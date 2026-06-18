@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 from typing import Union
 
+from audiotrace.cost import PricingTable, extract_cost
 from audiotrace.extractors import extract_media_info
 from audiotrace.models import CallReport, Latency
 from audiotrace.quality import extract_quality
@@ -25,6 +26,7 @@ def analyze(
     audio: AudioInput,
     metadata: dict[str, object] | None = None,
     hf_token: str | None = None,
+    pricing: PricingTable | None = None,
 ) -> CallReport:
     """Analyze a single call recording and return a structured report.
 
@@ -54,6 +56,9 @@ def analyze(
     # 4. Sentiment extraction (local Transformers)
     sentiment = extract_sentiment(transcript)
 
+    # 5. Cost attribution
+    cost = extract_cost(media, transcript, pricing)
+
     total_duration_ms = int((time.perf_counter() - start_time) * 1000)
 
     latency = Latency(
@@ -66,5 +71,6 @@ def analyze(
         transcript=transcript,
         quality=quality,
         sentiment=sentiment,
+        cost=cost,
         latency=latency,
     )

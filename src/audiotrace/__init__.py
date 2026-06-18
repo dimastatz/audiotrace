@@ -9,6 +9,7 @@ The extraction pipeline is not implemented yet; the data contract
 """
 
 from audiotrace.core import analyze
+from audiotrace.cost import PricingTable
 from audiotrace.models import (
     CallReport,
     Cost,
@@ -27,6 +28,7 @@ __version__ = "0.1.0"
 
 __all__ = [
     "analyze",
+    "PricingTable",
     "CallReport",
     "Cost",
     "Events",
