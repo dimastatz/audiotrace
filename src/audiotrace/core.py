@@ -15,6 +15,7 @@ from typing import Union
 from audiotrace.extractors import extract_media_info
 from audiotrace.models import CallReport, Latency
 from audiotrace.quality import extract_quality
+from audiotrace.sentiment import extract_sentiment
 from audiotrace.transcripts import extract_transcript
 
 AudioInput = Union[str, Path]
@@ -50,6 +51,9 @@ def analyze(
     # 3. Quality signal extraction (Librosa)
     quality = extract_quality(audio, transcript, media.duration_ms)
 
+    # 4. Sentiment extraction (local Transformers)
+    sentiment = extract_sentiment(transcript)
+
     total_duration_ms = int((time.perf_counter() - start_time) * 1000)
 
     latency = Latency(
@@ -61,5 +65,6 @@ def analyze(
         media=media,
         transcript=transcript,
         quality=quality,
+        sentiment=sentiment,
         latency=latency,
     )

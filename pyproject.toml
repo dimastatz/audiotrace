@@ -23,6 +23,7 @@ dependencies = [
     "openai-whisper",
     "pyannote.audio",
     "librosa",
+    "transformers>=4.30",
 ]
 
 [project.optional-dependencies]
