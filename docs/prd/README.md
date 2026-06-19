@@ -18,3 +18,4 @@ of truth Claude Code and contributors build against.
 | [0002](./0002-transcript.md)   | Transcript and diarization pipeline | Draft  |
 | [0003](./0003-quality.md)      | Quality extraction pipeline         | Draft  |
 | [0004](./0004-sentiment.md)    | Sentiment extraction pipeline       | Draft  |
+| [0005](./0005-events.md)       | Events extraction pipeline          | Draft  |
