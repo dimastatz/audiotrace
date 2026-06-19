@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Union
 
 from audiotrace.cost import PricingTable, extract_cost
+from audiotrace.events import extract_events
 from audiotrace.extractors import extract_media_info
 from audiotrace.models import CallReport, Latency
 from audiotrace.quality import extract_quality
@@ -59,6 +60,9 @@ def analyze(
     # 5. Cost attribution
     cost = extract_cost(media, transcript, pricing)
 
+    # 6. Event extraction (outcome, drop-off, intent, compliance)
+    events = extract_events(transcript, media.duration_ms)
+
     total_duration_ms = int((time.perf_counter() - start_time) * 1000)
 
     latency = Latency(
@@ -72,5 +76,6 @@ def analyze(
         quality=quality,
         sentiment=sentiment,
         cost=cost,
+        events=events,
         latency=latency,
     )

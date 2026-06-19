@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 
 import audiotrace
-from audiotrace.models import Cost, Quality, Sentiment, Transcript
+from audiotrace.models import Cost, Events, Quality, Sentiment, Transcript
 
 
 def test_version_exposed():
@@ -18,17 +18,23 @@ def test_pricing_table_exported():
     assert p.stt_per_minute_usd == 0.05
 
 
+@patch("audiotrace.core.extract_events")
 @patch("audiotrace.core.extract_cost")
 @patch("audiotrace.core.extract_sentiment")
 @patch("audiotrace.core.extract_quality")
 @patch("audiotrace.core.extract_transcript")
 def test_analyze_media_info(
-    mock_extract_transcript, mock_extract_quality, mock_extract_sentiment, mock_extract_cost
+    mock_extract_transcript,
+    mock_extract_quality,
+    mock_extract_sentiment,
+    mock_extract_cost,
+    mock_extract_events,
 ):
     mock_extract_transcript.return_value = Transcript()
     mock_extract_quality.return_value = Quality()
     mock_extract_sentiment.return_value = Sentiment()
     mock_extract_cost.return_value = Cost()
+    mock_extract_events.return_value = Events()
 
     fixture_path = Path(__file__).parent / "fixtures" / "premier_phone_call_30s.mp3"
     report = audiotrace.analyze(fixture_path)
@@ -44,6 +50,7 @@ def test_analyze_media_info(
     assert report.quality is not None
     assert report.sentiment is not None
     assert report.cost is not None
+    assert report.events is not None
     mock_extract_quality.assert_called_once_with(
         fixture_path, mock_extract_transcript.return_value, report.media.duration_ms
     )
@@ -51,19 +58,28 @@ def test_analyze_media_info(
     mock_extract_cost.assert_called_once_with(
         report.media, mock_extract_transcript.return_value, None
     )
+    mock_extract_events.assert_called_once_with(
+        mock_extract_transcript.return_value, report.media.duration_ms
+    )
 
 
+@patch("audiotrace.core.extract_events")
 @patch("audiotrace.core.extract_cost")
 @patch("audiotrace.core.extract_sentiment")
 @patch("audiotrace.core.extract_quality")
 @patch("audiotrace.core.extract_transcript")
 def test_analyze_file_not_found(
-    mock_extract_transcript, mock_extract_quality, mock_extract_sentiment, mock_extract_cost
+    mock_extract_transcript,
+    mock_extract_quality,
+    mock_extract_sentiment,
+    mock_extract_cost,
+    mock_extract_events,
 ):
     with pytest.raises(FileNotFoundError):
         audiotrace.analyze("non_existent_file.wav")
 
 
+@patch("audiotrace.core.extract_events")
 @patch("audiotrace.core.extract_cost")
 @patch("audiotrace.core.extract_sentiment")
 @patch("audiotrace.core.extract_quality")
@@ -73,6 +89,7 @@ def test_analyze_ffprobe_error(
     mock_extract_quality,
     mock_extract_sentiment,
     mock_extract_cost,
+    mock_extract_events,
     tmp_path,
 ):
     invalid_file = tmp_path / "invalid.wav"

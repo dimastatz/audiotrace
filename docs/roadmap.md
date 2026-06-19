@@ -14,14 +14,14 @@ this file answers *what's next and in what order*.
 
 - [x] Transcription + speaker diarization (Whisper + pyannote) — [PRD 0002](./prd/0002-transcript.md)
 - [x] Quality signals (silence gaps, interruptions, pace, pitch — Librosa) — [PRD 0003](./prd/0003-quality.md)
-- [ ] Sentiment extraction (local Transformers) — [PRD 0004](./prd/0004-sentiment.md)
+- [x] Sentiment extraction (local Transformers) — [PRD 0004](./prd/0004-sentiment.md)
+- [x] Cost attribution model
+- [ ] Events extraction (outcome, drop-off, intent, compliance) — [PRD 0005](./prd/0005-events.md)
 - [ ] Latency waterfall extraction
-- [ ] Cost attribution model
 
 ## Phase 2 — Providers & Intelligence
 
 - [ ] Provider adapters: Vapi, Retell, Twilio, Deepgram, ElevenLabs
-- [ ] Intent detection (Transformers)
 
 ## Phase 3 — Compliance & polish
 
