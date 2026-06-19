@@ -15,6 +15,7 @@ from typing import Union
 from audiotrace.cost import PricingTable, extract_cost
 from audiotrace.events import extract_events
 from audiotrace.extractors import extract_media_info
+from audiotrace.latency import extract_waterfall
 from audiotrace.models import CallReport, Latency
 from audiotrace.quality import extract_quality
 from audiotrace.sentiment import extract_sentiment
@@ -68,6 +69,7 @@ def analyze(
     latency = Latency(
         stt_ms=stt_duration_ms,
         total_ms=total_duration_ms,
+        waterfall=extract_waterfall(transcript),
     )
 
     return CallReport(

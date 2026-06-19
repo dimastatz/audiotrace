@@ -51,6 +51,8 @@ def test_analyze_media_info(
     assert report.sentiment is not None
     assert report.cost is not None
     assert report.events is not None
+    # Empty transcript → no agent-response waterfall spans
+    assert report.latency.waterfall == []
     mock_extract_quality.assert_called_once_with(
         fixture_path, mock_extract_transcript.return_value, report.media.duration_ms
     )

@@ -17,7 +17,7 @@ this file answers *what's next and in what order*.
 - [x] Sentiment extraction (local Transformers) — [PRD 0004](./prd/0004-sentiment.md)
 - [x] Cost attribution model
 - [ ] Events extraction (outcome, drop-off, intent, compliance) — [PRD 0005](./prd/0005-events.md)
-- [ ] Latency waterfall extraction
+- [ ] Latency waterfall extraction — [PRD 0006](./prd/0006-latency.md)
 
 ## Phase 2 — Providers & Intelligence
 
