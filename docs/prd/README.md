@@ -19,3 +19,4 @@ of truth Claude Code and contributors build against.
 | [0003](./0003-quality.md)      | Quality extraction pipeline         | Draft  |
 | [0004](./0004-sentiment.md)    | Sentiment extraction pipeline       | Draft  |
 | [0005](./0005-events.md)       | Events extraction pipeline          | Draft  |
+| [0006](./0006-latency.md)      | Latency waterfall extraction        | Draft  |
