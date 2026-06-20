@@ -2,13 +2,17 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import numpy as np
 import pytest
 
 from audiotrace.models import Turn
 from audiotrace.transcripts import (
     _apply_speaker_roles,
+    _cluster_pitches,
     _default_role_labels,
     _get_majority_speaker,
+    _kmeans_1d,
+    _segment_pitches,
     clear_model_cache,
     extract_transcript,
 )
@@ -129,6 +133,11 @@ def test_get_majority_speaker():
     speaker = _get_majority_speaker(mock_diarization, 0.0, 1.0)
     assert speaker == "unknown"
 
+    # Case 3: Labels present but no tracks yielded
+    mock_crop.labels.return_value = ["SPEAKER_00"]
+    mock_crop.itertracks.return_value = []
+    assert _get_majority_speaker(mock_diarization, 0.0, 1.0) == "unknown"
+
 
 def _setup_whisper(segments, text="hello", language="en"):
     mock_model = MagicMock()
@@ -140,19 +149,76 @@ def _setup_whisper(segments, text="hello", language="en"):
     }
 
 
-def test_fallback_num_speakers_assigns_alternating_roles():
+def test_fallback_groups_segments_by_pitch():
     _setup_whisper(
         [
-            {"start": 0.0, "end": 1.0, "text": "Hello, this is support."},
-            {"start": 1.0, "end": 2.0, "text": "Hi, I need a room."},
-            {"start": 2.0, "end": 3.0, "text": "Sure, what dates?"},
+            {"start": 0.0, "end": 2.0, "text": "Thank you for calling."},
+            {"start": 2.0, "end": 4.0, "text": "How can I help you today?"},
+            {"start": 4.0, "end": 6.0, "text": "Hi, I need a room."},
         ]
     )
     mock_pyannote_audio.Pipeline.from_pretrained.return_value = None
 
-    transcript = extract_transcript(FIXTURE, num_speakers=2)
+    # Agent's two sentences share a high pitch; the customer's is lower. They
+    # must group by speaker, not alternate per sentence.
+    with patch("audiotrace.transcripts._segment_pitches", return_value=[210.0, 205.0, 110.0]):
+        transcript = extract_transcript(FIXTURE, num_speakers=2)
 
-    assert [t.speaker for t in transcript.turns] == ["AI Agent", "Customer", "AI Agent"]
+    assert [t.speaker for t in transcript.turns] == ["AI Agent", "AI Agent", "Customer"]
+
+
+def test_cluster_pitches_two_groups():
+    clusters = _cluster_pitches([200.0, 205.0, 110.0, 115.0], 2)
+    assert clusters[0] == clusters[1]
+    assert clusters[2] == clusters[3]
+    assert clusters[0] != clusters[2]
+
+
+def test_cluster_pitches_none_inherits_previous():
+    clusters = _cluster_pitches([200.0, None, 110.0], 2)
+    assert clusters[1] == clusters[0]
+
+
+def test_cluster_pitches_insufficient_distinct_pitch():
+    assert _cluster_pitches([200.0, 200.0], 2) == [0, 0]
+
+
+def test_cluster_pitches_single_speaker():
+    assert _cluster_pitches([200.0, 110.0], 1) == [0, 0]
+
+
+def test_cluster_pitches_all_unvoiced():
+    assert _cluster_pitches([None, None], 2) == [0, 0]
+
+
+def test_kmeans_1d_separates_two_groups():
+    lo, hi = sorted(_kmeans_1d([100.0, 105.0, 300.0, 305.0], 2))
+    assert 95 <= lo <= 110
+    assert 295 <= hi <= 310
+
+
+def test_kmeans_1d_respects_iteration_cap():
+    # iters=1 forces the loop to exit by exhaustion (no convergence break).
+    centers = _kmeans_1d([100.0, 102.0, 300.0], 2, iters=1)
+    assert sorted(centers) == [101.0, 300.0]
+
+
+def test_segment_pitches_median_and_unvoiced_and_empty():
+    mock_librosa = MagicMock()
+    mock_librosa.load.return_value = (np.ones(60, dtype=float), 10)
+    mock_librosa.pyin.side_effect = [
+        (np.array([100.0, 200.0, 300.0]), np.array([True, True, True]), None),
+        (np.array([np.nan, np.nan]), np.array([False, False]), None),
+    ]
+    segments = [
+        {"start": 0.0, "end": 2.0, "text": "a"},  # voiced -> median 200
+        {"start": 2.0, "end": 4.0, "text": "b"},  # all NaN -> None
+        {"start": 4.0, "end": 4.0, "text": "c"},  # empty clip -> None
+    ]
+    with patch.dict(sys.modules, {"librosa": mock_librosa}):
+        pitches = _segment_pitches(Path("x.wav"), segments)
+
+    assert pitches == [200.0, None, None]
 
 
 def test_fallback_without_num_speakers_stays_unknown():

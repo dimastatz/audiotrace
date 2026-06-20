@@ -17,6 +17,11 @@ _MODELS: dict[str, Any] = {}
 # explicit labels are passed. Two speakers map to an agent/customer support call.
 DEFAULT_TWO_SPEAKER_LABELS = ("AI Agent", "Customer")
 
+# Pitch range (Hz) for per-segment fundamental-frequency estimation used by the
+# no-diarization fallback. Spans typical adult speech (~C2 to C7).
+PITCH_FMIN_HZ = 65.0
+PITCH_FMAX_HZ = 2093.0
+
 
 def clear_model_cache() -> None:
     """Clear the global model cache."""
@@ -72,9 +77,10 @@ def extract_transcript(
     All models run locally once weights are downloaded/cached.
 
     When diarization is unavailable (e.g. no token for the gated model) but
-    ``num_speakers`` is given, speakers are assumed to alternate turn by turn so
-    that role labels can still be assigned. Raw speaker ids — whether from real
-    diarization or this fallback — are mapped to friendly labels in order of
+    ``num_speakers`` is given, speakers are inferred by clustering each Whisper
+    segment by its voice pitch, so a speaker's consecutive sentences stay grouped
+    together rather than alternating per sentence. Raw speaker ids — whether from
+    real diarization or this fallback — are mapped to friendly labels in order of
     first appearance: ``speaker_labels`` if provided, otherwise the defaults
     (two speakers become "AI Agent" then "Customer").
 
@@ -121,17 +127,29 @@ def extract_transcript(
             )
             for seg in segments
         ]
-    else:
-        # Fallback: with a known speaker count, assume speakers alternate turn by
-        # turn; otherwise the speaker is unknown.
+    elif num_speakers:
+        # No diarization model: cluster Whisper segments by voice pitch so a
+        # speaker's consecutive sentences stay together, then label by role.
+        clusters = _cluster_pitches(_segment_pitches(path, segments), num_speakers)
         turns = [
             Turn(
-                speaker=(f"SPEAKER_{i % num_speakers:02d}" if num_speakers else "unknown"),
+                speaker=f"SPEAKER_{cluster:02d}",
                 text=seg["text"].strip(),
                 start_ms=int(seg["start"] * 1000),
                 end_ms=int(seg["end"] * 1000),
             )
-            for i, seg in enumerate(segments)
+            for seg, cluster in zip(segments, clusters)
+        ]
+    else:
+        # No diarization and no speaker count: speakers are unknown.
+        turns = [
+            Turn(
+                speaker="unknown",
+                text=seg["text"].strip(),
+                start_ms=int(seg["start"] * 1000),
+                end_ms=int(seg["end"] * 1000),
+            )
+            for seg in segments
         ]
 
     turns = _apply_speaker_roles(turns, num_speakers, speaker_labels)
@@ -172,6 +190,62 @@ def _apply_speaker_roles(
             mapping[turn.speaker] = labels[len(mapping) % len(labels)]
 
     return [turn.model_copy(update={"speaker": mapping[turn.speaker]}) for turn in turns]
+
+
+def _segment_pitches(path: Path, segments: Any) -> list[float | None]:
+    """Median voiced pitch (Hz) for each Whisper segment, or None if unvoiced."""
+    import librosa
+    import numpy as np
+
+    y, sr = librosa.load(str(path), sr=None, mono=True)
+
+    pitches: list[float | None] = []
+    for seg in segments:
+        clip = y[int(seg["start"] * sr) : int(seg["end"] * sr)]
+        if clip.size == 0:
+            pitches.append(None)
+            continue
+        f0, voiced_flag, _ = librosa.pyin(clip, fmin=PITCH_FMIN_HZ, fmax=PITCH_FMAX_HZ, sr=sr)
+        voiced = f0[voiced_flag] if voiced_flag is not None else f0
+        voiced = voiced[~np.isnan(voiced)]
+        pitches.append(float(np.median(voiced)) if voiced.size else None)
+    return pitches
+
+
+def _cluster_pitches(pitches: list[float | None], num_speakers: int) -> list[int]:
+    """Group segments into ``num_speakers`` clusters by pitch (1-D k-means).
+
+    Segments with no measurable pitch inherit the previous segment's cluster.
+    Returns one cluster index per segment.
+    """
+    valid = [p for p in pitches if p is not None]
+    if num_speakers < 2 or len(set(valid)) < 2:
+        return [0] * len(pitches)
+
+    centers = _kmeans_1d(valid, min(num_speakers, len(set(valid))))
+
+    clusters: list[int] = []
+    last = 0
+    for p in pitches:
+        if p is not None:
+            last = min(range(len(centers)), key=lambda c: abs(p - centers[c]))
+        clusters.append(last)
+    return clusters
+
+
+def _kmeans_1d(values: list[float], k: int, iters: int = 25) -> list[float]:
+    """Deterministic 1-D k-means returning ``k`` cluster centers."""
+    data = sorted(values)
+    centers = [data[min(int((i + 0.5) / k * len(data)), len(data) - 1)] for i in range(k)]
+    for _ in range(iters):
+        buckets: list[list[float]] = [[] for _ in range(k)]
+        for v in data:
+            buckets[min(range(k), key=lambda c: abs(v - centers[c]))].append(v)
+        updated = [sum(b) / len(b) if b else centers[i] for i, b in enumerate(buckets)]
+        if updated == centers:
+            break
+        centers = updated
+    return centers
 
 
 def _get_majority_speaker(diarization: Any, start: float, end: float) -> str:
