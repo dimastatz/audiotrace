@@ -37,23 +37,21 @@ console = Console(theme=theme)
 # Per-speaker accent colors for the transcript / playback.
 SPEAKER_STYLES = {"AI Agent": "bold cyan", "Customer": "bold green"}
 
-# Delay between words for the typewriter animation.
-WORD_DELAY_S = 0.05
-
 
 def _speaker_style(speaker: str) -> str:
     return SPEAKER_STYLES.get(speaker, "bold yellow")
 
 
-def _group_turns(turns: list[audiotrace.models.Turn]) -> list[tuple[str, str]]:
-    """Merge consecutive turns from the same speaker into one (speaker, text)."""
-    groups: list[tuple[str, str]] = []
+def _group_turns(
+    turns: list[audiotrace.models.Turn],
+) -> list[list[audiotrace.models.Turn]]:
+    """Group consecutive turns from the same speaker (label printed once per group)."""
+    groups: list[list[audiotrace.models.Turn]] = []
     for turn in turns:
-        if groups and groups[-1][0] == turn.speaker:
-            speaker, text = groups[-1]
-            groups[-1] = (speaker, f"{text} {turn.text}".strip())
+        if groups and groups[-1][-1].speaker == turn.speaker:
+            groups[-1].append(turn)
         else:
-            groups.append((turn.speaker, turn.text))
+            groups.append([turn])
     return groups
 
 
@@ -79,26 +77,40 @@ def _play_audio(path: str | Path) -> subprocess.Popen[bytes] | None:
     return None
 
 
-def _type_words(text: str, style: str = "value", delay: float = WORD_DELAY_S) -> None:
-    """Print ``text`` word by word for a typewriter effect."""
-    words = text.split()
-    for i, word in enumerate(words):
-        suffix = " " if i < len(words) - 1 else ""
-        console.print(f"[{style}]{word}{suffix}[/]", end="")
-        sys.stdout.flush()
+def _wait_until(start: float, target_s: float) -> None:
+    """Sleep until ``target_s`` seconds have elapsed since ``start`` (monotonic clock)."""
+    delay = start + target_s - time.monotonic()
+    if delay > 0:
         time.sleep(delay)
-    console.print()
+
+
+def _type_turn(turn: audiotrace.models.Turn, start: float, style: str) -> None:
+    """Reveal a turn's words spread across its [start_ms, end_ms] audio window."""
+    words = turn.text.split()
+    if not words:
+        return
+    begin = turn.start_ms / 1000
+    duration = max((turn.end_ms - turn.start_ms) / 1000, 0.0)
+    for i, word in enumerate(words):
+        _wait_until(start, begin + duration * i / len(words))
+        console.print(f"[{style}]{word} [/]", end="")
+        sys.stdout.flush()
 
 
 def play_conversation(report: audiotrace.models.CallReport, audio_path: str | Path | None) -> None:
-    """Play the audio and animate the transcript, one block per speaker turn."""
+    """Play the audio and reveal each word in sync with the speaker, by turn group."""
     console.print("\n[section]▶ Playing call[/]\n")
     proc = _play_audio(audio_path) if audio_path else None
+    start = time.monotonic()
 
-    for speaker, text in _group_turns(report.transcript.turns):
+    for group in _group_turns(report.transcript.turns):
+        speaker = group[0].speaker
         style = _speaker_style(speaker)
+        _wait_until(start, group[0].start_ms / 1000)
         console.print(f"[{style}]{speaker}:[/] ", end="")
-        _type_words(text)
+        sys.stdout.flush()
+        for turn in group:
+            _type_turn(turn, start, style)
         console.print()
 
     if proc is not None:
@@ -111,8 +123,10 @@ def print_transcript(report: audiotrace.models.CallReport) -> None:
     if not report.transcript.turns:
         console.print(f"[value]{report.transcript.full_text or '(Empty)'}[/]")
         return
-    for speaker, text in _group_turns(report.transcript.turns):
+    for group in _group_turns(report.transcript.turns):
+        speaker = group[0].speaker
         style = _speaker_style(speaker)
+        text = " ".join(t.text for t in group)
         console.print(f"[{style}]{speaker}:[/] [value]{text}[/]")
 
 
