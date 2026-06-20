@@ -49,7 +49,7 @@ def test_extract_transcript_success():
     mock_diarization = MagicMock()
     mock_pipeline.return_value = mock_diarization
 
-    fixture_path = Path(__file__).parent / "fixtures" / "premier_phone_call_30s.mp3"
+    fixture_path = Path(__file__).parent / "fixtures" / "paradise_hotel_booking_60s.mp3"
 
     with patch("audiotrace.transcripts._get_majority_speaker") as mock_majority:
         mock_majority.side_effect = ["SPEAKER_00", "SPEAKER_01"]
@@ -83,7 +83,7 @@ def test_extract_transcript_no_hf_token():
     # Pyannote mock returns None (e.g. no token)
     mock_pyannote_audio.Pipeline.from_pretrained.return_value = None
 
-    fixture_path = Path(__file__).parent / "fixtures" / "premier_phone_call_30s.mp3"
+    fixture_path = Path(__file__).parent / "fixtures" / "paradise_hotel_booking_60s.mp3"
     transcript = extract_transcript(fixture_path)
 
     assert transcript.full_text == "Hello"
