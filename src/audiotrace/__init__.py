@@ -22,6 +22,7 @@ from audiotrace.models import (
     Sentiment,
     Transcript,
     Turn,
+    Word,
 )
 
 __version__ = "1.0.0"
@@ -40,5 +41,6 @@ __all__ = [
     "Sentiment",
     "Transcript",
     "Turn",
+    "Word",
     "__version__",
 ]

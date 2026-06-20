@@ -5,7 +5,7 @@ Golden audio and other fixtures used by the test suite.
 ## `paradise_hotel_booking_60s.mp3`
 
 A ~64-second synthetic customer-support call: an AI hotel agent ("Aria" at
-Paradise Hotel, female voice) and a customer ("Mik Maclay", male voice) booking
+Paradise Hotel, female voice) and a customer ("Mik Maclay", male voiqce) booking
 a room for a vacation. Used as golden data for the media, transcription,
 diarization, quality, sentiment, cost, latency, and events tests.
 

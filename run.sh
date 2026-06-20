@@ -1,5 +1,16 @@
 #!/bin/bash
 # AudioTrace runner script
+#
+# Usage:
+#   ./run.sh [audio_file] [--animate]
+#
+#   audio_file     Path to an audio file (default: bundled Paradise Hotel demo).
+#   -a, --animate  Play the audio and animate the transcript word by word.
+#
+# Examples:
+#   ./run.sh                                # analyze the demo fixture
+#   ./run.sh --animate                      # animated demo with audio
+#   ./run.sh path/to/call.mp3 --animate     # animate your own file
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -31,5 +42,11 @@ if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
     fi
 fi
 
-# 3. Run
+# 3. Helpful first-run hints
+echo -e "${GREEN}AudioTrace${NC} — first run downloads the local models (Whisper, sentiment, intent); cached afterwards."
+if [ -z "${HF_TOKEN:-}" ]; then
+    echo "Tip: set HF_TOKEN to enable real pyannote diarization (otherwise speakers are inferred by pitch)."
+fi
+
+# 4. Run (forwards the file path and flags such as --animate to the CLI)
 python3 src/audiotrace/boot.py "$@"
