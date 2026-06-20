@@ -13,6 +13,15 @@ logger = logging.getLogger(__name__)
 # Global cache for models to avoid redundant reloads/network checks during a process lifetime
 _MODELS: dict[str, Any] = {}
 
+# Default friendly speaker labels used when a speaker count is given but no
+# explicit labels are passed. Two speakers map to an agent/customer support call.
+DEFAULT_TWO_SPEAKER_LABELS = ("AI Agent", "Customer")
+
+# Pitch range (Hz) for per-segment fundamental-frequency estimation used by the
+# no-diarization fallback. Spans typical adult speech (~C2 to C7).
+PITCH_FMIN_HZ = 65.0
+PITCH_FMAX_HZ = 2093.0
+
 
 def clear_model_cache() -> None:
     """Clear the global model cache."""
@@ -59,17 +68,30 @@ def extract_transcript(
     hf_token: str | None = None,
     whisper_model: str = "base",
     diarization_model: str = "pyannote/speaker-diarization-3.1",
+    num_speakers: int | None = None,
+    speaker_labels: list[str] | None = None,
 ) -> Transcript:
     """Extract a structured transcript with speaker diarization.
 
     This uses OpenAI Whisper for transcription and pyannote.audio for diarization.
     All models run locally once weights are downloaded/cached.
 
+    When diarization is unavailable (e.g. no token for the gated model) but
+    ``num_speakers`` is given, speakers are inferred by clustering each Whisper
+    segment by its voice pitch, so a speaker's consecutive sentences stay grouped
+    together rather than alternating per sentence. Raw speaker ids — whether from
+    real diarization or this fallback — are mapped to friendly labels in order of
+    first appearance: ``speaker_labels`` if provided, otherwise the defaults
+    (two speakers become "AI Agent" then "Customer").
+
     Args:
         audio_path: Path to the audio file.
         hf_token: Optional HuggingFace token for pyannote.audio gated models.
         whisper_model: Name or path of the Whisper model to use.
         diarization_model: Name or path of the pyannote pipeline to use.
+        num_speakers: Expected number of speakers. Improves real diarization and
+            enables role labelling when diarization is unavailable.
+        speaker_labels: Optional custom labels to apply in order of appearance.
 
     Returns:
         A populated :class:`~audiotrace.models.Transcript`.
@@ -89,42 +111,141 @@ def extract_transcript(
     # 2. Diarization with pyannote.audio (Local execution)
     pipeline = get_diarization_pipeline(diarization_model, use_auth_token=hf_token)
 
-    # Run diarization
     if pipeline is not None:
-        diarization = pipeline(str(path))
-
-        # 3. Alignment: map Whisper segments to Pyannote speaker turns
-        turns: list[Turn] = []
-        for segment in segments:
-            start = segment["start"]
-            end = segment["end"]
-            text = segment["text"].strip()
-
-            # Find the majority speaker for this segment
-            speaker = _get_majority_speaker(diarization, start, end)
-
-            turns.append(
-                Turn(
-                    speaker=speaker,
-                    text=text,
-                    start_ms=int(start * 1000),
-                    end_ms=int(end * 1000),
-                )
-            )
-
-        return Transcript(full_text=full_text, turns=turns, language=language)
-
-    # Fallback if pipeline couldn't be loaded
-    turns = [
-        Turn(
-            speaker="unknown",
-            text=segment["text"].strip(),
-            start_ms=int(segment["start"] * 1000),
-            end_ms=int(segment["end"] * 1000),
+        # 3. Alignment: map each Whisper segment to its majority speaker.
+        diarization = (
+            pipeline(str(path), num_speakers=num_speakers)
+            if num_speakers is not None
+            else pipeline(str(path))
         )
-        for segment in segments
-    ]
+        turns = [
+            Turn(
+                speaker=_get_majority_speaker(diarization, seg["start"], seg["end"]),
+                text=seg["text"].strip(),
+                start_ms=int(seg["start"] * 1000),
+                end_ms=int(seg["end"] * 1000),
+            )
+            for seg in segments
+        ]
+    elif num_speakers:
+        # No diarization model: cluster Whisper segments by voice pitch so a
+        # speaker's consecutive sentences stay together, then label by role.
+        clusters = _cluster_pitches(_segment_pitches(path, segments), num_speakers)
+        turns = [
+            Turn(
+                speaker=f"SPEAKER_{cluster:02d}",
+                text=seg["text"].strip(),
+                start_ms=int(seg["start"] * 1000),
+                end_ms=int(seg["end"] * 1000),
+            )
+            for seg, cluster in zip(segments, clusters)
+        ]
+    else:
+        # No diarization and no speaker count: speakers are unknown.
+        turns = [
+            Turn(
+                speaker="unknown",
+                text=seg["text"].strip(),
+                start_ms=int(seg["start"] * 1000),
+                end_ms=int(seg["end"] * 1000),
+            )
+            for seg in segments
+        ]
+
+    turns = _apply_speaker_roles(turns, num_speakers, speaker_labels)
     return Transcript(full_text=full_text, turns=turns, language=language)
+
+
+def _default_role_labels(num_speakers: int) -> list[str]:
+    """Default friendly labels for a known speaker count."""
+    if num_speakers == 2:
+        return list(DEFAULT_TWO_SPEAKER_LABELS)
+    return [f"Speaker {i + 1}" for i in range(num_speakers)]
+
+
+def _apply_speaker_roles(
+    turns: list[Turn],
+    num_speakers: int | None,
+    speaker_labels: list[str] | None,
+) -> list[Turn]:
+    """Relabel raw diarization speakers with friendly role names.
+
+    Raw speakers are mapped to labels in order of first appearance, cycling if
+    there are more distinct speakers than labels. With no custom labels and no
+    speaker count, turns are returned unchanged (raw ids preserved).
+    """
+    if speaker_labels:
+        labels = speaker_labels
+    elif num_speakers is not None:
+        labels = _default_role_labels(num_speakers)
+    else:
+        return turns
+
+    if not labels:
+        return turns
+
+    mapping: dict[str, str] = {}
+    for turn in turns:
+        if turn.speaker not in mapping:
+            mapping[turn.speaker] = labels[len(mapping) % len(labels)]
+
+    return [turn.model_copy(update={"speaker": mapping[turn.speaker]}) for turn in turns]
+
+
+def _segment_pitches(path: Path, segments: Any) -> list[float | None]:
+    """Median voiced pitch (Hz) for each Whisper segment, or None if unvoiced."""
+    import librosa
+    import numpy as np
+
+    y, sr = librosa.load(str(path), sr=None, mono=True)
+
+    pitches: list[float | None] = []
+    for seg in segments:
+        clip = y[int(seg["start"] * sr) : int(seg["end"] * sr)]
+        if clip.size == 0:
+            pitches.append(None)
+            continue
+        f0, voiced_flag, _ = librosa.pyin(clip, fmin=PITCH_FMIN_HZ, fmax=PITCH_FMAX_HZ, sr=sr)
+        voiced = f0[voiced_flag] if voiced_flag is not None else f0
+        voiced = voiced[~np.isnan(voiced)]
+        pitches.append(float(np.median(voiced)) if voiced.size else None)
+    return pitches
+
+
+def _cluster_pitches(pitches: list[float | None], num_speakers: int) -> list[int]:
+    """Group segments into ``num_speakers`` clusters by pitch (1-D k-means).
+
+    Segments with no measurable pitch inherit the previous segment's cluster.
+    Returns one cluster index per segment.
+    """
+    valid = [p for p in pitches if p is not None]
+    if num_speakers < 2 or len(set(valid)) < 2:
+        return [0] * len(pitches)
+
+    centers = _kmeans_1d(valid, min(num_speakers, len(set(valid))))
+
+    clusters: list[int] = []
+    last = 0
+    for p in pitches:
+        if p is not None:
+            last = min(range(len(centers)), key=lambda c: abs(p - centers[c]))
+        clusters.append(last)
+    return clusters
+
+
+def _kmeans_1d(values: list[float], k: int, iters: int = 25) -> list[float]:
+    """Deterministic 1-D k-means returning ``k`` cluster centers."""
+    data = sorted(values)
+    centers = [data[min(int((i + 0.5) / k * len(data)), len(data) - 1)] for i in range(k)]
+    for _ in range(iters):
+        buckets: list[list[float]] = [[] for _ in range(k)]
+        for v in data:
+            buckets[min(range(k), key=lambda c: abs(v - centers[c]))].append(v)
+        updated = [sum(b) / len(b) if b else centers[i] for i, b in enumerate(buckets)]
+        if updated == centers:
+            break
+        centers = updated
+    return centers
 
 
 def _get_majority_speaker(diarization: Any, start: float, end: float) -> str:

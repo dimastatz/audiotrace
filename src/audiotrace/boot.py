@@ -113,7 +113,7 @@ def run_analysis(file_path: str | Path) -> None:
 
     with console.status(f"[info]Analyzing {path.name}...[/]", spinner="dots"):
         try:
-            report = audiotrace.analyze(path)
+            report = audiotrace.analyze(path, num_speakers=2)
             console.print(f"\n[success]✓ Analysis Complete:[/] [white]{path}[/]")
             print_report(report)
         except Exception as e:

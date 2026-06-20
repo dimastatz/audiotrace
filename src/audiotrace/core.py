@@ -29,6 +29,8 @@ def analyze(
     metadata: dict[str, object] | None = None,
     hf_token: str | None = None,
     pricing: PricingTable | None = None,
+    num_speakers: int | None = None,
+    speaker_labels: list[str] | None = None,
 ) -> CallReport:
     """Analyze a single call recording and return a structured report.
 
@@ -37,6 +39,11 @@ def analyze(
         metadata: Optional call metadata (call_id, agent_version, provider, ...).
         hf_token: Optional HuggingFace token for pyannote.audio diarization.
             If not provided, looks for HF_TOKEN environment variable.
+        num_speakers: Expected number of speakers. Enables role labelling even
+            when diarization is unavailable (two speakers become "AI Agent" and
+            "Customer").
+        speaker_labels: Optional custom speaker labels, applied in order of
+            appearance instead of the defaults.
 
     Returns:
         A populated :class:`~audiotrace.models.CallReport`.
@@ -49,7 +56,9 @@ def analyze(
 
     # 2. Transcription and Diarization (Local Models)
     stt_start = time.perf_counter()
-    transcript = extract_transcript(audio, hf_token=token)
+    transcript = extract_transcript(
+        audio, hf_token=token, num_speakers=num_speakers, speaker_labels=speaker_labels
+    )
     stt_duration_ms = int((time.perf_counter() - stt_start) * 1000)
 
     # 3. Quality signal extraction (Librosa)
