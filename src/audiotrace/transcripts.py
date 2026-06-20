@@ -13,6 +13,10 @@ logger = logging.getLogger(__name__)
 # Global cache for models to avoid redundant reloads/network checks during a process lifetime
 _MODELS: dict[str, Any] = {}
 
+# Default friendly speaker labels used when a speaker count is given but no
+# explicit labels are passed. Two speakers map to an agent/customer support call.
+DEFAULT_TWO_SPEAKER_LABELS = ("AI Agent", "Customer")
+
 
 def clear_model_cache() -> None:
     """Clear the global model cache."""
@@ -59,17 +63,29 @@ def extract_transcript(
     hf_token: str | None = None,
     whisper_model: str = "base",
     diarization_model: str = "pyannote/speaker-diarization-3.1",
+    num_speakers: int | None = None,
+    speaker_labels: list[str] | None = None,
 ) -> Transcript:
     """Extract a structured transcript with speaker diarization.
 
     This uses OpenAI Whisper for transcription and pyannote.audio for diarization.
     All models run locally once weights are downloaded/cached.
 
+    When diarization is unavailable (e.g. no token for the gated model) but
+    ``num_speakers`` is given, speakers are assumed to alternate turn by turn so
+    that role labels can still be assigned. Raw speaker ids — whether from real
+    diarization or this fallback — are mapped to friendly labels in order of
+    first appearance: ``speaker_labels`` if provided, otherwise the defaults
+    (two speakers become "AI Agent" then "Customer").
+
     Args:
         audio_path: Path to the audio file.
         hf_token: Optional HuggingFace token for pyannote.audio gated models.
         whisper_model: Name or path of the Whisper model to use.
         diarization_model: Name or path of the pyannote pipeline to use.
+        num_speakers: Expected number of speakers. Improves real diarization and
+            enables role labelling when diarization is unavailable.
+        speaker_labels: Optional custom labels to apply in order of appearance.
 
     Returns:
         A populated :class:`~audiotrace.models.Transcript`.
@@ -89,42 +105,73 @@ def extract_transcript(
     # 2. Diarization with pyannote.audio (Local execution)
     pipeline = get_diarization_pipeline(diarization_model, use_auth_token=hf_token)
 
-    # Run diarization
     if pipeline is not None:
-        diarization = pipeline(str(path))
-
-        # 3. Alignment: map Whisper segments to Pyannote speaker turns
-        turns: list[Turn] = []
-        for segment in segments:
-            start = segment["start"]
-            end = segment["end"]
-            text = segment["text"].strip()
-
-            # Find the majority speaker for this segment
-            speaker = _get_majority_speaker(diarization, start, end)
-
-            turns.append(
-                Turn(
-                    speaker=speaker,
-                    text=text,
-                    start_ms=int(start * 1000),
-                    end_ms=int(end * 1000),
-                )
-            )
-
-        return Transcript(full_text=full_text, turns=turns, language=language)
-
-    # Fallback if pipeline couldn't be loaded
-    turns = [
-        Turn(
-            speaker="unknown",
-            text=segment["text"].strip(),
-            start_ms=int(segment["start"] * 1000),
-            end_ms=int(segment["end"] * 1000),
+        # 3. Alignment: map each Whisper segment to its majority speaker.
+        diarization = (
+            pipeline(str(path), num_speakers=num_speakers)
+            if num_speakers is not None
+            else pipeline(str(path))
         )
-        for segment in segments
-    ]
+        turns = [
+            Turn(
+                speaker=_get_majority_speaker(diarization, seg["start"], seg["end"]),
+                text=seg["text"].strip(),
+                start_ms=int(seg["start"] * 1000),
+                end_ms=int(seg["end"] * 1000),
+            )
+            for seg in segments
+        ]
+    else:
+        # Fallback: with a known speaker count, assume speakers alternate turn by
+        # turn; otherwise the speaker is unknown.
+        turns = [
+            Turn(
+                speaker=(f"SPEAKER_{i % num_speakers:02d}" if num_speakers else "unknown"),
+                text=seg["text"].strip(),
+                start_ms=int(seg["start"] * 1000),
+                end_ms=int(seg["end"] * 1000),
+            )
+            for i, seg in enumerate(segments)
+        ]
+
+    turns = _apply_speaker_roles(turns, num_speakers, speaker_labels)
     return Transcript(full_text=full_text, turns=turns, language=language)
+
+
+def _default_role_labels(num_speakers: int) -> list[str]:
+    """Default friendly labels for a known speaker count."""
+    if num_speakers == 2:
+        return list(DEFAULT_TWO_SPEAKER_LABELS)
+    return [f"Speaker {i + 1}" for i in range(num_speakers)]
+
+
+def _apply_speaker_roles(
+    turns: list[Turn],
+    num_speakers: int | None,
+    speaker_labels: list[str] | None,
+) -> list[Turn]:
+    """Relabel raw diarization speakers with friendly role names.
+
+    Raw speakers are mapped to labels in order of first appearance, cycling if
+    there are more distinct speakers than labels. With no custom labels and no
+    speaker count, turns are returned unchanged (raw ids preserved).
+    """
+    if speaker_labels:
+        labels = speaker_labels
+    elif num_speakers is not None:
+        labels = _default_role_labels(num_speakers)
+    else:
+        return turns
+
+    if not labels:
+        return turns
+
+    mapping: dict[str, str] = {}
+    for turn in turns:
+        if turn.speaker not in mapping:
+            mapping[turn.speaker] = labels[len(mapping) % len(labels)]
+
+    return [turn.model_copy(update={"speaker": mapping[turn.speaker]}) for turn in turns]
 
 
 def _get_majority_speaker(diarization: Any, start: float, end: float) -> str:
