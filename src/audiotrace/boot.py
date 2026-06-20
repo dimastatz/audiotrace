@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """A simple CLI entry point to run AudioTrace analysis on a file."""
 
+from __future__ import annotations
+
 import argparse
+import shutil
+import subprocess
+import sys
+import time
 from pathlib import Path
 
 from rich.console import Console
@@ -28,11 +34,92 @@ theme = Theme(
 
 console = Console(theme=theme)
 
+# Per-speaker accent colors for the transcript / playback.
+SPEAKER_STYLES = {"AI Agent": "bold cyan", "Customer": "bold green"}
 
-def print_report(report: audiotrace.models.CallReport) -> None:
-    """Print the CallReport in a beautiful, structured format."""
+# Delay between words for the typewriter animation.
+WORD_DELAY_S = 0.05
 
-    # 1. Media Info Panel
+
+def _speaker_style(speaker: str) -> str:
+    return SPEAKER_STYLES.get(speaker, "bold yellow")
+
+
+def _group_turns(turns: list[audiotrace.models.Turn]) -> list[tuple[str, str]]:
+    """Merge consecutive turns from the same speaker into one (speaker, text)."""
+    groups: list[tuple[str, str]] = []
+    for turn in turns:
+        if groups and groups[-1][0] == turn.speaker:
+            speaker, text = groups[-1]
+            groups[-1] = (speaker, f"{text} {turn.text}".strip())
+        else:
+            groups.append((turn.speaker, turn.text))
+    return groups
+
+
+def _play_audio(path: str | Path) -> subprocess.Popen[bytes] | None:
+    """Start playing an audio file in the background; return the process or None.
+
+    Tries macOS ``afplay`` first, then ``ffplay`` (bundled with FFmpeg).
+    """
+    players = (
+        ["afplay"],
+        ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet"],
+    )
+    for player in players:
+        if shutil.which(player[0]):
+            try:
+                return subprocess.Popen(
+                    [*player, str(path)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            except OSError:
+                return None
+    return None
+
+
+def _type_words(text: str, style: str = "value", delay: float = WORD_DELAY_S) -> None:
+    """Print ``text`` word by word for a typewriter effect."""
+    words = text.split()
+    for i, word in enumerate(words):
+        suffix = " " if i < len(words) - 1 else ""
+        console.print(f"[{style}]{word}{suffix}[/]", end="")
+        sys.stdout.flush()
+        time.sleep(delay)
+    console.print()
+
+
+def play_conversation(report: audiotrace.models.CallReport, audio_path: str | Path | None) -> None:
+    """Play the audio and animate the transcript, one block per speaker turn."""
+    console.print("\n[section]▶ Playing call[/]\n")
+    proc = _play_audio(audio_path) if audio_path else None
+
+    for speaker, text in _group_turns(report.transcript.turns):
+        style = _speaker_style(speaker)
+        console.print(f"[{style}]{speaker}:[/] ", end="")
+        _type_words(text)
+        console.print()
+
+    if proc is not None:
+        proc.wait()
+
+
+def print_transcript(report: audiotrace.models.CallReport) -> None:
+    """Print the transcript, one block per speaker turn (consecutive turns merged)."""
+    console.print("\n[section]Transcript[/]")
+    if not report.transcript.turns:
+        console.print(f"[value]{report.transcript.full_text or '(Empty)'}[/]")
+        return
+    for speaker, text in _group_turns(report.transcript.turns):
+        style = _speaker_style(speaker)
+        console.print(f"[{style}]{speaker}:[/] [value]{text}[/]")
+
+
+def print_summary(report: audiotrace.models.CallReport) -> None:
+    """Print the media, analysis, cost, latency, and JSON sections."""
+
+    # Media Info Panel
     if report.media:
         media_table = Table(show_header=False, box=None, padding=(0, 1))
         media_table.add_row("[key]Duration:[/]", f"{report.media.duration_ms}ms")
@@ -42,28 +129,25 @@ def print_report(report: audiotrace.models.CallReport) -> None:
         media_table.add_row("[key]Channels:[/]", str(report.media.channels))
         media_table.add_row("[key]Bitrate:[/]", f"{report.media.bitrate_kbps:.2f} kbps")
         media_table.add_row("[key]File Size:[/]", f"{report.media.file_size_bytes} bytes")
-
         console.print(
             Panel(
                 media_table, title="[section]Media Metadata[/]", expand=False, border_style="blue"
             )
         )
 
-    # 2. Main Analysis Summary Table
+    # Main Analysis Summary Table
     main_table = Table(
         title="\n[section]Analysis Summary[/]", show_header=True, header_style="bold cyan"
     )
     main_table.add_column("Section")
     main_table.add_column("Highlights")
 
-    # Quality
     main_table.add_row(
         "Quality",
         f"Score: {report.quality.overall_score:.2f} | "
         f"Interruptions: {report.quality.interruptions}",
     )
 
-    # Sentiment
     sentiment_color = "red" if report.sentiment.caller_frustration else "green"
     main_table.add_row(
         "Sentiment",
@@ -71,41 +155,62 @@ def print_report(report: audiotrace.models.CallReport) -> None:
         f"Frustration: [{sentiment_color}]{report.sentiment.caller_frustration}[/]",
     )
 
-    # Latency
-    main_table.add_row(
-        "Latency",
-        f"Total: {report.latency.total_ms}ms "
-        f"(STT: {report.latency.stt_ms}ms | LLM: {report.latency.llm_full_response_ms}ms)",
-    )
-
-    # Cost
-    main_table.add_row("Cost", f"Total: $[success]{report.cost.total_usd:.4f}[/]")
-
-    # Events
+    flags = ", ".join(report.events.compliance_flags) or "none"
     main_table.add_row(
         "Events",
-        f"Outcome: {report.events.outcome} | Intent: {report.events.intent_detected or 'N/A'}",
+        f"Outcome: {report.events.outcome} | "
+        f"Intent: {report.events.intent_detected or 'N/A'} | "
+        f"Compliance: {flags}",
     )
 
     console.print(main_table)
 
-    # 3. Transcript Preview
-    if report.transcript.full_text or report.transcript.turns:
-        console.print("\n[section]Transcript Preview[/]")
-        if not report.transcript.turns:
-            console.print(f"[value]{report.transcript.full_text or '(Empty)'}[/]")
-        else:
-            for turn in report.transcript.turns[:5]:  # Show first 5 turns
-                console.print(f"[key]{turn.speaker}:[/] [value]{turn.text}[/]")
-            if len(report.transcript.turns) > 5:
-                console.print(f"... and {len(report.transcript.turns) - 5} more turns.")
+    # Cost Breakdown Panel
+    cost_table = Table(show_header=False, box=None, padding=(0, 1))
+    cost_table.add_row("[key]STT:[/]", f"${report.cost.stt_usd:.4f}")
+    cost_table.add_row("[key]LLM:[/]", f"${report.cost.llm_usd:.4f}")
+    cost_table.add_row("[key]TTS:[/]", f"${report.cost.tts_usd:.4f}")
+    cost_table.add_row("[key]Telephony:[/]", f"${report.cost.telephony_usd:.4f}")
+    cost_table.add_row("[key]Total:[/]", f"[success]${report.cost.total_usd:.4f}[/]")
+    console.print(
+        Panel(cost_table, title="[section]Cost Breakdown[/]", expand=False, border_style="green")
+    )
 
-    # 4. Full Report as prettified, colorized JSON
+    # Latency Panel (incl. agent-response waterfall)
+    lat_table = Table(show_header=False, box=None, padding=(0, 1))
+    lat_table.add_row("[key]STT:[/]", f"{report.latency.stt_ms}ms")
+    lat_table.add_row("[key]Pipeline total:[/]", f"{report.latency.total_ms}ms")
+    for span in report.latency.waterfall:
+        lat_table.add_row(
+            f"[key]{span.name}:[/]", f"{span.duration_ms}ms @ {span.start_ms / 1000:0.1f}s"
+        )
+    console.print(
+        Panel(lat_table, title="[section]Latency[/]", expand=False, border_style="magenta")
+    )
+
+    # Full Report as prettified, colorized JSON
     console.print("\n[section]Full Report (JSON)[/]")
     console.print_json(report.model_dump_json())
 
 
-def run_analysis(file_path: str | Path) -> None:
+def print_report(
+    report: audiotrace.models.CallReport,
+    animate: bool = False,
+    audio_path: str | Path | None = None,
+) -> None:
+    """Render the report: play/show the call first, then the full summary."""
+    has_conversation = bool(report.transcript.full_text or report.transcript.turns)
+
+    if has_conversation:
+        if animate:
+            play_conversation(report, audio_path)
+        else:
+            print_transcript(report)
+
+    print_summary(report)
+
+
+def run_analysis(file_path: str | Path, animate: bool = False) -> None:
     path = Path(file_path)
     if not path.exists():
         console.print(f"[error]Error: File not found: {path}[/]")
@@ -115,9 +220,11 @@ def run_analysis(file_path: str | Path) -> None:
         try:
             report = audiotrace.analyze(path, num_speakers=2)
             console.print(f"\n[success]✓ Analysis Complete:[/] [white]{path}[/]")
-            print_report(report)
         except Exception as e:
             console.print(f"[error]Error during analysis: {e}[/]")
+            return
+
+    print_report(report, animate=animate, audio_path=path)
 
 
 def main() -> None:
@@ -129,11 +236,17 @@ def main() -> None:
         default=str(DEFAULT_FIXTURE),
         help=f"Path to the audio file (default: {DEFAULT_FIXTURE})",
     )
+    parser.add_argument(
+        "-a",
+        "--animate",
+        action="store_true",
+        help="Play the audio and animate the transcript word by word.",
+    )
 
     args = parser.parse_args()
 
     # First analysis from CLI arg
-    run_analysis(args.file_path)
+    run_analysis(args.file_path, animate=args.animate)
 
     # Interactive loop
     while True:
@@ -147,7 +260,7 @@ def main() -> None:
                 break
             if not user_input:
                 continue
-            run_analysis(user_input)
+            run_analysis(user_input, animate=args.animate)
         except (KeyboardInterrupt, EOFError):
             console.print("\n[info]Exiting.[/]")
             break
