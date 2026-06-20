@@ -85,15 +85,26 @@ def _wait_until(start: float, target_s: float) -> None:
 
 
 def _type_turn(turn: audiotrace.models.Turn, start: float, style: str) -> None:
-    """Reveal a turn's words spread across its [start_ms, end_ms] audio window."""
-    words = turn.text.split()
-    if not words:
+    """Reveal a turn's words in sync with the audio.
+
+    Uses each word's own timestamp when available (word-level transcription);
+    otherwise spreads the words evenly across the turn's [start_ms, end_ms].
+    """
+    if turn.words:
+        for word in turn.words:
+            _wait_until(start, word.start_ms / 1000)
+            console.print(f"[{style}]{word.text} [/]", end="")
+            sys.stdout.flush()
+        return
+
+    tokens = turn.text.split()
+    if not tokens:
         return
     begin = turn.start_ms / 1000
     duration = max((turn.end_ms - turn.start_ms) / 1000, 0.0)
-    for i, word in enumerate(words):
-        _wait_until(start, begin + duration * i / len(words))
-        console.print(f"[{style}]{word} [/]", end="")
+    for i, token in enumerate(tokens):
+        _wait_until(start, begin + duration * i / len(tokens))
+        console.print(f"[{style}]{token} [/]", end="")
         sys.stdout.flush()
 
 

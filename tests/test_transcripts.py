@@ -12,7 +12,9 @@ from audiotrace.transcripts import (
     _default_role_labels,
     _get_majority_speaker,
     _kmeans_1d,
+    _make_turn,
     _segment_pitches,
+    _segment_words,
     clear_model_cache,
     extract_transcript,
 )
@@ -201,6 +203,62 @@ def test_kmeans_1d_respects_iteration_cap():
     # iters=1 forces the loop to exit by exhaustion (no convergence break).
     centers = _kmeans_1d([100.0, 102.0, 300.0], 2, iters=1)
     assert sorted(centers) == [101.0, 300.0]
+
+
+def test_segment_words_extracts_timings():
+    seg = {
+        "words": [
+            {"word": " Hello", "start": 0.0, "end": 0.5},
+            {"word": " world", "start": 0.5, "end": 1.0},
+        ]
+    }
+    words = _segment_words(seg)
+    assert [(w.text, w.start_ms, w.end_ms) for w in words] == [
+        ("Hello", 0, 500),
+        ("world", 500, 1000),
+    ]
+
+
+def test_segment_words_empty_when_absent():
+    assert _segment_words({"text": "hi"}) == []
+
+
+def test_make_turn_includes_words():
+    seg = {
+        "text": " Hello world ",
+        "start": 0.0,
+        "end": 1.0,
+        "words": [
+            {"word": " Hello", "start": 0.0, "end": 0.5},
+            {"word": " world", "start": 0.5, "end": 1.0},
+        ],
+    }
+    turn = _make_turn(seg, "AI Agent")
+    assert turn.speaker == "AI Agent"
+    assert turn.text == "Hello world"
+    assert (turn.start_ms, turn.end_ms) == (0, 1000)
+    assert [w.text for w in turn.words] == ["Hello", "world"]
+
+
+def test_extract_transcript_populates_word_timings():
+    _setup_whisper(
+        [
+            {
+                "start": 0.0,
+                "end": 1.0,
+                "text": "Hello world",
+                "words": [
+                    {"word": " Hello", "start": 0.0, "end": 0.5},
+                    {"word": " world", "start": 0.5, "end": 1.0},
+                ],
+            }
+        ]
+    )
+    mock_pyannote_audio.Pipeline.from_pretrained.return_value = None
+
+    transcript = extract_transcript(FIXTURE)
+
+    assert [w.text for w in transcript.turns[0].words] == ["Hello", "world"]
 
 
 def test_segment_pitches_median_and_unvoiced_and_empty():

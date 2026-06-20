@@ -6,7 +6,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from audiotrace.models import Transcript, Turn
+from audiotrace.models import Transcript, Turn, Word
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ def extract_transcript(
 
     # 1. Transcription with Whisper (Local execution)
     model = get_whisper_model(whisper_model)
-    whisper_result = model.transcribe(str(path), verbose=False)
+    whisper_result = model.transcribe(str(path), verbose=False, word_timestamps=True)
 
     full_text = whisper_result.get("text", "").strip()
     language = whisper_result.get("language", "en")
@@ -119,12 +119,7 @@ def extract_transcript(
             else pipeline(str(path))
         )
         turns = [
-            Turn(
-                speaker=_get_majority_speaker(diarization, seg["start"], seg["end"]),
-                text=seg["text"].strip(),
-                start_ms=int(seg["start"] * 1000),
-                end_ms=int(seg["end"] * 1000),
-            )
+            _make_turn(seg, _get_majority_speaker(diarization, seg["start"], seg["end"]))
             for seg in segments
         ]
     elif num_speakers:
@@ -132,28 +127,39 @@ def extract_transcript(
         # speaker's consecutive sentences stay together, then label by role.
         clusters = _cluster_pitches(_segment_pitches(path, segments), num_speakers)
         turns = [
-            Turn(
-                speaker=f"SPEAKER_{cluster:02d}",
-                text=seg["text"].strip(),
-                start_ms=int(seg["start"] * 1000),
-                end_ms=int(seg["end"] * 1000),
-            )
-            for seg, cluster in zip(segments, clusters)
+            _make_turn(seg, f"SPEAKER_{cluster:02d}") for seg, cluster in zip(segments, clusters)
         ]
     else:
         # No diarization and no speaker count: speakers are unknown.
-        turns = [
-            Turn(
-                speaker="unknown",
-                text=seg["text"].strip(),
-                start_ms=int(seg["start"] * 1000),
-                end_ms=int(seg["end"] * 1000),
-            )
-            for seg in segments
-        ]
+        turns = [_make_turn(seg, "unknown") for seg in segments]
 
     turns = _apply_speaker_roles(turns, num_speakers, speaker_labels)
     return Transcript(full_text=full_text, turns=turns, language=language)
+
+
+def _make_turn(seg: Any, speaker: str) -> Turn:
+    """Build a Turn (with word-level timing) from a Whisper segment."""
+    return Turn(
+        speaker=speaker,
+        text=seg["text"].strip(),
+        start_ms=int(seg["start"] * 1000),
+        end_ms=int(seg["end"] * 1000),
+        words=_segment_words(seg),
+    )
+
+
+def _segment_words(seg: Any) -> list[Word]:
+    """Extract word-level timings from a Whisper segment (empty if unavailable)."""
+    words: list[Word] = []
+    for word in seg.get("words") or []:
+        words.append(
+            Word(
+                text=str(word["word"]).strip(),
+                start_ms=int(word["start"] * 1000),
+                end_ms=int(word["end"] * 1000),
+            )
+        )
+    return words
 
 
 def _default_role_labels(num_speakers: int) -> list[str]:

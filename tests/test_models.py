@@ -1,4 +1,4 @@
-from audiotrace import CallReport, MediaInfo, Transcript, Turn
+from audiotrace import CallReport, MediaInfo, Transcript, Turn, Word
 
 
 def test_callreport_defaults():
@@ -35,3 +35,23 @@ def test_callreport_roundtrip():
     restored = CallReport.model_validate(report.model_dump())
     assert restored.transcript.turns[0].speaker == "agent"
     assert restored.transcript.full_text == "hello"
+
+
+def test_turn_words_default_empty():
+    turn = Turn(speaker="agent", text="hi", start_ms=0, end_ms=500)
+    assert turn.words == []
+
+
+def test_turn_with_words():
+    turn = Turn(
+        speaker="agent",
+        text="hi there",
+        start_ms=0,
+        end_ms=500,
+        words=[
+            Word(text="hi", start_ms=0, end_ms=200),
+            Word(text="there", start_ms=200, end_ms=500),
+        ],
+    )
+    assert [w.text for w in turn.words] == ["hi", "there"]
+    assert turn.words[1].start_ms == 200

@@ -22,6 +22,14 @@ class MediaInfo(BaseModel):
     bitrate_kbps: float
 
 
+class Word(BaseModel):
+    """A single word with its timing, from word-level transcription."""
+
+    text: str
+    start_ms: int
+    end_ms: int
+
+
 class Turn(BaseModel):
     """A single speaker turn within the transcript."""
 
@@ -29,6 +37,7 @@ class Turn(BaseModel):
     text: str
     start_ms: int
     end_ms: int
+    words: list[Word] = Field(default_factory=list)
 
 
 class Transcript(BaseModel):
