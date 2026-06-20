@@ -11,7 +11,7 @@ from rich.theme import Theme
 
 import audiotrace
 
-DEFAULT_FIXTURE = Path("tests/fixtures/premier_phone_call_30s.mp3")
+DEFAULT_FIXTURE = Path("tests/fixtures/paradise_hotel_booking_60s.mp3")
 
 # Custom theme for consistent coloring
 theme = Theme(

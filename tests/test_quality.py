@@ -18,7 +18,7 @@ from audiotrace.quality import (
 
 mock_librosa = MagicMock()
 
-FIXTURE = Path(__file__).parent / "fixtures" / "premier_phone_call_30s.mp3"
+FIXTURE = Path(__file__).parent / "fixtures" / "paradise_hotel_booking_60s.mp3"
 
 
 @pytest.fixture(autouse=True)

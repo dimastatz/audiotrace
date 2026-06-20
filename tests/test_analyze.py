@@ -36,13 +36,13 @@ def test_analyze_media_info(
     mock_extract_cost.return_value = Cost()
     mock_extract_events.return_value = Events()
 
-    fixture_path = Path(__file__).parent / "fixtures" / "premier_phone_call_30s.mp3"
+    fixture_path = Path(__file__).parent / "fixtures" / "paradise_hotel_booking_60s.mp3"
     report = audiotrace.analyze(fixture_path)
 
     assert report.media is not None
     assert report.media.codec == "mp3"
     # Allow 100ms tolerance for different FFmpeg versions (PRD requirement)
-    assert abs(report.media.duration_ms - 30012) <= 100
+    assert abs(report.media.duration_ms - 63875) <= 100
     assert report.media.sample_rate_hz == 48000
     assert report.media.channels == 2
     assert report.media.file_format == "mp3"
