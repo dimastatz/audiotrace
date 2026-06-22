@@ -13,16 +13,15 @@ means assembling speech recognition, speaker separation, audio analysis, a
 sentiment model, and a pricing sheet — and then doing it all again at the next
 company.
 
-This matters most when an AI agent, rather than a person, is the one on the
-call. A human follows a script in roughly predictable ways. An AI agent does
-not — its behavior shifts from call to call, drifts as you change a prompt or a
-model, and surprises you in ways no test suite anticipates. You can't manage
-what you can't see, so these conversations need to be monitored in detail, one
-call at a time. And the same signals that tell you how the agent behaved —
-where it stalled, where the caller grew frustrated, where it missed the intent —
-are exactly the examples you feed back in to fine-tune and improve it. Detailed
-monitoring isn't only oversight; it's the raw material for the next, better
-version of the agent.
+This matters most when the voice on the call is an AI agent rather than a
+person. An AI agent's behavior isn't fixed: it shifts from one call to the next,
+drifts as you tweak a prompt or swap a model, and surprises you in ways no test
+suite anticipates. You can't manage what you can't see, so these conversations
+have to be watched closely, one call at a time. And the very signals that reveal
+how the agent behaved — where it stalled, where the caller grew frustrated,
+where it missed the intent — are the examples you feed back in to fine-tune it.
+Detailed monitoring isn't just oversight; it's the raw material for the next,
+better version of the agent.
 
 I kept seeing this duplicated effort, so I built a small open-source library
 called AudioTrace. You hand it a call recording, and it hands back one
