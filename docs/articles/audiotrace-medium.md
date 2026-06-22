@@ -63,6 +63,26 @@ find this happens more often than we expect. We reach for the biggest model out
 of habit, when a careful look at the data points to something lighter, cheaper,
 and easier to reason about.
 
+Step back, and there are really two ways to pull meaning out of audio, and a
+complete system needs both. One is classical signal processing: deterministic
+math run directly on the waveform — energy, pitch, the length of a silence. It
+is cheap, exact, needs no training data, and it shines for physical questions.
+How long was the pause? How fast did someone speak? Is the voice high or low?
+You measure the answer rather than guess at it. The other is learned models:
+statistical systems like Whisper or a sentiment classifier that have absorbed
+enormous amounts of data and estimate an answer. They own everything that turns
+on meaning rather than physics — the words, who is speaking, whether the caller
+is upset, what they intended — where no hand-written rule survives the
+messiness of real speech.
+
+Knowing which question belongs to which approach is most of the craft, and the
+two reinforce each other. In AudioTrace the acoustic layer — silence, pace,
+pitch — is pure signal processing, while the semantic layer — transcript,
+sentiment, intent — is models. And when the speaker model wasn't available, a
+deterministic pitch measurement stood in for it. Reach for a model when you
+need to estimate meaning; reach for signal processing when you can simply
+measure it.
+
 There's a broader pattern here, too. A lot of progress in AI doesn't come from a
 new model at all. It comes from packaging hard-won engineering into something
 others can reuse — turning a week of glue code into a single `pip install`. That
