@@ -18,13 +18,17 @@ suite anticipates. You can't manage what you can't see, so these conversations
 have to be watched closely, one call at a time. If that agent were typing
 instead of talking, you'd already have the instruments — LangChain to wire up
 the chain, LangSmith to trace and grade each run, OpenTelemetry to fan spans out
-to your dashboards. But the moment it speaks on a phone call, that whole stack
-goes quiet: it watches tokens, not audio. AudioTrace is meant to be the missing
-half — the same observability mindset, applied to the waveform. And the very
-signals that reveal how the agent behaved — where it stalled, where the caller
-grew frustrated, where it missed the intent — are the examples you feed back in
-to fine-tune it. Detailed monitoring isn't just oversight; it's the raw material
-for the next, better version of the agent.
+to your dashboards. But the moment it speaks on a phone call, those tools see
+tokens, not audio. AudioTrace is built to slot right into them rather than
+replace them: because every call comes back as one structured, typed report, you
+can emit it as OpenTelemetry spans, attach it to your LangChain and LangSmith
+traces, or assert on it in a CI check that fails the build when a prompt change
+makes the agent slower, colder, or less compliant. It gives the voice side the
+same observability — and the same pre-deploy quality gate — you already expect
+for text. And the very signals that reveal how the agent behaved — where it
+stalled, where the caller grew frustrated, where it missed the intent — are the
+examples you feed back in to fine-tune it. Detailed monitoring isn't just
+oversight; it's the raw material for the next, better version of the agent.
 
 Before getting to any tool, it helps to step back, because there are really two
 ways to pull meaning out of audio, and a complete system needs both. One is
