@@ -1,8 +1,6 @@
-# When the Right Tool Is the Simpler One
+# AudioTrace: When the Right Tool Is the Simpler One
 
-*Written in the spirit of Andrew Ng's letters in The Batch.*
-
-Dear friends,
+Dear signal-chasers,
 
 A recording of a voice-AI call is one of the richest artifacts in modern
 software. Hidden inside a single `.mp3` is the transcript, the customer's
@@ -17,11 +15,16 @@ This matters most when the voice on the call is an AI agent rather than a
 person. An AI agent's behavior isn't fixed: it shifts from one call to the next,
 drifts as you tweak a prompt or swap a model, and surprises you in ways no test
 suite anticipates. You can't manage what you can't see, so these conversations
-have to be watched closely, one call at a time. And the very signals that reveal
-how the agent behaved — where it stalled, where the caller grew frustrated,
-where it missed the intent — are the examples you feed back in to fine-tune it.
-Detailed monitoring isn't just oversight; it's the raw material for the next,
-better version of the agent.
+have to be watched closely, one call at a time. If that agent were typing
+instead of talking, you'd already have the instruments — LangChain to wire up
+the chain, LangSmith to trace and grade each run, OpenTelemetry to fan spans out
+to your dashboards. But the moment it speaks on a phone call, that whole stack
+goes quiet: it watches tokens, not audio. AudioTrace is meant to be the missing
+half — the same observability mindset, applied to the waveform. And the very
+signals that reveal how the agent behaved — where it stalled, where the caller
+grew frustrated, where it missed the intent — are the examples you feed back in
+to fine-tune it. Detailed monitoring isn't just oversight; it's the raw material
+for the next, better version of the agent.
 
 Before getting to any tool, it helps to step back, because there are really two
 ways to pull meaning out of audio, and a complete system needs both. One is
