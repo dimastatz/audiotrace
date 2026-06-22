@@ -244,8 +244,8 @@ For quick testing or interactive analysis, you can use the provided runner scrip
 # Analyze default golden data fixture
 ./scripts/run.sh
 
-# Animated playback, inferring speakers by pitch (no pyannote token needed)
-./scripts/run.sh --animate --skip-pyannote
+# Playback, inferring speakers by pitch (no pyannote token needed)
+./scripts/run.sh --playback --skip-pyannote
 
 # Analyze a specific file
 ./scripts/run.sh path/to/your/audio.wav

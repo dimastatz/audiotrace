@@ -2,17 +2,17 @@
 # AudioTrace runner script. Run from the repository root.
 #
 # Usage:
-#   ./scripts/run.sh [audio_file] [--animate] [--skip-pyannote]
+#   ./scripts/run.sh [audio_file] [--playback] [--skip-pyannote]
 #
 #   audio_file        Path to an audio file (default: bundled Paradise Hotel demo).
-#   -a, --animate     Play the audio and animate the transcript word by word.
+#   -p, --playback    Play the audio back while revealing the transcript word by word.
 #   --skip-pyannote   Skip loading the pyannote diarization model; infer speakers
 #                     by pitch (no token, no network, faster — handy for demos).
 #
 # Examples:
 #   ./scripts/run.sh                                # analyze the demo fixture
-#   ./scripts/run.sh --animate --skip-pyannote      # clean animated demo
-#   ./scripts/run.sh path/to/call.mp3 --animate     # animate your own file
+#   ./scripts/run.sh --playback --skip-pyannote     # clean playback demo
+#   ./scripts/run.sh path/to/call.mp3 --playback    # play back your own file
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -50,5 +50,5 @@ if [ -z "${HF_TOKEN:-}" ]; then
     echo "Tip: set HF_TOKEN to enable real pyannote diarization (otherwise speakers are inferred by pitch)."
 fi
 
-# 4. Run (forwards the file path and flags such as --animate / --skip-pyannote)
+# 4. Run (forwards the file path and flags such as --playback / --skip-pyannote)
 python3 src/audiotrace/boot.py "$@"

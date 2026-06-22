@@ -220,14 +220,14 @@ def print_summary(report: audiotrace.models.CallReport) -> None:
 
 def print_report(
     report: audiotrace.models.CallReport,
-    animate: bool = False,
+    playback: bool = False,
     audio_path: str | Path | None = None,
 ) -> None:
     """Render the report: play/show the call first, then the full summary."""
     has_conversation = bool(report.transcript.full_text or report.transcript.turns)
 
     if has_conversation:
-        if animate:
+        if playback:
             play_conversation(report, audio_path)
         else:
             print_transcript(report)
@@ -235,7 +235,9 @@ def print_report(
     print_summary(report)
 
 
-def run_analysis(file_path: str | Path, animate: bool = False, skip_pyannote: bool = False) -> None:
+def run_analysis(
+    file_path: str | Path, playback: bool = False, skip_pyannote: bool = False
+) -> None:
     path = Path(file_path)
     if not path.exists():
         console.print(f"[error]Error: File not found: {path}[/]")
@@ -249,7 +251,7 @@ def run_analysis(file_path: str | Path, animate: bool = False, skip_pyannote: bo
             console.print(f"[error]Error during analysis: {e}[/]")
             return
 
-    print_report(report, animate=animate, audio_path=path)
+    print_report(report, playback=playback, audio_path=path)
 
 
 def main() -> None:
@@ -262,10 +264,10 @@ def main() -> None:
         help=f"Path to the audio file (default: {DEFAULT_FIXTURE})",
     )
     parser.add_argument(
-        "-a",
-        "--animate",
+        "-p",
+        "--playback",
         action="store_true",
-        help="Play the audio and animate the transcript word by word.",
+        help="Play the audio back while revealing the transcript word by word.",
     )
     parser.add_argument(
         "--skip-pyannote",
@@ -276,7 +278,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # First analysis from CLI arg
-    run_analysis(args.file_path, animate=args.animate, skip_pyannote=args.skip_pyannote)
+    run_analysis(args.file_path, playback=args.playback, skip_pyannote=args.skip_pyannote)
 
     # Interactive loop
     while True:
@@ -290,7 +292,7 @@ def main() -> None:
                 break
             if not user_input:
                 continue
-            run_analysis(user_input, animate=args.animate, skip_pyannote=args.skip_pyannote)
+            run_analysis(user_input, playback=args.playback, skip_pyannote=args.skip_pyannote)
         except (KeyboardInterrupt, EOFError):
             console.print("\n[info]Exiting.[/]")
             break
