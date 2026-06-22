@@ -21,12 +21,12 @@ RUN pip install --no-cache-dir .
 
 # Copy the rest of the files (tests for golden data, runner script)
 COPY tests/fixtures ./tests/fixtures
-COPY run.sh ./
+COPY scripts/run.sh ./scripts/run.sh
 
 # Ensure the runner is executable
-RUN chmod +x run.sh
+RUN chmod +x scripts/run.sh
 
 # Set the entrypoint to the runner script
-# Since we pre-install dependencies above, run.sh will bypass the 
+# Since we pre-install dependencies above, run.sh will bypass the
 # interactive prompt and start analysis immediately.
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["./scripts/run.sh"]

@@ -235,7 +235,7 @@ def print_report(
     print_summary(report)
 
 
-def run_analysis(file_path: str | Path, animate: bool = False) -> None:
+def run_analysis(file_path: str | Path, animate: bool = False, skip_pyannote: bool = False) -> None:
     path = Path(file_path)
     if not path.exists():
         console.print(f"[error]Error: File not found: {path}[/]")
@@ -243,7 +243,7 @@ def run_analysis(file_path: str | Path, animate: bool = False) -> None:
 
     with console.status(f"[info]Analyzing {path.name}...[/]", spinner="dots"):
         try:
-            report = audiotrace.analyze(path, num_speakers=2)
+            report = audiotrace.analyze(path, num_speakers=2, diarize=not skip_pyannote)
             console.print(f"\n[success]✓ Analysis Complete:[/] [white]{path}[/]")
         except Exception as e:
             console.print(f"[error]Error during analysis: {e}[/]")
@@ -267,11 +267,16 @@ def main() -> None:
         action="store_true",
         help="Play the audio and animate the transcript word by word.",
     )
+    parser.add_argument(
+        "--skip-pyannote",
+        action="store_true",
+        help="Skip loading the pyannote diarization model; infer speakers by pitch.",
+    )
 
     args = parser.parse_args()
 
     # First analysis from CLI arg
-    run_analysis(args.file_path, animate=args.animate)
+    run_analysis(args.file_path, animate=args.animate, skip_pyannote=args.skip_pyannote)
 
     # Interactive loop
     while True:
@@ -285,7 +290,7 @@ def main() -> None:
                 break
             if not user_input:
                 continue
-            run_analysis(user_input, animate=args.animate)
+            run_analysis(user_input, animate=args.animate, skip_pyannote=args.skip_pyannote)
         except (KeyboardInterrupt, EOFError):
             console.print("\n[info]Exiting.[/]")
             break
