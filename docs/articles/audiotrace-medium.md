@@ -73,11 +73,8 @@ There's a broader lesson too. A lot of progress in AI doesn't come from a new
 model at all; it comes from packaging hard-won engineering into something others
 can reuse — turning a week of glue code into one `pip install`. That work rarely
 makes headlines, but it's how a field compounds. Every tool we share is time
-handed back to the next builder.
-
-AudioTrace is early — provider integrations, stage-by-stage latency, and richer
-compliance checks are still to come. If you build voice agents, I'd love for you
-to try it, and even more for you to improve it.
+handed back to the next builder. AudioTrace is early — provider integrations,  
+stage-by-stage, latency, and richer compliance checks are still to come.
 
 ```bash
 pip install audiotrace
@@ -85,4 +82,3 @@ pip install audiotrace
 
 Keep building!
 
-Dima
