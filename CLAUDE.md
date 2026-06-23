@@ -22,8 +22,7 @@ docs/
   prd/                 # what we build — one spec per feature, see docs/prd/README.md
   roadmap.md           # when — phases and ordering
 docker/                # Dockerfiles for testing and production
-scripts/               # Automation scripts
-run.sh                 # Local CLI runner
+scripts/               # Automation scripts (test_local.sh, run.sh, publish.sh)
 .github/workflows/     # CI
 ```
 
@@ -37,7 +36,7 @@ pip install -e ".[dev]"   # install library + dev tooling
 ./scripts/test_local.sh test  # format, lint, type-check, and test (100% coverage)
 
 # Running locally
-./run.sh [file_path]      # analyze a file interactively
+./scripts/run.sh [file_path]      # analyze a file interactively
 
 # Reproduce CI locally (mirrors GitHub Actions exactly):
 docker build -f docker/Dockerfile.test -t audiotrace-test .

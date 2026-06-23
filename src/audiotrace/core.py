@@ -31,6 +31,7 @@ def analyze(
     pricing: PricingTable | None = None,
     num_speakers: int | None = None,
     speaker_labels: list[str] | None = None,
+    diarize: bool = True,
 ) -> CallReport:
     """Analyze a single call recording and return a structured report.
 
@@ -44,6 +45,8 @@ def analyze(
             "Customer").
         speaker_labels: Optional custom speaker labels, applied in order of
             appearance instead of the defaults.
+        diarize: When False, skip loading the pyannote diarization model and
+            infer speakers by pitch instead.
 
     Returns:
         A populated :class:`~audiotrace.models.CallReport`.
@@ -57,7 +60,11 @@ def analyze(
     # 2. Transcription and Diarization (Local Models)
     stt_start = time.perf_counter()
     transcript = extract_transcript(
-        audio, hf_token=token, num_speakers=num_speakers, speaker_labels=speaker_labels
+        audio,
+        hf_token=token,
+        num_speakers=num_speakers,
+        speaker_labels=speaker_labels,
+        diarize=diarize,
     )
     stt_duration_ms = int((time.perf_counter() - stt_start) * 1000)
 

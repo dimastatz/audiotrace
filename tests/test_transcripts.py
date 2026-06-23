@@ -169,6 +169,24 @@ def test_fallback_groups_segments_by_pitch():
     assert [t.speaker for t in transcript.turns] == ["AI Agent", "AI Agent", "Customer"]
 
 
+def test_diarize_false_skips_pyannote():
+    _setup_whisper(
+        [
+            {"start": 0.0, "end": 2.0, "text": "Hello there."},
+            {"start": 2.0, "end": 4.0, "text": "Hi, I need a room."},
+        ]
+    )
+    # A pipeline WOULD load, but diarize=False must skip pyannote entirely.
+    mock_pyannote_audio.Pipeline.from_pretrained.reset_mock()
+    mock_pyannote_audio.Pipeline.from_pretrained.return_value = MagicMock()
+
+    with patch("audiotrace.transcripts._segment_pitches", return_value=[210.0, 110.0]):
+        transcript = extract_transcript(FIXTURE, num_speakers=2, diarize=False)
+
+    mock_pyannote_audio.Pipeline.from_pretrained.assert_not_called()
+    assert [t.speaker for t in transcript.turns] == ["AI Agent", "Customer"]
+
+
 def test_cluster_pitches_two_groups():
     clusters = _cluster_pitches([200.0, 205.0, 110.0, 115.0], 2)
     assert clusters[0] == clusters[1]

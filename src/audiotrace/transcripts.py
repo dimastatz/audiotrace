@@ -70,6 +70,7 @@ def extract_transcript(
     diarization_model: str = "pyannote/speaker-diarization-3.1",
     num_speakers: int | None = None,
     speaker_labels: list[str] | None = None,
+    diarize: bool = True,
 ) -> Transcript:
     """Extract a structured transcript with speaker diarization.
 
@@ -92,6 +93,8 @@ def extract_transcript(
         num_speakers: Expected number of speakers. Improves real diarization and
             enables role labelling when diarization is unavailable.
         speaker_labels: Optional custom labels to apply in order of appearance.
+        diarize: When False, skip loading the pyannote diarization model and
+            infer speakers by pitch instead (useful offline or for a fast demo).
 
     Returns:
         A populated :class:`~audiotrace.models.Transcript`.
@@ -108,8 +111,10 @@ def extract_transcript(
     language = whisper_result.get("language", "en")
     segments = whisper_result.get("segments", [])
 
-    # 2. Diarization with pyannote.audio (Local execution)
-    pipeline = get_diarization_pipeline(diarization_model, use_auth_token=hf_token)
+    # 2. Diarization with pyannote.audio (Local execution), unless skipped.
+    pipeline = (
+        get_diarization_pipeline(diarization_model, use_auth_token=hf_token) if diarize else None
+    )
 
     if pipeline is not None:
         # 3. Alignment: map each Whisper segment to its majority speaker.
