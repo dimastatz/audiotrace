@@ -108,6 +108,12 @@ def _type_turn(turn: audiotrace.models.Turn, start: float, style: str) -> None:
         sys.stdout.flush()
 
 
+def _format_ts(ms: int) -> str:
+    """Format milliseconds from the call start as M:SS."""
+    total_s = int(ms / 1000)
+    return f"{total_s // 60}:{total_s % 60:02d}"
+
+
 def play_conversation(report: audiotrace.models.CallReport, audio_path: str | Path | None) -> None:
     """Play the audio and reveal each word in sync with the speaker, by turn group."""
     console.print("\n[section]▶ Playing call[/]\n")
@@ -118,7 +124,7 @@ def play_conversation(report: audiotrace.models.CallReport, audio_path: str | Pa
         speaker = group[0].speaker
         style = _speaker_style(speaker)
         _wait_until(start, group[0].start_ms / 1000)
-        console.print(f"[{style}]{speaker}:[/] ", end="")
+        console.print(f"[dim]{_format_ts(group[0].start_ms)}[/] [{style}]{speaker}:[/] ", end="")
         sys.stdout.flush()
         for turn in group:
             _type_turn(turn, start, style)
@@ -138,7 +144,8 @@ def print_transcript(report: audiotrace.models.CallReport) -> None:
         speaker = group[0].speaker
         style = _speaker_style(speaker)
         text = " ".join(t.text for t in group)
-        console.print(f"[{style}]{speaker}:[/] [value]{text}[/]")
+        ts = _format_ts(group[0].start_ms)
+        console.print(f"[dim]{ts}[/] [{style}]{speaker}:[/] [value]{text}[/]")
 
 
 def _panel(table: Table, title: str, border: str) -> None:
