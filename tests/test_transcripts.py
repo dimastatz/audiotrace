@@ -13,6 +13,7 @@ from audiotrace.transcripts import (
     _get_majority_speaker,
     _kmeans_1d,
     _make_turn,
+    _segment_confidence,
     _segment_pitches,
     _segment_words,
     clear_model_cache,
@@ -256,6 +257,37 @@ def test_make_turn_includes_words():
     assert turn.text == "Hello world"
     assert (turn.start_ms, turn.end_ms) == (0, 1000)
     assert [w.text for w in turn.words] == ["Hello", "world"]
+
+
+def test_segment_confidence_mean_word_probability():
+    seg = {
+        "words": [
+            {"word": " Hello", "probability": 0.9},
+            {"word": " world", "probability": 0.7},
+        ]
+    }
+    assert _segment_confidence(seg) == pytest.approx(0.8)
+
+
+def test_segment_confidence_avg_logprob_fallback():
+    import math
+
+    seg = {"avg_logprob": math.log(0.5)}
+    assert _segment_confidence(seg) == pytest.approx(0.5)
+
+
+def test_segment_confidence_absent_is_zero():
+    assert _segment_confidence({"text": "hi"}) == 0.0
+
+
+def test_make_turn_includes_confidence():
+    seg = {
+        "text": "hi",
+        "start": 0.0,
+        "end": 1.0,
+        "words": [{"word": " hi", "start": 0.0, "end": 1.0, "probability": 0.95}],
+    }
+    assert _make_turn(seg, "AI Agent").confidence == pytest.approx(0.95)
 
 
 def test_extract_transcript_populates_word_timings():
