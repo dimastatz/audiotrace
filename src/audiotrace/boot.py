@@ -114,6 +114,11 @@ def _format_ts(ms: int) -> str:
     return f"{total_s // 60}:{total_s % 60:02d}"
 
 
+def _group_confidence(group: list[audiotrace.models.Turn]) -> float:
+    """Mean transcription confidence across the turns in a speaker group."""
+    return sum(t.confidence for t in group) / len(group)
+
+
 def play_conversation(report: audiotrace.models.CallReport, audio_path: str | Path | None) -> None:
     """Play the audio and reveal each word in sync with the speaker, by turn group."""
     console.print("\n[section]▶ Playing call[/]\n")
@@ -128,7 +133,7 @@ def play_conversation(report: audiotrace.models.CallReport, audio_path: str | Pa
         sys.stdout.flush()
         for turn in group:
             _type_turn(turn, start, style)
-        console.print()
+        console.print(f"[dim]({_group_confidence(group):.0%} conf)[/]")
 
     if proc is not None:
         proc.wait()
@@ -145,7 +150,10 @@ def print_transcript(report: audiotrace.models.CallReport) -> None:
         style = _speaker_style(speaker)
         text = " ".join(t.text for t in group)
         ts = _format_ts(group[0].start_ms)
-        console.print(f"[dim]{ts}[/] [{style}]{speaker}:[/] [value]{text}[/]")
+        conf = _group_confidence(group)
+        console.print(
+            f"[dim]{ts}[/] [{style}]{speaker}:[/] [value]{text}[/] [dim]({conf:.0%} conf)[/]"
+        )
 
 
 def _panel(table: Table, title: str, border: str) -> None:

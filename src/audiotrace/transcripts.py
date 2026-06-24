@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from pathlib import Path
 from typing import Any
 
@@ -143,14 +144,26 @@ def extract_transcript(
 
 
 def _make_turn(seg: Any, speaker: str) -> Turn:
-    """Build a Turn (with word-level timing) from a Whisper segment."""
+    """Build a Turn (with word-level timing and confidence) from a Whisper segment."""
     return Turn(
         speaker=speaker,
         text=seg["text"].strip(),
         start_ms=int(seg["start"] * 1000),
         end_ms=int(seg["end"] * 1000),
+        confidence=_segment_confidence(seg),
         words=_segment_words(seg),
     )
+
+
+def _segment_confidence(seg: Any) -> float:
+    """Transcription confidence (0-1) for a segment: mean word probability, or
+    exp(avg_logprob) as a fallback."""
+    probs = [float(w["probability"]) for w in seg.get("words") or [] if "probability" in w]
+    if probs:
+        return sum(probs) / len(probs)
+    if "avg_logprob" in seg:
+        return min(1.0, math.exp(float(seg["avg_logprob"])))
+    return 0.0
 
 
 def _segment_words(seg: Any) -> list[Word]:

@@ -151,7 +151,7 @@ CallReport
 │   └── bitrate_kbps: float
 ├── transcript
 │   ├── full_text: str
-│   ├── turns: List[Turn]   # speaker · text · start_ms · end_ms · words[]
+│   ├── turns: List[Turn]   # speaker · text · start_ms · end_ms · confidence · words[]
 │   └── language: str
 ├── quality
 │   ├── overall_score: float

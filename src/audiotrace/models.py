@@ -37,6 +37,7 @@ class Turn(BaseModel):
     text: str
     start_ms: int
     end_ms: int
+    confidence: float = 0.0
     words: list[Word] = Field(default_factory=list)
 
 
