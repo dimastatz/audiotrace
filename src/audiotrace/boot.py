@@ -133,7 +133,7 @@ def play_conversation(report: audiotrace.models.CallReport, audio_path: str | Pa
         sys.stdout.flush()
         for turn in group:
             _type_turn(turn, start, style)
-        console.print(f"[dim]({_group_confidence(group):.0%} conf)[/]")
+        console.print(f"[bright_red]({_group_confidence(group):.0%} conf)[/]")
 
     if proc is not None:
         proc.wait()
@@ -152,7 +152,7 @@ def print_transcript(report: audiotrace.models.CallReport) -> None:
         ts = _format_ts(group[0].start_ms)
         conf = _group_confidence(group)
         console.print(
-            f"[dim]{ts}[/] [{style}]{speaker}:[/] [value]{text}[/] [dim]({conf:.0%} conf)[/]"
+            f"[dim]{ts}[/] [{style}]{speaker}:[/] [value]{text}[/] [bright_red]({conf:.0%} conf)[/]"
         )
 
 
