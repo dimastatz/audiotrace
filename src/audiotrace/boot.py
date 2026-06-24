@@ -141,79 +141,77 @@ def print_transcript(report: audiotrace.models.CallReport) -> None:
         console.print(f"[{style}]{speaker}:[/] [value]{text}[/]")
 
 
+def _panel(table: Table, title: str, border: str) -> None:
+    console.print(Panel(table, title=f"[section]{title}[/]", expand=False, border_style=border))
+
+
 def print_summary(report: audiotrace.models.CallReport) -> None:
-    """Print the media, analysis, cost, latency, and JSON sections."""
+    """Print a colorful table for each section of the CallReport."""
 
-    # Media Info Panel
+    # Media
     if report.media:
-        media_table = Table(show_header=False, box=None, padding=(0, 1))
-        media_table.add_row("[key]Duration:[/]", f"{report.media.duration_ms}ms")
-        media_table.add_row("[key]Codec:[/]", report.media.codec)
-        media_table.add_row("[key]Format:[/]", report.media.file_format)
-        media_table.add_row("[key]Sample Rate:[/]", f"{report.media.sample_rate_hz}Hz")
-        media_table.add_row("[key]Channels:[/]", str(report.media.channels))
-        media_table.add_row("[key]Bitrate:[/]", f"{report.media.bitrate_kbps:.2f} kbps")
-        media_table.add_row("[key]File Size:[/]", f"{report.media.file_size_bytes} bytes")
-        console.print(
-            Panel(
-                media_table, title="[section]Media Metadata[/]", expand=False, border_style="blue"
-            )
-        )
+        t = Table(show_header=False, box=None, padding=(0, 1))
+        t.add_row("[key]Duration:[/]", f"{report.media.duration_ms}ms")
+        t.add_row("[key]Codec:[/]", report.media.codec)
+        t.add_row("[key]Format:[/]", report.media.file_format)
+        t.add_row("[key]Sample Rate:[/]", f"{report.media.sample_rate_hz}Hz")
+        t.add_row("[key]Channels:[/]", str(report.media.channels))
+        t.add_row("[key]Bitrate:[/]", f"{report.media.bitrate_kbps:.2f} kbps")
+        t.add_row("[key]File Size:[/]", f"{report.media.file_size_bytes} bytes")
+        _panel(t, "Media", "blue")
 
-    # Main Analysis Summary Table
-    main_table = Table(
-        title="\n[section]Analysis Summary[/]", show_header=True, header_style="bold cyan"
-    )
-    main_table.add_column("Section")
-    main_table.add_column("Highlights")
+    # Quality
+    q = report.quality
+    t = Table(show_header=False, box=None, padding=(0, 1))
+    t.add_row("[key]Overall score:[/]", f"{q.overall_score:.2f}")
+    t.add_row("[key]Interruptions:[/]", str(q.interruptions))
+    t.add_row("[key]Silence gaps:[/]", str(len(q.silence_gaps)))
+    t.add_row("[key]Speaking pace:[/]", f"{q.speaking_pace_wpm:.0f} wpm")
+    t.add_row("[key]Pitch variance:[/]", f"{q.pitch_variance:.1f} Hz")
+    t.add_row("[key]Avg turn length:[/]", f"{q.turn_length_avg_ms:.0f}ms")
+    _panel(t, "Quality", "cyan")
 
-    main_table.add_row(
-        "Quality",
-        f"Score: {report.quality.overall_score:.2f} | "
-        f"Interruptions: {report.quality.interruptions}",
-    )
+    # Sentiment
+    s = report.sentiment
+    frust = "red" if s.caller_frustration else "green"
+    t = Table(show_header=False, box=None, padding=(0, 1))
+    t.add_row("[key]Overall:[/]", f"{s.overall:+.2f}")
+    t.add_row("[key]Caller frustration:[/]", f"[{frust}]{s.caller_frustration}[/]")
+    t.add_row("[key]Shift points:[/]", str(len(s.shift_points)))
+    _panel(t, "Sentiment", "yellow")
 
-    sentiment_color = "red" if report.sentiment.caller_frustration else "green"
-    main_table.add_row(
-        "Sentiment",
-        f"Overall: {report.sentiment.overall:.2f} | "
-        f"Frustration: [{sentiment_color}]{report.sentiment.caller_frustration}[/]",
-    )
+    # Cost
+    c = report.cost
+    t = Table(show_header=False, box=None, padding=(0, 1))
+    t.add_row("[key]STT:[/]", f"${c.stt_usd:.4f}")
+    t.add_row("[key]LLM:[/]", f"${c.llm_usd:.4f}")
+    t.add_row("[key]TTS:[/]", f"${c.tts_usd:.4f}")
+    t.add_row("[key]Telephony:[/]", f"${c.telephony_usd:.4f}")
+    t.add_row("[key]Total:[/]", f"[success]${c.total_usd:.4f}[/]")
+    _panel(t, "Cost", "green")
 
-    flags = ", ".join(report.events.compliance_flags) or "none"
-    main_table.add_row(
-        "Events",
-        f"Outcome: {report.events.outcome} | "
-        f"Intent: {report.events.intent_detected or 'N/A'} | "
-        f"Compliance: {flags}",
-    )
-
-    console.print(main_table)
-
-    # Cost Breakdown Panel
-    cost_table = Table(show_header=False, box=None, padding=(0, 1))
-    cost_table.add_row("[key]STT:[/]", f"${report.cost.stt_usd:.4f}")
-    cost_table.add_row("[key]LLM:[/]", f"${report.cost.llm_usd:.4f}")
-    cost_table.add_row("[key]TTS:[/]", f"${report.cost.tts_usd:.4f}")
-    cost_table.add_row("[key]Telephony:[/]", f"${report.cost.telephony_usd:.4f}")
-    cost_table.add_row("[key]Total:[/]", f"[success]${report.cost.total_usd:.4f}[/]")
-    console.print(
-        Panel(cost_table, title="[section]Cost Breakdown[/]", expand=False, border_style="green")
-    )
-
-    # Latency Panel (incl. agent-response waterfall)
-    lat_table = Table(show_header=False, box=None, padding=(0, 1))
-    lat_table.add_row("[key]STT:[/]", f"{report.latency.stt_ms}ms")
-    lat_table.add_row("[key]Pipeline total:[/]", f"{report.latency.total_ms}ms")
+    # Latency (incl. agent-response waterfall)
+    t = Table(show_header=False, box=None, padding=(0, 1))
+    t.add_row("[key]STT:[/]", f"{report.latency.stt_ms}ms")
+    t.add_row("[key]Pipeline total:[/]", f"{report.latency.total_ms}ms")
     for span in report.latency.waterfall:
-        lat_table.add_row(
-            f"[key]{span.name}:[/]", f"{span.duration_ms}ms @ {span.start_ms / 1000:0.1f}s"
-        )
-    console.print(
-        Panel(lat_table, title="[section]Latency[/]", expand=False, border_style="magenta")
-    )
+        t.add_row(f"[key]{span.name}:[/]", f"{span.duration_ms}ms @ {span.start_ms / 1000:0.1f}s")
+    _panel(t, "Latency", "magenta")
 
-    # Full Report as prettified, colorized JSON
+    # Events
+    e = report.events
+    drop = f"{e.drop_off}" + (f" (turn {e.drop_off_turn})" if e.drop_off_turn is not None else "")
+    t = Table(show_header=False, box=None, padding=(0, 1))
+    t.add_row("[key]Outcome:[/]", e.outcome)
+    t.add_row("[key]Drop-off:[/]", drop)
+    t.add_row("[key]Intent:[/]", e.intent_detected or "N/A")
+    t.add_row("[key]Failure type:[/]", e.failure_type or "none")
+    t.add_row("[key]Compliance:[/]", ", ".join(e.compliance_flags) or "none")
+    _panel(t, "Events", "red")
+
+
+def print_json(report: audiotrace.models.CallReport) -> None:
+    """Print the full report as prettified, colorized JSON."""
     console.print("\n[section]Full Report (JSON)[/]")
     console.print_json(report.model_dump_json())
 
@@ -222,8 +220,9 @@ def print_report(
     report: audiotrace.models.CallReport,
     playback: bool = False,
     audio_path: str | Path | None = None,
+    summary: bool = False,
 ) -> None:
-    """Render the report: play/show the call first, then the full summary."""
+    """Render the call, then the per-section summary, then JSON (unless summary)."""
     has_conversation = bool(report.transcript.full_text or report.transcript.turns)
 
     if has_conversation:
@@ -233,10 +232,15 @@ def print_report(
             print_transcript(report)
 
     print_summary(report)
+    if not summary:
+        print_json(report)
 
 
 def run_analysis(
-    file_path: str | Path, playback: bool = False, skip_pyannote: bool = False
+    file_path: str | Path,
+    playback: bool = False,
+    skip_pyannote: bool = False,
+    summary: bool = False,
 ) -> None:
     path = Path(file_path)
     if not path.exists():
@@ -251,7 +255,7 @@ def run_analysis(
             console.print(f"[error]Error during analysis: {e}[/]")
             return
 
-    print_report(report, playback=playback, audio_path=path)
+    print_report(report, playback=playback, audio_path=path, summary=summary)
 
 
 def main() -> None:
@@ -274,11 +278,22 @@ def main() -> None:
         action="store_true",
         help="Skip loading the pyannote diarization model; infer speakers by pitch.",
     )
+    parser.add_argument(
+        "-s",
+        "--summary",
+        action="store_true",
+        help="Show per-section summary tables only; omit the raw JSON.",
+    )
 
     args = parser.parse_args()
 
     # First analysis from CLI arg
-    run_analysis(args.file_path, playback=args.playback, skip_pyannote=args.skip_pyannote)
+    run_analysis(
+        args.file_path,
+        playback=args.playback,
+        skip_pyannote=args.skip_pyannote,
+        summary=args.summary,
+    )
 
     # Interactive loop
     while True:
@@ -292,7 +307,12 @@ def main() -> None:
                 break
             if not user_input:
                 continue
-            run_analysis(user_input, playback=args.playback, skip_pyannote=args.skip_pyannote)
+            run_analysis(
+                user_input,
+                playback=args.playback,
+                skip_pyannote=args.skip_pyannote,
+                summary=args.summary,
+            )
         except (KeyboardInterrupt, EOFError):
             console.print("\n[info]Exiting.[/]")
             break

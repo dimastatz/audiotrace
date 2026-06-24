@@ -2,15 +2,17 @@
 # AudioTrace runner script. Run from the repository root.
 #
 # Usage:
-#   ./scripts/run.sh [audio_file] [--playback] [--skip-pyannote]
+#   ./scripts/run.sh [audio_file] [--playback] [--skip-pyannote] [--summary]
 #
 #   audio_file        Path to an audio file (default: bundled Paradise Hotel demo).
 #   -p, --playback    Play the audio back while revealing the transcript word by word.
 #   --skip-pyannote   Skip loading the pyannote diarization model; infer speakers
 #                     by pitch (no token, no network, faster — handy for demos).
+#   -s, --summary     Show per-section summary tables only; omit the raw JSON.
 #
 # Examples:
 #   ./scripts/run.sh                                # analyze the demo fixture
+#   ./scripts/run.sh --summary                      # concise per-section tables
 #   ./scripts/run.sh --playback --skip-pyannote     # clean playback demo
 #   ./scripts/run.sh path/to/call.mp3 --playback    # play back your own file
 
@@ -50,5 +52,5 @@ if [ -z "${HF_TOKEN:-}" ]; then
     echo "Tip: set HF_TOKEN to enable real pyannote diarization (otherwise speakers are inferred by pitch)."
 fi
 
-# 4. Run (forwards the file path and flags such as --playback / --skip-pyannote)
+# 4. Run (forwards the file path and flags: --playback / --skip-pyannote / --summary)
 python3 src/audiotrace/boot.py "$@"
