@@ -28,6 +28,10 @@ print(report.events.drop_off)              # False
 print(report.cost.total_usd)               # 0.063
 ```
 
+📺 **Watch the demo:**
+
+[![AudioTrace demo video](https://img.youtube.com/vi/sBWPomlYpv4/maxresdefault.jpg)](https://youtu.be/sBWPomlYpv4)
+
 ---
 
 ## Why AudioTrace?
