@@ -191,14 +191,18 @@ CallReport
 
 ## Provider support
 
+> **Provider adapters are TBD** — not yet implemented. The integrations below are
+> planned; today you pass a local audio file path to `analyze()` directly. The
+> adapter example above is illustrative of the intended API.
+
 | Provider | Adapter | Status |
 |---|---|---|
-| Vapi | `audiotrace[vapi]` | Stable |
-| Retell | `audiotrace[retell]` | Stable |
-| Twilio | `audiotrace[twilio]` | Stable |
-| ElevenLabs | `audiotrace[elevenlabs]` | Beta |
-| Deepgram | `audiotrace[deepgram]` | Stable |
-| Custom webhook | `CustomAdapter` | Stable |
+| Vapi | `audiotrace[vapi]` | TBD |
+| Retell | `audiotrace[retell]` | TBD |
+| Twilio | `audiotrace[twilio]` | TBD |
+| ElevenLabs | `audiotrace[elevenlabs]` | TBD |
+| Deepgram | `audiotrace[deepgram]` | TBD |
+| Custom webhook | `CustomAdapter` | TBD |
 
 ---
 
