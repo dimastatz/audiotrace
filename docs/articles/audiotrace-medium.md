@@ -1,4 +1,4 @@
-# AudioTrace: When the Right Tool Is the Simpler One
+# AudioTrace — Observability for Voice AI
 
 Dear signal-chasers,
 
