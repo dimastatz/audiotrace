@@ -1,6 +1,6 @@
 ---
 title: "Your AI Voice Agent Is a Black Box. Here's How to Open It."
-published: false
+published: true
 description: "LangChain and LangSmith trace your agent when it types. The moment it speaks on a phone call, they see tokens, not audio. Here's how to get structured signals out of a raw recording."
 tags: ai, python, opensource, machinelearning
 series: Observability for AI Voice Agents
