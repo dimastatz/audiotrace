@@ -1,0 +1,1328 @@
+{
+  "summary": {
+    "outcome": "completed",
+    "quality_score": 0.93,
+    "sentiment": 0.6,
+    "caller_frustration": false,
+    "interruptions": 0,
+    "speaking_pace_wpm": 181.3,
+    "response_p95_ms": 0,
+    "drop_off": false,
+    "compliance_flags": 0,
+    "cost_usd": 0.034,
+    "duration_ms": 63875
+  },
+  "report": {
+    "media": {
+      "duration_ms": 63875,
+      "sample_rate_hz": 48000,
+      "channels": 2,
+      "codec": "mp3",
+      "file_size_bytes": 1023020,
+      "file_format": "mp3",
+      "bitrate_kbps": 128.127
+    },
+    "transcript": {
+      "full_text": "Thank you for calling Paradise Hotel. This is Aria, your virtual assistant. Please note this call may be recorded for quality and training purposes. How can I help you today? Hi Aria, my name is Mick McClay. I'd like to book a room for a vacation next month. Wonderful, Mr. McClay. I'd be happy to help. What dates were you considering for your stay? I'm looking at checking in on July 15th and checking out on July 20th. Great, that's Five Nights. How many guests will be staying and do you have a room preference? It'll be two adults. We'd love an ocean view room with a king bed if that's available. You're in luck. We have a Deluxe Ocean view room with a king bed available for those dates at $240 per night. That sounds perfect. Let's go ahead and book it. Excellent, I've reserved the Deluxe Ocean view king for Mick McClay, July 15th through the 20th. A confirmation will be sent to your email. Thank you so much Aria. I really appreciate your help. It's my pleasure. We look forward to welcoming you to Paradise Hotel. Have a wonderful day.",
+      "turns": [
+        {
+          "speaker": "AI Agent",
+          "text": "Thank you for calling Paradise Hotel.",
+          "start_ms": 0,
+          "end_ms": 1760,
+          "confidence": 0.9342017273108164,
+          "words": [
+            {
+              "text": "Thank",
+              "start_ms": 0,
+              "end_ms": 360
+            },
+            {
+              "text": "you",
+              "start_ms": 360,
+              "end_ms": 560
+            },
+            {
+              "text": "for",
+              "start_ms": 560,
+              "end_ms": 700
+            },
+            {
+              "text": "calling",
+              "start_ms": 700,
+              "end_ms": 960
+            },
+            {
+              "text": "Paradise",
+              "start_ms": 960,
+              "end_ms": 1420
+            },
+            {
+              "text": "Hotel.",
+              "start_ms": 1420,
+              "end_ms": 1760
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "This is Aria, your virtual assistant.",
+          "start_ms": 2380,
+          "end_ms": 4120,
+          "confidence": 0.9001460572083791,
+          "words": [
+            {
+              "text": "This",
+              "start_ms": 2380,
+              "end_ms": 2460
+            },
+            {
+              "text": "is",
+              "start_ms": 2460,
+              "end_ms": 2720
+            },
+            {
+              "text": "Aria,",
+              "start_ms": 2720,
+              "end_ms": 2940
+            },
+            {
+              "text": "your",
+              "start_ms": 3240,
+              "end_ms": 3320
+            },
+            {
+              "text": "virtual",
+              "start_ms": 3320,
+              "end_ms": 3680
+            },
+            {
+              "text": "assistant.",
+              "start_ms": 3680,
+              "end_ms": 4120
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "Please note this call may be recorded for quality and training purposes.",
+          "start_ms": 4540,
+          "end_ms": 7500,
+          "confidence": 0.9816382924715678,
+          "words": [
+            {
+              "text": "Please",
+              "start_ms": 4540,
+              "end_ms": 4680
+            },
+            {
+              "text": "note",
+              "start_ms": 4680,
+              "end_ms": 4920
+            },
+            {
+              "text": "this",
+              "start_ms": 4920,
+              "end_ms": 5140
+            },
+            {
+              "text": "call",
+              "start_ms": 5140,
+              "end_ms": 5360
+            },
+            {
+              "text": "may",
+              "start_ms": 5360,
+              "end_ms": 5540
+            },
+            {
+              "text": "be",
+              "start_ms": 5540,
+              "end_ms": 5660
+            },
+            {
+              "text": "recorded",
+              "start_ms": 5660,
+              "end_ms": 6000
+            },
+            {
+              "text": "for",
+              "start_ms": 6000,
+              "end_ms": 6240
+            },
+            {
+              "text": "quality",
+              "start_ms": 6240,
+              "end_ms": 6600
+            },
+            {
+              "text": "and",
+              "start_ms": 6600,
+              "end_ms": 6800
+            },
+            {
+              "text": "training",
+              "start_ms": 6800,
+              "end_ms": 7080
+            },
+            {
+              "text": "purposes.",
+              "start_ms": 7080,
+              "end_ms": 7500
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "How can I help you today?",
+          "start_ms": 8020,
+          "end_ms": 8920,
+          "confidence": 0.9970727960268656,
+          "words": [
+            {
+              "text": "How",
+              "start_ms": 8020,
+              "end_ms": 8220
+            },
+            {
+              "text": "can",
+              "start_ms": 8220,
+              "end_ms": 8340
+            },
+            {
+              "text": "I",
+              "start_ms": 8340,
+              "end_ms": 8440
+            },
+            {
+              "text": "help",
+              "start_ms": 8440,
+              "end_ms": 8580
+            },
+            {
+              "text": "you",
+              "start_ms": 8580,
+              "end_ms": 8720
+            },
+            {
+              "text": "today?",
+              "start_ms": 8720,
+              "end_ms": 8920
+            }
+          ]
+        },
+        {
+          "speaker": "Customer",
+          "text": "Hi Aria, my name is Mick McClay.",
+          "start_ms": 10020,
+          "end_ms": 11760,
+          "confidence": 0.7767506561108998,
+          "words": [
+            {
+              "text": "Hi",
+              "start_ms": 10020,
+              "end_ms": 10180
+            },
+            {
+              "text": "Aria,",
+              "start_ms": 10180,
+              "end_ms": 10580
+            },
+            {
+              "text": "my",
+              "start_ms": 10780,
+              "end_ms": 10840
+            },
+            {
+              "text": "name",
+              "start_ms": 10840,
+              "end_ms": 11020
+            },
+            {
+              "text": "is",
+              "start_ms": 11020,
+              "end_ms": 11220
+            },
+            {
+              "text": "Mick",
+              "start_ms": 11220,
+              "end_ms": 11420
+            },
+            {
+              "text": "McClay.",
+              "start_ms": 11420,
+              "end_ms": 11760
+            }
+          ]
+        },
+        {
+          "speaker": "Customer",
+          "text": "I'd like to book a room for a vacation next month.",
+          "start_ms": 12300,
+          "end_ms": 14560,
+          "confidence": 0.9966018904339183,
+          "words": [
+            {
+              "text": "I'd",
+              "start_ms": 12300,
+              "end_ms": 12460
+            },
+            {
+              "text": "like",
+              "start_ms": 12460,
+              "end_ms": 12520
+            },
+            {
+              "text": "to",
+              "start_ms": 12520,
+              "end_ms": 12660
+            },
+            {
+              "text": "book",
+              "start_ms": 12660,
+              "end_ms": 12760
+            },
+            {
+              "text": "a",
+              "start_ms": 12760,
+              "end_ms": 12920
+            },
+            {
+              "text": "room",
+              "start_ms": 12920,
+              "end_ms": 13120
+            },
+            {
+              "text": "for",
+              "start_ms": 13120,
+              "end_ms": 13340
+            },
+            {
+              "text": "a",
+              "start_ms": 13340,
+              "end_ms": 13400
+            },
+            {
+              "text": "vacation",
+              "start_ms": 13400,
+              "end_ms": 13780
+            },
+            {
+              "text": "next",
+              "start_ms": 13780,
+              "end_ms": 14100
+            },
+            {
+              "text": "month.",
+              "start_ms": 14100,
+              "end_ms": 14560
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "Wonderful, Mr. McClay.",
+          "start_ms": 15600,
+          "end_ms": 16560,
+          "confidence": 0.9426121115684509,
+          "words": [
+            {
+              "text": "Wonderful,",
+              "start_ms": 15600,
+              "end_ms": 15840
+            },
+            {
+              "text": "Mr.",
+              "start_ms": 16100,
+              "end_ms": 16260
+            },
+            {
+              "text": "McClay.",
+              "start_ms": 16360,
+              "end_ms": 16560
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "I'd be happy to help.",
+          "start_ms": 16940,
+          "end_ms": 17740,
+          "confidence": 0.9990072906017303,
+          "words": [
+            {
+              "text": "I'd",
+              "start_ms": 16940,
+              "end_ms": 17080
+            },
+            {
+              "text": "be",
+              "start_ms": 17080,
+              "end_ms": 17140
+            },
+            {
+              "text": "happy",
+              "start_ms": 17140,
+              "end_ms": 17360
+            },
+            {
+              "text": "to",
+              "start_ms": 17360,
+              "end_ms": 17520
+            },
+            {
+              "text": "help.",
+              "start_ms": 17520,
+              "end_ms": 17740
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "What dates were you considering for your stay?",
+          "start_ms": 18100,
+          "end_ms": 19700,
+          "confidence": 0.995763748884201,
+          "words": [
+            {
+              "text": "What",
+              "start_ms": 18100,
+              "end_ms": 18280
+            },
+            {
+              "text": "dates",
+              "start_ms": 18280,
+              "end_ms": 18460
+            },
+            {
+              "text": "were",
+              "start_ms": 18460,
+              "end_ms": 18680
+            },
+            {
+              "text": "you",
+              "start_ms": 18680,
+              "end_ms": 18780
+            },
+            {
+              "text": "considering",
+              "start_ms": 18780,
+              "end_ms": 19180
+            },
+            {
+              "text": "for",
+              "start_ms": 19180,
+              "end_ms": 19400
+            },
+            {
+              "text": "your",
+              "start_ms": 19400,
+              "end_ms": 19520
+            },
+            {
+              "text": "stay?",
+              "start_ms": 19520,
+              "end_ms": 19700
+            }
+          ]
+        },
+        {
+          "speaker": "Customer",
+          "text": "I'm looking at checking in on July 15th",
+          "start_ms": 20740,
+          "end_ms": 23080,
+          "confidence": 0.9839792028069496,
+          "words": [
+            {
+              "text": "I'm",
+              "start_ms": 20740,
+              "end_ms": 20980
+            },
+            {
+              "text": "looking",
+              "start_ms": 20980,
+              "end_ms": 21180
+            },
+            {
+              "text": "at",
+              "start_ms": 21180,
+              "end_ms": 21320
+            },
+            {
+              "text": "checking",
+              "start_ms": 21320,
+              "end_ms": 21560
+            },
+            {
+              "text": "in",
+              "start_ms": 21560,
+              "end_ms": 21800
+            },
+            {
+              "text": "on",
+              "start_ms": 21800,
+              "end_ms": 22040
+            },
+            {
+              "text": "July",
+              "start_ms": 22040,
+              "end_ms": 22200
+            },
+            {
+              "text": "15th",
+              "start_ms": 22200,
+              "end_ms": 23080
+            }
+          ]
+        },
+        {
+          "speaker": "Customer",
+          "text": "and checking out on July 20th.",
+          "start_ms": 23080,
+          "end_ms": 24880,
+          "confidence": 0.9615528186162313,
+          "words": [
+            {
+              "text": "and",
+              "start_ms": 23080,
+              "end_ms": 23280
+            },
+            {
+              "text": "checking",
+              "start_ms": 23280,
+              "end_ms": 23580
+            },
+            {
+              "text": "out",
+              "start_ms": 23580,
+              "end_ms": 23840
+            },
+            {
+              "text": "on",
+              "start_ms": 23840,
+              "end_ms": 24000
+            },
+            {
+              "text": "July",
+              "start_ms": 24000,
+              "end_ms": 24160
+            },
+            {
+              "text": "20th.",
+              "start_ms": 24160,
+              "end_ms": 24880
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "Great, that's Five Nights.",
+          "start_ms": 25720,
+          "end_ms": 26840,
+          "confidence": 0.8950698375701904,
+          "words": [
+            {
+              "text": "Great,",
+              "start_ms": 25720,
+              "end_ms": 26040
+            },
+            {
+              "text": "that's",
+              "start_ms": 26200,
+              "end_ms": 26420
+            },
+            {
+              "text": "Five",
+              "start_ms": 26420,
+              "end_ms": 26580
+            },
+            {
+              "text": "Nights.",
+              "start_ms": 26580,
+              "end_ms": 26840
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "How many guests will be staying and do you have a room preference?",
+          "start_ms": 26840,
+          "end_ms": 29740,
+          "confidence": 0.8714530204351132,
+          "words": [
+            {
+              "text": "How",
+              "start_ms": 26840,
+              "end_ms": 27340
+            },
+            {
+              "text": "many",
+              "start_ms": 27340,
+              "end_ms": 27520
+            },
+            {
+              "text": "guests",
+              "start_ms": 27520,
+              "end_ms": 27740
+            },
+            {
+              "text": "will",
+              "start_ms": 27740,
+              "end_ms": 27940
+            },
+            {
+              "text": "be",
+              "start_ms": 27940,
+              "end_ms": 28080
+            },
+            {
+              "text": "staying",
+              "start_ms": 28080,
+              "end_ms": 28380
+            },
+            {
+              "text": "and",
+              "start_ms": 28380,
+              "end_ms": 28740
+            },
+            {
+              "text": "do",
+              "start_ms": 28740,
+              "end_ms": 28860
+            },
+            {
+              "text": "you",
+              "start_ms": 28860,
+              "end_ms": 28960
+            },
+            {
+              "text": "have",
+              "start_ms": 28960,
+              "end_ms": 29080
+            },
+            {
+              "text": "a",
+              "start_ms": 29080,
+              "end_ms": 29180
+            },
+            {
+              "text": "room",
+              "start_ms": 29180,
+              "end_ms": 29340
+            },
+            {
+              "text": "preference?",
+              "start_ms": 29340,
+              "end_ms": 29740
+            }
+          ]
+        },
+        {
+          "speaker": "Customer",
+          "text": "It'll be two adults.",
+          "start_ms": 30600,
+          "end_ms": 31740,
+          "confidence": 0.8791892193257809,
+          "words": [
+            {
+              "text": "It'll",
+              "start_ms": 30600,
+              "end_ms": 31100
+            },
+            {
+              "text": "be",
+              "start_ms": 31100,
+              "end_ms": 31220
+            },
+            {
+              "text": "two",
+              "start_ms": 31220,
+              "end_ms": 31420
+            },
+            {
+              "text": "adults.",
+              "start_ms": 31420,
+              "end_ms": 31740
+            }
+          ]
+        },
+        {
+          "speaker": "Customer",
+          "text": "We'd love an ocean view room with a king bed if that's available.",
+          "start_ms": 32299,
+          "end_ms": 35200,
+          "confidence": 0.9274426331886878,
+          "words": [
+            {
+              "text": "We'd",
+              "start_ms": 32299,
+              "end_ms": 32479
+            },
+            {
+              "text": "love",
+              "start_ms": 32479,
+              "end_ms": 32600
+            },
+            {
+              "text": "an",
+              "start_ms": 32600,
+              "end_ms": 32759
+            },
+            {
+              "text": "ocean",
+              "start_ms": 32759,
+              "end_ms": 33080
+            },
+            {
+              "text": "view",
+              "start_ms": 33080,
+              "end_ms": 33300
+            },
+            {
+              "text": "room",
+              "start_ms": 33300,
+              "end_ms": 33620
+            },
+            {
+              "text": "with",
+              "start_ms": 33620,
+              "end_ms": 33760
+            },
+            {
+              "text": "a",
+              "start_ms": 33760,
+              "end_ms": 33860
+            },
+            {
+              "text": "king",
+              "start_ms": 33860,
+              "end_ms": 34040
+            },
+            {
+              "text": "bed",
+              "start_ms": 34040,
+              "end_ms": 34300
+            },
+            {
+              "text": "if",
+              "start_ms": 34300,
+              "end_ms": 34540
+            },
+            {
+              "text": "that's",
+              "start_ms": 34540,
+              "end_ms": 34840
+            },
+            {
+              "text": "available.",
+              "start_ms": 34840,
+              "end_ms": 35200
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "You're in luck.",
+          "start_ms": 36040,
+          "end_ms": 36780,
+          "confidence": 0.9356227616469065,
+          "words": [
+            {
+              "text": "You're",
+              "start_ms": 36040,
+              "end_ms": 36520
+            },
+            {
+              "text": "in",
+              "start_ms": 36520,
+              "end_ms": 36600
+            },
+            {
+              "text": "luck.",
+              "start_ms": 36600,
+              "end_ms": 36780
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "We have a Deluxe Ocean view room with a king bed available for those dates",
+          "start_ms": 37180,
+          "end_ms": 40480,
+          "confidence": 0.9645770430564881,
+          "words": [
+            {
+              "text": "We",
+              "start_ms": 37180,
+              "end_ms": 37340
+            },
+            {
+              "text": "have",
+              "start_ms": 37340,
+              "end_ms": 37440
+            },
+            {
+              "text": "a",
+              "start_ms": 37440,
+              "end_ms": 37540
+            },
+            {
+              "text": "Deluxe",
+              "start_ms": 37540,
+              "end_ms": 37800
+            },
+            {
+              "text": "Ocean",
+              "start_ms": 37800,
+              "end_ms": 38200
+            },
+            {
+              "text": "view",
+              "start_ms": 38200,
+              "end_ms": 38380
+            },
+            {
+              "text": "room",
+              "start_ms": 38380,
+              "end_ms": 38720
+            },
+            {
+              "text": "with",
+              "start_ms": 38720,
+              "end_ms": 38840
+            },
+            {
+              "text": "a",
+              "start_ms": 38840,
+              "end_ms": 38920
+            },
+            {
+              "text": "king",
+              "start_ms": 38920,
+              "end_ms": 39120
+            },
+            {
+              "text": "bed",
+              "start_ms": 39120,
+              "end_ms": 39360
+            },
+            {
+              "text": "available",
+              "start_ms": 39360,
+              "end_ms": 39800
+            },
+            {
+              "text": "for",
+              "start_ms": 39800,
+              "end_ms": 40040
+            },
+            {
+              "text": "those",
+              "start_ms": 40040,
+              "end_ms": 40200
+            },
+            {
+              "text": "dates",
+              "start_ms": 40200,
+              "end_ms": 40480
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "at $240 per night.",
+          "start_ms": 40480,
+          "end_ms": 42520,
+          "confidence": 0.9419255256652832,
+          "words": [
+            {
+              "text": "at",
+              "start_ms": 40480,
+              "end_ms": 40960
+            },
+            {
+              "text": "$240",
+              "start_ms": 40960,
+              "end_ms": 41820
+            },
+            {
+              "text": "per",
+              "start_ms": 41820,
+              "end_ms": 42300
+            },
+            {
+              "text": "night.",
+              "start_ms": 42300,
+              "end_ms": 42520
+            }
+          ]
+        },
+        {
+          "speaker": "Customer",
+          "text": "That sounds perfect.",
+          "start_ms": 43220,
+          "end_ms": 44460,
+          "confidence": 0.9849031170209249,
+          "words": [
+            {
+              "text": "That",
+              "start_ms": 43220,
+              "end_ms": 43720
+            },
+            {
+              "text": "sounds",
+              "start_ms": 43720,
+              "end_ms": 44000
+            },
+            {
+              "text": "perfect.",
+              "start_ms": 44000,
+              "end_ms": 44460
+            }
+          ]
+        },
+        {
+          "speaker": "Customer",
+          "text": "Let's go ahead and book it.",
+          "start_ms": 44820,
+          "end_ms": 45980,
+          "confidence": 0.9969241221745809,
+          "words": [
+            {
+              "text": "Let's",
+              "start_ms": 44820,
+              "end_ms": 45040
+            },
+            {
+              "text": "go",
+              "start_ms": 45040,
+              "end_ms": 45180
+            },
+            {
+              "text": "ahead",
+              "start_ms": 45180,
+              "end_ms": 45420
+            },
+            {
+              "text": "and",
+              "start_ms": 45420,
+              "end_ms": 45540
+            },
+            {
+              "text": "book",
+              "start_ms": 45540,
+              "end_ms": 45700
+            },
+            {
+              "text": "it.",
+              "start_ms": 45700,
+              "end_ms": 45980
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "Excellent, I've reserved the Deluxe Ocean view king for Mick McClay,",
+          "start_ms": 46900,
+          "end_ms": 49960,
+          "confidence": 0.8283746946941722,
+          "words": [
+            {
+              "text": "Excellent,",
+              "start_ms": 46900,
+              "end_ms": 47160
+            },
+            {
+              "text": "I've",
+              "start_ms": 47440,
+              "end_ms": 47700
+            },
+            {
+              "text": "reserved",
+              "start_ms": 47700,
+              "end_ms": 47920
+            },
+            {
+              "text": "the",
+              "start_ms": 47920,
+              "end_ms": 48180
+            },
+            {
+              "text": "Deluxe",
+              "start_ms": 48180,
+              "end_ms": 48480
+            },
+            {
+              "text": "Ocean",
+              "start_ms": 48480,
+              "end_ms": 48840
+            },
+            {
+              "text": "view",
+              "start_ms": 48840,
+              "end_ms": 49020
+            },
+            {
+              "text": "king",
+              "start_ms": 49020,
+              "end_ms": 49280
+            },
+            {
+              "text": "for",
+              "start_ms": 49280,
+              "end_ms": 49520
+            },
+            {
+              "text": "Mick",
+              "start_ms": 49520,
+              "end_ms": 49660
+            },
+            {
+              "text": "McClay,",
+              "start_ms": 49660,
+              "end_ms": 49960
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "July 15th through the 20th.",
+          "start_ms": 50400,
+          "end_ms": 51920,
+          "confidence": 0.9596197545528412,
+          "words": [
+            {
+              "text": "July",
+              "start_ms": 50400,
+              "end_ms": 50520
+            },
+            {
+              "text": "15th",
+              "start_ms": 50520,
+              "end_ms": 51160
+            },
+            {
+              "text": "through",
+              "start_ms": 51160,
+              "end_ms": 51300
+            },
+            {
+              "text": "the",
+              "start_ms": 51300,
+              "end_ms": 51420
+            },
+            {
+              "text": "20th.",
+              "start_ms": 51420,
+              "end_ms": 51920
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "A confirmation will be sent to your email.",
+          "start_ms": 52260,
+          "end_ms": 54060,
+          "confidence": 0.9912382140755653,
+          "words": [
+            {
+              "text": "A",
+              "start_ms": 52260,
+              "end_ms": 52420
+            },
+            {
+              "text": "confirmation",
+              "start_ms": 52420,
+              "end_ms": 52840
+            },
+            {
+              "text": "will",
+              "start_ms": 52840,
+              "end_ms": 53180
+            },
+            {
+              "text": "be",
+              "start_ms": 53180,
+              "end_ms": 53320
+            },
+            {
+              "text": "sent",
+              "start_ms": 53320,
+              "end_ms": 53520
+            },
+            {
+              "text": "to",
+              "start_ms": 53520,
+              "end_ms": 53700
+            },
+            {
+              "text": "your",
+              "start_ms": 53700,
+              "end_ms": 53780
+            },
+            {
+              "text": "email.",
+              "start_ms": 53780,
+              "end_ms": 54060
+            }
+          ]
+        },
+        {
+          "speaker": "Customer",
+          "text": "Thank you so much Aria.",
+          "start_ms": 54820,
+          "end_ms": 56120,
+          "confidence": 0.8878877349197865,
+          "words": [
+            {
+              "text": "Thank",
+              "start_ms": 54820,
+              "end_ms": 55300
+            },
+            {
+              "text": "you",
+              "start_ms": 55300,
+              "end_ms": 55420
+            },
+            {
+              "text": "so",
+              "start_ms": 55420,
+              "end_ms": 55580
+            },
+            {
+              "text": "much",
+              "start_ms": 55580,
+              "end_ms": 55860
+            },
+            {
+              "text": "Aria.",
+              "start_ms": 55860,
+              "end_ms": 56120
+            }
+          ]
+        },
+        {
+          "speaker": "Customer",
+          "text": "I really appreciate your help.",
+          "start_ms": 56120,
+          "end_ms": 57760,
+          "confidence": 0.9271962761878967,
+          "words": [
+            {
+              "text": "I",
+              "start_ms": 56120,
+              "end_ms": 56580
+            },
+            {
+              "text": "really",
+              "start_ms": 56580,
+              "end_ms": 56780
+            },
+            {
+              "text": "appreciate",
+              "start_ms": 56780,
+              "end_ms": 57300
+            },
+            {
+              "text": "your",
+              "start_ms": 57300,
+              "end_ms": 57480
+            },
+            {
+              "text": "help.",
+              "start_ms": 57480,
+              "end_ms": 57760
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "It's my pleasure.",
+          "start_ms": 58480,
+          "end_ms": 59360,
+          "confidence": 0.9566897253195444,
+          "words": [
+            {
+              "text": "It's",
+              "start_ms": 58480,
+              "end_ms": 58920
+            },
+            {
+              "text": "my",
+              "start_ms": 58920,
+              "end_ms": 59020
+            },
+            {
+              "text": "pleasure.",
+              "start_ms": 59020,
+              "end_ms": 59360
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "We look forward to welcoming you to Paradise Hotel.",
+          "start_ms": 59640,
+          "end_ms": 61780,
+          "confidence": 0.9788747760984633,
+          "words": [
+            {
+              "text": "We",
+              "start_ms": 59640,
+              "end_ms": 59720
+            },
+            {
+              "text": "look",
+              "start_ms": 59720,
+              "end_ms": 59840
+            },
+            {
+              "text": "forward",
+              "start_ms": 59840,
+              "end_ms": 60120
+            },
+            {
+              "text": "to",
+              "start_ms": 60120,
+              "end_ms": 60320
+            },
+            {
+              "text": "welcoming",
+              "start_ms": 60320,
+              "end_ms": 60640
+            },
+            {
+              "text": "you",
+              "start_ms": 60640,
+              "end_ms": 60920
+            },
+            {
+              "text": "to",
+              "start_ms": 60920,
+              "end_ms": 61060
+            },
+            {
+              "text": "Paradise",
+              "start_ms": 61060,
+              "end_ms": 61400
+            },
+            {
+              "text": "Hotel.",
+              "start_ms": 61400,
+              "end_ms": 61780
+            }
+          ]
+        },
+        {
+          "speaker": "AI Agent",
+          "text": "Have a wonderful day.",
+          "start_ms": 62160,
+          "end_ms": 63020,
+          "confidence": 0.997372955083847,
+          "words": [
+            {
+              "text": "Have",
+              "start_ms": 62160,
+              "end_ms": 62360
+            },
+            {
+              "text": "a",
+              "start_ms": 62360,
+              "end_ms": 62460
+            },
+            {
+              "text": "wonderful",
+              "start_ms": 62460,
+              "end_ms": 62680
+            },
+            {
+              "text": "day.",
+              "start_ms": 62680,
+              "end_ms": 63020
+            }
+          ]
+        }
+      ],
+      "language": "en"
+    },
+    "quality": {
+      "overall_score": 0.9335789110164614,
+      "interruptions": 0,
+      "silence_gaps": [],
+      "speaking_pace_wpm": 181.29158512720156,
+      "pitch_variance": 54.401869167698244,
+      "turn_length_avg_ms": 1735.75
+    },
+    "sentiment": {
+      "by_turn": [
+        0.9998114705085754,
+        0.9961058497428894,
+        -0.9872573018074036,
+        0.945328414440155,
+        0.9973189234733582,
+        -0.9746872782707214,
+        0.9998792409896851,
+        0.9998522996902466,
+        -0.5828573107719421,
+        0.9574084281921387,
+        0.9990702271461487,
+        0.9998468160629272,
+        -0.9728531241416931,
+        0.9953752160072327,
+        0.9962894916534424,
+        0.9998624324798584,
+        0.9952657222747803,
+        -0.9565051198005676,
+        0.9998753070831299,
+        0.9951268434524536,
+        0.999731719493866,
+        0.8721564412117004,
+        -0.6102173328399658,
+        0.9998576641082764,
+        0.999763548374176,
+        0.9998633861541748,
+        0.9998672008514404,
+        0.9998846054077148
+      ],
+      "overall": 0.5951129921845028,
+      "shift_points": [
+        2,
+        3,
+        5,
+        6,
+        8,
+        9,
+        12,
+        13,
+        17,
+        18,
+        22,
+        23
+      ],
+      "caller_frustration": false
+    },
+    "latency": {
+      "stt_ms": 27071,
+      "llm_first_token_ms": 0,
+      "llm_full_response_ms": 0,
+      "tts_ms": 0,
+      "total_ms": 53364,
+      "waterfall": []
+    },
+    "cost": {
+      "stt_usd": 0.02555,
+      "llm_usd": 9.8e-05,
+      "tts_usd": 0.008384,
+      "telephony_usd": 0.0,
+      "total_usd": 0.034032
+    },
+    "events": {
+      "outcome": "completed",
+      "drop_off": false,
+      "drop_off_turn": null,
+      "intent_detected": "general inquiry",
+      "failure_type": null,
+      "compliance_flags": []
+    }
+  }
+}

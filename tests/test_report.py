@@ -11,15 +11,29 @@ from audiotrace.models import (
     MediaInfo,
     Quality,
     Sentiment,
+    Transcript,
+    Turn,
 )
 from audiotrace.report import (
+    Delta,
     Metric,
     _as_number,
     _banner,
-    _deltas_section,
+    _bubble,
+    _flags_badge,
+    _flags_list,
+    _format_ts,
     _format_value,
+    _header_sub,
+    _initials,
     _response_p95_ms,
+    _sentiment_svg,
+    _status_class,
+    _tile,
+    _tile_delta,
+    _transcript_html,
     _trim,
+    _waterfall_html,
     diff,
     render_html,
     render_json,
@@ -41,16 +55,21 @@ def _report(
     cost: float = 0.12,
     duration_ms: int = 60_000,
     waterfall_ms: tuple[int, ...] = (),
+    media: bool = True,
 ) -> CallReport:
     return CallReport(
-        media=MediaInfo(
-            duration_ms=duration_ms,
-            sample_rate_hz=16000,
-            channels=1,
-            codec="mp3",
-            file_size_bytes=1000,
-            file_format="mp3",
-            bitrate_kbps=128.0,
+        media=(
+            MediaInfo(
+                duration_ms=duration_ms,
+                sample_rate_hz=16000,
+                channels=1,
+                codec="mp3",
+                file_size_bytes=1000,
+                file_format="mp3",
+                bitrate_kbps=128.0,
+            )
+            if media
+            else None
         ),
         quality=Quality(
             overall_score=quality_score,
@@ -99,9 +118,7 @@ def test_summarize_compliance_flags_counts_not_lists():
 
 
 def test_summarize_handles_missing_media():
-    report = _report()
-    report.media = None
-    metrics = {m.key: m.value for m in summarize(report)}
+    metrics = {m.key: m.value for m in summarize(_report(media=False))}
     assert metrics["duration_ms"] == 0
 
 
@@ -131,8 +148,7 @@ def test_response_p95_nearest_rank():
 
 
 def test_diff_skips_neutral_and_string_metrics():
-    deltas = diff(_report(), _report())
-    keys = {d.key for d in deltas}
+    keys = {d.key for d in diff(_report(), _report())}
     assert "outcome" not in keys  # neutral string
     assert "duration_ms" not in keys  # neutral
     assert "quality_score" in keys
@@ -169,7 +185,6 @@ def test_diff_no_change_not_regressed():
 
 def test_diff_missing_baseline_metric_is_skipped():
     base_metrics = [Metric("quality_score", "Quality score", 0.9, "score", True)]
-    # A current metric absent from baseline should be dropped by the key lookup.
     from audiotrace import report as report_mod
 
     original = report_mod.summarize
@@ -177,7 +192,7 @@ def test_diff_missing_baseline_metric_is_skipped():
 
     def fake_summarize(r):
         calls["n"] += 1
-        return base_metrics if calls["n"] == 1 else summarize(r)
+        return base_metrics if calls["n"] == 1 else original(r)
 
     report_mod.summarize = fake_summarize
     try:
@@ -206,8 +221,7 @@ def test_render_json_includes_deltas_with_baseline():
 
 
 def test_render_json_summary_values_match_metrics():
-    report = _report(cost=0.3456)
-    data = json.loads(render_json(report))
+    data = json.loads(render_json(_report(cost=0.3456)))
     assert data["summary"]["cost_usd"] == pytest.approx(0.3456)
 
 
@@ -217,8 +231,9 @@ def test_render_json_summary_values_match_metrics():
 def test_render_html_is_standalone_document():
     out = render_html(_report())
     assert out.startswith("<!doctype html>")
-    assert "AudioTrace call report" in out
-    assert "Change vs. baseline" not in out  # no baseline -> no deltas section
+    assert "<title>AudioTrace call report</title>" in out
+    assert 'class="tiles"' in out
+    assert "Latency waterfall" in out
 
 
 def test_render_html_escapes_outcome():
@@ -227,10 +242,15 @@ def test_render_html_escapes_outcome():
     assert "&lt;script&gt;" in out
 
 
+def test_render_html_no_banner_without_baseline():
+    out = render_html(_report())
+    assert "vs. baseline" not in out
+
+
 def test_render_html_ok_banner_when_no_regressions():
     out = render_html(_report(), baseline=_report())
     assert "No regressions vs. baseline" in out
-    assert "Change vs. baseline" in out
+    assert 'class="banner ok"' in out
 
 
 def test_render_html_bad_banner_counts_regressions():
@@ -245,12 +265,162 @@ def test_render_html_single_regression_singular_label():
     assert "1 regression vs. baseline" in out
 
 
-def test_render_html_improved_metric_marked_and_signed():
-    # quality improves 0.7 -> 0.9: positive change, "improved" class, no regression.
-    out = render_html(_report(quality_score=0.9), baseline=_report(quality_score=0.7))
-    assert "No regressions vs. baseline" in out
-    assert 'class="improved"' in out
-    assert "+0.2" in out
+def test_render_html_renders_transcript_bubbles():
+    report = _report()
+    report.transcript = Transcript(
+        full_text="hi there",
+        turns=[
+            Turn(speaker="AI Agent", text="hi", start_ms=0, end_ms=1000),
+            Turn(speaker="Customer", text="there", start_ms=2000, end_ms=3000),
+        ],
+    )
+    out = render_html(report)
+    assert 'class="bubble agent"' in out
+    assert 'class="bubble caller"' in out
+    assert ">AA<" in out  # agent initials
+
+
+def test_render_html_renders_flags_badge_and_list():
+    out = render_html(_report(compliance_flags=("pii_exposed", "missing_consent")))
+    assert "flags-badge" in out
+    assert "2 flags" in out
+    assert "pii_exposed" in out
+
+
+# --- tiles ---
+
+
+def test_tile_outcome_renders_status_pill():
+    metric = next(m for m in summarize(_report(outcome="dropped")) if m.key == "outcome")
+    assert 'class="pill warn"' in _tile(metric, None)
+
+
+def test_tile_includes_delta_subline():
+    deltas = {d.key: d for d in diff(_report(quality_score=0.9), _report(quality_score=0.7))}
+    metric = next(m for m in summarize(_report(quality_score=0.7)) if m.key == "quality_score")
+    html_out = _tile(metric, deltas["quality_score"])
+    assert "tile-sub down" in html_out
+    assert "↓ vs 0.9" in html_out
+
+
+def test_tile_delta_improvement_is_up_arrow():
+    delta = Delta("quality_score", "Quality score", 0.7, 0.9, 0.2, regressed=False)
+    out = _tile_delta(delta)
+    assert "tile-sub up" in out
+    assert "↑ vs 0.7" in out
+
+
+def test_tile_delta_increase_regression_is_up_arrow_and_down_class():
+    # cost rose: change > 0 (up arrow) but it's a regression (red "down" class).
+    delta = Delta("cost_usd", "Cost", 0.1, 0.3, 0.2, regressed=True)
+    out = _tile_delta(delta)
+    assert "tile-sub down" in out
+    assert "↑ vs 0.1" in out
+
+
+def test_tile_delta_flat_when_unchanged():
+    delta = Delta("quality_score", "Quality score", 0.9, 0.9, 0.0, regressed=False)
+    assert "tile-sub flat" in _tile_delta(delta)
+
+
+# --- header / status / flags helpers ---
+
+
+@pytest.mark.parametrize(
+    "outcome, cls",
+    [("completed", "ok"), ("dropped", "warn"), ("failed", "bad"), ("weird", "neutral")],
+)
+def test_status_class(outcome, cls):
+    assert _status_class(outcome) == cls
+
+
+def test_header_sub_includes_intent_duration_format():
+    report = _report()
+    report.events.intent_detected = "billing"
+    sub = _header_sub(report)
+    assert "billing" in sub
+    assert "1:00" in sub  # 60_000 ms
+    assert "mp3" in sub
+
+
+def test_header_sub_without_intent_or_media():
+    report = _report(media=False)
+    assert _header_sub(report) == ""
+
+
+def test_flags_badge_empty_and_singular_and_plural():
+    assert _flags_badge([]) == ""
+    assert "1 flag<" in _flags_badge(["pii"]) or "1 flag " in _flags_badge(["pii"])
+    assert "2 flags" in _flags_badge(["pii", "consent"])
+
+
+def test_flags_list_empty_and_populated():
+    assert _flags_list([]) == ""
+    assert "pii_exposed" in _flags_list(["pii_exposed"])
+
+
+# --- transcript helpers ---
+
+
+def test_format_ts():
+    assert _format_ts(0) == "0:00"
+    assert _format_ts(75_000) == "1:15"
+
+
+def test_initials_multiword_and_empty():
+    assert _initials("AI Agent") == "AA"
+    assert _initials("") == "?"
+
+
+def test_bubble_agent_vs_caller_side():
+    agent = Turn(speaker="AI Agent", text="hi", start_ms=0, end_ms=1000)
+    caller = Turn(speaker="Customer", text="hello", start_ms=0, end_ms=1000)
+    assert 'class="bubble agent"' in _bubble(agent)
+    assert 'class="bubble caller"' in _bubble(caller)
+
+
+def test_transcript_html_empty_with_full_text():
+    out = _transcript_html(Transcript(full_text="only text"))
+    assert "only text" in out
+
+
+def test_transcript_html_empty_without_text():
+    out = _transcript_html(Transcript())
+    assert "(no transcript)" in out
+
+
+# --- waterfall ---
+
+
+def test_waterfall_all_zero_has_no_fill():
+    out = _waterfall_html(Latency())
+    assert "width:0%" in out
+    assert "STT" in out
+
+
+def test_waterfall_scales_to_peak():
+    out = _waterfall_html(Latency(stt_ms=100, total_ms=200))
+    assert "width:50%" in out  # stt 100 of peak 200
+    assert "width:100%" in out  # total
+
+
+# --- sentiment sparkline ---
+
+
+def test_sentiment_svg_empty_is_blank():
+    assert _sentiment_svg(Sentiment()) == ""
+
+
+def test_sentiment_svg_single_point_centered():
+    out = _sentiment_svg(Sentiment(by_turn=[0.0]))
+    assert "<polyline" in out
+    assert "160.0,45.0" in out  # centered x, midline y
+
+
+def test_sentiment_svg_multi_point_and_clamps():
+    out = _sentiment_svg(Sentiment(by_turn=[1.5, -2.0]))  # out-of-range, clamped
+    assert "0.0,0.0" in out  # clamped to +1 -> top
+    assert "320.0,90.0" in out  # clamped to -1 -> bottom
 
 
 # --- write_report ---
@@ -299,10 +469,6 @@ def test_format_value(metric, expected):
 def test_trim_drops_whole_number_decimal():
     assert _trim(5.0) == "5"
     assert _trim(-0.2) == "-0.2"
-
-
-def test_deltas_section_empty_for_no_deltas():
-    assert _deltas_section([]) == ""
 
 
 def test_banner_no_baseline_is_empty():
