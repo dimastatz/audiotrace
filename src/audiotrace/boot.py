@@ -251,11 +251,26 @@ def print_report(
         print_json(report)
 
 
+def write_report_files(
+    report: audiotrace.models.CallReport,
+    output_dir: str | Path,
+    audio_path: str | Path,
+) -> None:
+    """Write JSON + HTML report files named after the audio file into output_dir."""
+    stem = Path(audio_path).stem or "report"
+    paths = audiotrace.write_report(report, output_dir, stem=stem)
+    console.print(
+        f"\n[section]Report written[/] "
+        f"[value]{paths['html']}[/] [dim]and[/] [value]{paths['json']}[/]"
+    )
+
+
 def run_analysis(
     file_path: str | Path,
     playback: bool = False,
     skip_pyannote: bool = False,
     summary: bool = False,
+    report_dir: str | Path | None = None,
 ) -> None:
     path = Path(file_path)
     if not path.exists():
@@ -271,6 +286,8 @@ def run_analysis(
             return
 
     print_report(report, playback=playback, audio_path=path, summary=summary)
+    if report_dir is not None:
+        write_report_files(report, report_dir, path)
 
 
 def main() -> None:
@@ -299,6 +316,12 @@ def main() -> None:
         action="store_true",
         help="Show per-section summary tables only; omit the raw JSON.",
     )
+    parser.add_argument(
+        "--report",
+        metavar="DIR",
+        default=None,
+        help="Also write a JSON + HTML report (named after the audio file) into DIR.",
+    )
 
     args = parser.parse_args()
 
@@ -308,6 +331,7 @@ def main() -> None:
         playback=args.playback,
         skip_pyannote=args.skip_pyannote,
         summary=args.summary,
+        report_dir=args.report,
     )
 
     # Interactive loop
@@ -327,6 +351,7 @@ def main() -> None:
                 playback=args.playback,
                 skip_pyannote=args.skip_pyannote,
                 summary=args.summary,
+                report_dir=args.report,
             )
         except (KeyboardInterrupt, EOFError):
             console.print("\n[info]Exiting.[/]")
