@@ -24,12 +24,28 @@ from audiotrace.models import (
     Turn,
     Word,
 )
+from audiotrace.report import (
+    Delta,
+    Metric,
+    diff,
+    render_html,
+    render_json,
+    summarize,
+    write_report,
+)
 
 __version__ = "1.1.1"
 
 __all__ = [
     "analyze",
     "PricingTable",
+    "summarize",
+    "diff",
+    "render_json",
+    "render_html",
+    "write_report",
+    "Metric",
+    "Delta",
     "CallReport",
     "Cost",
     "Events",
