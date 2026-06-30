@@ -8,6 +8,15 @@ The extraction pipeline is not implemented yet; the data contract
 (:class:`CallReport` and friends) is stable and lives in ``audiotrace.models``.
 """
 
+from audiotrace.check import (
+    CheckResult,
+    Regression,
+    Threshold,
+    check,
+    format_result,
+    load_baseline,
+    write_baseline,
+)
 from audiotrace.core import analyze
 from audiotrace.cost import PricingTable
 from audiotrace.models import (
@@ -46,6 +55,13 @@ __all__ = [
     "write_report",
     "Metric",
     "Delta",
+    "check",
+    "write_baseline",
+    "load_baseline",
+    "format_result",
+    "Threshold",
+    "Regression",
+    "CheckResult",
     "CallReport",
     "Cost",
     "Events",

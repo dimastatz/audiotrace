@@ -42,6 +42,9 @@ dev = [
     "mypy>=1.10",
 ]
 
+[project.scripts]
+audiotrace = "audiotrace.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/audiotrace/audiotrace"
 Repository = "https://github.com/audiotrace/audiotrace"
@@ -64,7 +67,7 @@ addopts = "-q --cov=audiotrace --cov-report=term-missing --cov-fail-under=95"
 [tool.coverage.run]
 source = ["audiotrace"]
 branch = true
-omit = ["src/audiotrace/boot.py"]
+omit = ["src/audiotrace/boot.py", "src/audiotrace/cli.py"]
 
 [tool.coverage.report]
 show_missing = true
