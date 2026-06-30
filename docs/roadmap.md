@@ -39,9 +39,9 @@ real enough to prove willingness to pay.
 
 - [x] Quality/regression **report output**: a single `analyze()`-fed HTML + JSON
       summary a customer can actually read (per-call + run-over-run deltas) — [PRD 0007](./prd/0007-report.md)
-- [ ] **Baseline + drift check**: commit a baseline, flag regressions vs. it
-      (the pytest/CI pattern from [devto-3](./articles/devto-3-voice-agents-in-ci.md))
-- [ ] **GitHub Action** wrapper so a customer can drop it into CI in <15 min
+- [x] **Baseline + drift check**: commit a baseline, flag regressions vs. it
+      (the pytest/CI pattern from [devto-3](./articles/devto-3-voice-agents-in-ci.md)) — [PRD 0008](./prd/0008-regression-gate.md)
+- [x] **GitHub Action** wrapper so a customer can drop it into CI in <15 min — [`action.yml`](../action.yml)
 
 ### Workstream B — Payment rails (week 1, ~half a day)
 

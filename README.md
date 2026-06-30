@@ -271,6 +271,41 @@ Before submitting changes, ensure everything passes the local validation suite (
 
 ---
 
+## Regression gating in CI
+
+Treat a handful of representative recordings as golden fixtures, commit a **baseline**, and fail the build when a prompt/model/voice change makes the agent measurably worse — slower, colder, less compliant.
+
+```bash
+# 1. Commit a baseline from your golden calls (one time, and after intentional changes)
+audiotrace baseline tests/calls -o baseline.json
+
+# 2. Gate every change against it — exits non-zero on regression, writes per-call reports
+audiotrace check tests/calls -b baseline.json --report audiotrace-report
+```
+
+A metric only fails the build when it drifts past its tolerance (quality −0.05, sentiment −0.10, latency +15%, cost +20%; frustration / drop-off / compliance have zero slack). New recordings not in the baseline are skipped, not failed.
+
+### GitHub Action
+
+Drop the gate into CI in a few lines. It installs AudioTrace, runs the check, and uploads the HTML report as an artifact even when the build fails:
+
+```yaml
+# .github/workflows/voice-quality.yml
+name: Voice quality
+on: [pull_request]
+jobs:
+  audiotrace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dimastatz/audiotrace@v1
+        with:
+          calls: tests/calls
+          baseline: baseline.json
+```
+
+---
+
 ## Contributing
 
 Contributions are welcome — especially new provider adapters, persona definitions for simulation, and compliance rule sets.

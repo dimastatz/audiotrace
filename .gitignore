@@ -220,3 +220,4 @@ __marimo__/
 # Claude Code
 #   Personal, per-machine settings — should NOT be committed.
 .claude/settings.local.json
+.DS_Store

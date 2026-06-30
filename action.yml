@@ -1,0 +1,59 @@
+name: "AudioTrace regression gate"
+description: >-
+  Fail the build when your voice agent's call quality regresses against a
+  committed baseline — latency, sentiment, drop-off, cost, and compliance.
+author: "AudioTrace contributors"
+branding:
+  icon: "activity"
+  color: "red"
+
+inputs:
+  calls:
+    description: "Directory of golden call recordings to analyze."
+    required: true
+  baseline:
+    description: "Path to the committed baseline JSON (see `audiotrace baseline`)."
+    required: true
+    default: "baseline.json"
+  report-dir:
+    description: "Directory to write per-call HTML + JSON reports into."
+    required: false
+    default: "audiotrace-report"
+  version:
+    description: "pip requirement spec for AudioTrace (e.g. 'audiotrace==1.1.1')."
+    required: false
+    default: "audiotrace"
+  python-version:
+    description: "Python version to run the gate on."
+    required: false
+    default: "3.12"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install FFmpeg
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+    - name: Install AudioTrace
+      shell: bash
+      run: pip install "${{ inputs.version }}"
+
+    - name: Run regression gate
+      shell: bash
+      run: >-
+        audiotrace check "${{ inputs.calls }}"
+        --baseline "${{ inputs.baseline }}"
+        --report "${{ inputs.report-dir }}"
+
+    - name: Upload report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: audiotrace-report
+        path: ${{ inputs.report-dir }}

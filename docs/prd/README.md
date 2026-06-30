@@ -21,3 +21,4 @@ of truth Claude Code and contributors build against.
 | [0005](./0005-events.md)       | Events extraction pipeline          | Draft  |
 | [0006](./0006-latency.md)      | Latency waterfall extraction        | Draft  |
 | [0007](./0007-report.md)       | Report output (JSON + HTML summary) | In progress |
+| [0008](./0008-regression-gate.md) | Baseline + regression gate (CI)  | In progress |
