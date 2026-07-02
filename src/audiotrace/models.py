@@ -45,6 +45,11 @@ class Transcript(BaseModel):
     full_text: str = ""
     turns: list[Turn] = Field(default_factory=list)
     language: str = "en"
+    # How well speakers could be told apart (0-1), for the pitch-clustering
+    # fallback only. ``None`` means not measured (real diarization, or speakers
+    # not separated). A low value means the speaker labels are unreliable
+    # because the voices' pitch ranges overlap.
+    diarization_confidence: float | None = None
 
 
 class Gap(BaseModel):

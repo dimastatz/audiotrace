@@ -156,7 +156,8 @@ CallReport
 ├── transcript
 │   ├── full_text: str
 │   ├── turns: List[Turn]   # speaker · text · start_ms · end_ms · confidence · words[]
-│   └── language: str
+│   ├── language: str
+│   └── diarization_confidence: float | None   # pitch-fallback speaker separability (0-1); None if not measured
 ├── quality
 │   ├── overall_score: float
 │   ├── interruptions: int

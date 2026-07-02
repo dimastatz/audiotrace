@@ -23,6 +23,13 @@ DEFAULT_TWO_SPEAKER_LABELS = ("AI Agent", "Customer")
 PITCH_FMIN_HZ = 65.0
 PITCH_FMAX_HZ = 2093.0
 
+# Ratio of the gap between the two nearest pitch clusters to the spread within
+# them at which we consider the speakers fully separable (confidence 1.0).
+SEPARATION_RATIO_CONFIDENT = 4.0
+# Below this confidence the pitch groups overlap too much to trust: we stop
+# inventing separate speakers and collapse the call to a single speaker.
+MIN_DIARIZATION_CONFIDENCE = 0.5
+
 
 def clear_model_cache() -> None:
     """Clear the global model cache."""
@@ -117,6 +124,7 @@ def extract_transcript(
         get_diarization_pipeline(diarization_model, use_auth_token=hf_token) if diarize else None
     )
 
+    diarization_confidence: float | None = None
     if pipeline is not None:
         # 3. Alignment: map each Whisper segment to its majority speaker.
         diarization = (
@@ -131,7 +139,12 @@ def extract_transcript(
     elif num_speakers:
         # No diarization model: cluster Whisper segments by voice pitch so a
         # speaker's consecutive sentences stay together, then label by role.
-        clusters = _cluster_pitches(_segment_pitches(path, segments), num_speakers)
+        pitches = _segment_pitches(path, segments)
+        clusters = _cluster_pitches(pitches, num_speakers)
+        diarization_confidence = _cluster_confidence(pitches, clusters)
+        if diarization_confidence < MIN_DIARIZATION_CONFIDENCE:
+            # Voices too alike to tell apart by pitch: don't invent speakers.
+            clusters = [0] * len(segments)
         turns = [
             _make_turn(seg, f"SPEAKER_{cluster:02d}") for seg, cluster in zip(segments, clusters)
         ]
@@ -140,7 +153,12 @@ def extract_transcript(
         turns = [_make_turn(seg, "unknown") for seg in segments]
 
     turns = _apply_speaker_roles(turns, num_speakers, speaker_labels)
-    return Transcript(full_text=full_text, turns=turns, language=language)
+    return Transcript(
+        full_text=full_text,
+        turns=turns,
+        language=language,
+        diarization_confidence=diarization_confidence,
+    )
 
 
 def _make_turn(seg: Any, speaker: str) -> Turn:
@@ -255,6 +273,31 @@ def _cluster_pitches(pitches: list[float | None], num_speakers: int) -> list[int
             last = min(range(len(centers)), key=lambda c: abs(p - centers[c]))
         clusters.append(last)
     return clusters
+
+
+def _cluster_confidence(pitches: list[float | None], clusters: list[int]) -> float:
+    """How separable the pitch clusters are, as a confidence in ``[0, 1]``.
+
+    Distinct speakers occupy separate pitch bands with an empty valley between
+    them; a single speaker (or two too-alike ones) form one continuous blob
+    that k-means splits down the middle with no real gap. So we score the
+    *empty gap* between adjacent pitch bands (lowest pitch of the upper band
+    minus highest of the lower) against the average spread within the bands.
+    Well-separated voices score near 1; overlapping ones near 0. A single
+    cluster (or none) scores 0 — there is nothing to separate.
+    """
+    import numpy as np
+
+    voiced = [(c, p) for c, p in zip(clusters, pitches) if p is not None]
+    labels = {c for c, _ in voiced}
+    if len(labels) < 2:
+        return 0.0
+
+    groups = {label: [p for c, p in voiced if c == label] for label in labels}
+    ordered = sorted(labels, key=lambda label: float(np.mean(groups[label])))
+    within = max(float(np.mean([float(np.std(g)) for g in groups.values()])), 1e-6)
+    min_gap = min(min(groups[hi]) - max(groups[lo]) for lo, hi in zip(ordered, ordered[1:]))
+    return min(1.0, max(0.0, min_gap / within) / SEPARATION_RATIO_CONFIDENT)
 
 
 def _kmeans_1d(values: list[float], k: int, iters: int = 25) -> list[float]:

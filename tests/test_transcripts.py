@@ -7,7 +7,9 @@ import pytest
 
 from audiotrace.models import Turn
 from audiotrace.transcripts import (
+    MIN_DIARIZATION_CONFIDENCE,
     _apply_speaker_roles,
+    _cluster_confidence,
     _cluster_pitches,
     _default_role_labels,
     _get_majority_speaker,
@@ -210,6 +212,76 @@ def test_cluster_pitches_single_speaker():
 
 def test_cluster_pitches_all_unvoiced():
     assert _cluster_pitches([None, None], 2) == [0, 0]
+
+
+def test_cluster_confidence_well_separated():
+    # Two clear pitch bands with an empty valley between them -> high confidence.
+    pitches = [200.0, 205.0, 110.0, 115.0]
+    conf = _cluster_confidence(pitches, _cluster_pitches(pitches, 2))
+    assert conf == 1.0
+
+
+def test_cluster_confidence_overlapping_is_low():
+    # One continuous blob k-means splits down the middle: no real gap -> low.
+    pitches = [200.0, 205.0, 210.0, 215.0, 220.0, 225.0]
+    conf = _cluster_confidence(pitches, _cluster_pitches(pitches, 2))
+    assert conf < MIN_DIARIZATION_CONFIDENCE
+
+
+def test_cluster_confidence_single_cluster_is_zero():
+    assert _cluster_confidence([200.0, 205.0], [0, 0]) == 0.0
+
+
+def test_fallback_collapses_when_voices_too_similar():
+    _setup_whisper(
+        [
+            {"start": 0.0, "end": 2.0, "text": "Hello there."},
+            {"start": 2.0, "end": 4.0, "text": "Hi, I need a room."},
+            {"start": 4.0, "end": 6.0, "text": "Of course, what dates?"},
+            {"start": 6.0, "end": 8.0, "text": "This weekend if possible."},
+            {"start": 8.0, "end": 10.0, "text": "Let me check for you."},
+            {"start": 10.0, "end": 12.0, "text": "Thanks so much."},
+        ]
+    )
+    mock_pyannote_audio.Pipeline.from_pretrained.return_value = None
+
+    # One continuous pitch blob (no valley): can't tell the speakers apart.
+    pitches = [200.0, 205.0, 210.0, 215.0, 220.0, 225.0]
+    with patch("audiotrace.transcripts._segment_pitches", return_value=pitches):
+        transcript = extract_transcript(FIXTURE, num_speakers=2)
+
+    # Everyone collapses to one speaker, and the result is flagged low-confidence.
+    assert len({t.speaker for t in transcript.turns}) == 1
+    assert transcript.diarization_confidence < MIN_DIARIZATION_CONFIDENCE
+
+
+def test_fallback_reports_high_confidence_when_separated():
+    _setup_whisper(
+        [
+            {"start": 0.0, "end": 2.0, "text": "Hello there."},
+            {"start": 2.0, "end": 4.0, "text": "Hi, I need a room."},
+        ]
+    )
+    mock_pyannote_audio.Pipeline.from_pretrained.return_value = None
+
+    with patch("audiotrace.transcripts._segment_pitches", return_value=[210.0, 110.0]):
+        transcript = extract_transcript(FIXTURE, num_speakers=2)
+
+    assert [t.speaker for t in transcript.turns] == ["AI Agent", "Customer"]
+    assert transcript.diarization_confidence == 1.0
+
+
+def test_diarization_confidence_none_for_real_pipeline():
+    _setup_whisper([{"start": 0.0, "end": 2.0, "text": "Hello there."}])
+    diarization = MagicMock()
+    diarization.crop.return_value.labels.return_value = ["SPEAKER_00"]
+    diarization.crop.return_value.itertracks.return_value = []
+    pipeline = MagicMock(return_value=diarization)
+    mock_pyannote_audio.Pipeline.from_pretrained.return_value = pipeline
+
+    transcript = extract_transcript(FIXTURE, hf_token="t", num_speakers=2)
+
+    assert transcript.diarization_confidence is None
 
 
 def test_kmeans_1d_separates_two_groups():
