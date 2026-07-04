@@ -87,3 +87,14 @@ closed) — that decides whether Phase 4 is the managed cloud or a compliance pa
 - [ ] Compliance flag detection (PII, consent gaps)
 - [ ] Custom webhook adapter
 - [ ] Docs site + examples
+- [ ] **Extractor provenance stamping** — record the extraction stack
+      (audiotrace + Whisper/pyannote/sentiment/Librosa versions) on every
+      `CallReport` so drift is attributable to the agent vs. the measurement —
+      [PRD 0009 Part A](./prd/0009-drift-gating.md)
+
+## Phase 4 — Trust & scale
+
+- [ ] **Distributional drift gate (PSI/KL)** over a golden call set — the
+      robust replacement for per-call assertions on noisy audio-derived signals.
+      Blocked on growing the golden set past today's n=1, likely sourced from
+      the first design-partner pilot — [PRD 0009 Part B](./prd/0009-drift-gating.md)
