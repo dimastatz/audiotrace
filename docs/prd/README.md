@@ -12,13 +12,14 @@ of truth Claude Code and contributors build against.
 
 ## Index
 
-| #                              | Title                               | Status |
-|--------------------------------|-------------------------------------|--------|
-| [0001](./0001-mediainfo.md)    | MediaInfo extraction                | Draft  |
-| [0002](./0002-transcript.md)   | Transcript and diarization pipeline | Draft  |
-| [0003](./0003-quality.md)      | Quality extraction pipeline         | Draft  |
-| [0004](./0004-sentiment.md)    | Sentiment extraction pipeline       | Draft  |
-| [0005](./0005-events.md)       | Events extraction pipeline          | Draft  |
-| [0006](./0006-latency.md)      | Latency waterfall extraction        | Draft  |
-| [0007](./0007-report.md)       | Report output (JSON + HTML summary) | In progress |
-| [0008](./0008-regression-gate.md) | Baseline + regression gate (CI)  | In progress |
+| #                                 | Title                               | Status      |
+|-----------------------------------|-------------------------------------|-------------|
+| [0001](./0001-mediainfo.md)       | MediaInfo extraction                | Draft       |
+| [0002](./0002-transcript.md)      | Transcript and diarization pipeline | Draft       |
+| [0003](./0003-quality.md)         | Quality extraction pipeline         | Draft       |
+| [0004](./0004-sentiment.md)       | Sentiment extraction pipeline       | Draft       |
+| [0005](./0005-events.md)          | Events extraction pipeline          | Draft       |
+| [0006](./0006-latency.md)         | Latency waterfall extraction        | Draft       |
+| [0007](./0007-report.md)          | Report output (JSON + HTML summary) | In progress |
+| [0008](./0008-regression-gate.md) | Baseline + regression gate (CI)     | In progress |
+| [0009](./0009-drift-gating.md)    | Drift gating (provenance + PSI/KL)  | Draft       |

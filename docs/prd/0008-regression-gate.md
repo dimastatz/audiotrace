@@ -43,7 +43,9 @@ Ships as:
   time). The gate is per-call pass/fail plus a per-call report; the multi-call
   "session review" view is a separate, later item.
 - **Threshold auto-tuning / statistical baselines.** Tolerances are static
-  config; learning them from history is out of scope.
+  config; learning them from history is out of scope. Distributional (PSI/KL)
+  drift over a golden set — the more robust approach for noisy audio-derived
+  signals — is specified separately in [PRD 0009](./0009-drift-gating.md).
 - **Fetching recordings from a provider.** `<dir>` is local files; provider
   adapters are [Phase 2](../roadmap.md).
 
