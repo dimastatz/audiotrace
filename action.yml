@@ -1,6 +1,6 @@
 name: "AudioTrace regression gate"
 description: >-
-  Fail the build when your voice agent's call quality regresses against a
+  Voice agent's call quality regresses against a
   committed baseline — latency, sentiment, drop-off, cost, and compliance.
 author: "AudioTrace contributors"
 branding:
