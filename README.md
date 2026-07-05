@@ -243,6 +243,9 @@ AudioTrace is the open-source foundation that powers two commercial products:
 
 AudioTrace is free and MIT-licensed. The commercial products are optional hosted layers on top.
 
+Want it run *for* you today? We're taking a few paid design-partner pilots —
+"early access + we run it for you." See [COMMERCIAL.md](COMMERCIAL.md).
+
 ---
 
 ## Running locally
