@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "audiotrace"
-version = "1.2.1"
+version = "1.2.2"
 description = "Structured analysis for voice-agent call recordings — transcript, quality, sentiment, latency, cost, and events from raw audio."
 readme = "README.md"
 requires-python = ">=3.9"
