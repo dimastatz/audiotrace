@@ -302,7 +302,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dimastatz/audiotrace@v1
+      - uses: dimastatz/audiotrace@v1.2.1
         with:
           calls: tests/calls
           baseline: baseline.json
