@@ -53,6 +53,11 @@ def test_analyze_media_info(
     assert report.events is not None
     # Empty transcript → no agent-response waterfall spans
     assert report.latency.waterfall == []
+    # Provenance records the stack; diarize=True with no num_speakers and no
+    # cached pipeline (extraction is mocked) means no diarization ran.
+    assert report.provenance is not None
+    assert report.provenance.whisper_model == "base"
+    assert report.provenance.diarization == "none"
     mock_extract_quality.assert_called_once_with(
         fixture_path, mock_extract_transcript.return_value, report.media.duration_ms
     )

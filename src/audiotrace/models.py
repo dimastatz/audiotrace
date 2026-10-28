@@ -109,6 +109,28 @@ class Events(BaseModel):
     compliance_flags: list[str] = Field(default_factory=list)
 
 
+class Provenance(BaseModel):
+    """The extraction stack that produced a report (PRD 0009 Part A).
+
+    The extractors are models too, so a moved metric can mean the agent changed
+    *or* the measurement changed. Recording the stack makes that attributable.
+    Empty strings mean the version could not be determined.
+    """
+
+    audiotrace_version: str = ""
+    whisper_model: str = ""
+    # pyannote pipeline id, "pitch" (pitch-clustering fallback), or "none".
+    diarization: str = ""
+    sentiment_model: str = ""
+    intent_model: str = ""
+    python_version: str = ""
+    whisper_version: str = ""
+    pyannote_version: str = ""
+    librosa_version: str = ""
+    transformers_version: str = ""
+    torch_version: str = ""
+
+
 class CallReport(BaseModel):
     """The full structured analysis of a single call."""
 
@@ -119,3 +141,5 @@ class CallReport(BaseModel):
     latency: Latency = Field(default_factory=Latency)
     cost: Cost = Field(default_factory=Cost)
     events: Events = Field(default_factory=Events)
+    # ``None`` for reports produced before provenance was recorded.
+    provenance: Provenance | None = None

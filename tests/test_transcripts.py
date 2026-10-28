@@ -7,6 +7,7 @@ import pytest
 
 from audiotrace.models import Turn
 from audiotrace.transcripts import (
+    _MODELS,
     MIN_DIARIZATION_CONFIDENCE,
     _apply_speaker_roles,
     _cluster_confidence,
@@ -19,6 +20,7 @@ from audiotrace.transcripts import (
     _segment_pitches,
     _segment_words,
     clear_model_cache,
+    diarization_method,
     extract_transcript,
 )
 
@@ -475,3 +477,24 @@ def test_apply_speaker_roles_empty_default_is_noop():
     turns = [Turn(speaker="SPEAKER_00", text="x", start_ms=0, end_ms=1)]
     out = _apply_speaker_roles(turns, 0, None)
     assert out[0].speaker == "SPEAKER_00"
+
+
+# --- diarization_method ---
+
+
+def test_diarization_method_pyannote_when_pipeline_loaded():
+    _MODELS["pyannote:pipe"] = object()
+    assert diarization_method(True, 2, diarization_model="pipe") == "pipe"
+
+
+def test_diarization_method_pitch_fallback_when_pipeline_missing():
+    assert diarization_method(True, 2, diarization_model="pipe") == "pitch"
+
+
+def test_diarization_method_pitch_when_skipped_with_speaker_count():
+    _MODELS["pyannote:pipe"] = object()
+    assert diarization_method(False, 2, diarization_model="pipe") == "pitch"
+
+
+def test_diarization_method_none_without_pipeline_or_speaker_count():
+    assert diarization_method(False, None) == "none"
