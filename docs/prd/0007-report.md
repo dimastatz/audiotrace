@@ -1,6 +1,6 @@
 # PRD 0007 — Report output (JSON + HTML summary)
 
-**Status:** In progress
+**Status:** Shipped
 **Owner:** Dima Statz
 **Related:** [roadmap Phase M, Workstream A](../roadmap.md),
 [devto-3 (CI / drift)](../articles/devto-3-voice-agents-in-ci.md)

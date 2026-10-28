@@ -1,6 +1,6 @@
 # PRD 0006 — Latency waterfall extraction
 
-**Status:** Draft
+**Status:** Shipped
 **Owner:** Dima Statz
 **Related:** [roadmap Phase 1](../roadmap.md), [PRD 0001](./0001-mediainfo.md) (open question: latency
 derivable from audio alone — answered "yes")

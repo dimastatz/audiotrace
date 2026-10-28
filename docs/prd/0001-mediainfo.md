@@ -1,6 +1,6 @@
 # PRD 0001 — Core `analyze()` pipeline
 
-**Status:** In Progress
+**Status:** Shipped
 **Owner:** Dima Statz
 **Related:** [roadmap Phase 0/1](../roadmap.md)
 

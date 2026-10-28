@@ -1,6 +1,6 @@
 # PRD 0008 — Baseline + regression gate (CI)
 
-**Status:** In progress
+**Status:** Shipped
 **Owner:** Dima Statz
 **Related:** [roadmap Phase M, Workstream A](../roadmap.md),
 [PRD 0007 (report)](./0007-report.md),

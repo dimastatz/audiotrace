@@ -14,14 +14,14 @@ of truth Claude Code and contributors build against.
 
 | #                                 | Title                               | Status      |
 |-----------------------------------|-------------------------------------|-------------|
-| [0001](./0001-mediainfo.md)       | MediaInfo extraction                | Draft       |
-| [0002](./0002-transcript.md)      | Transcript and diarization pipeline | Draft       |
-| [0003](./0003-quality.md)         | Quality extraction pipeline         | Draft       |
-| [0004](./0004-sentiment.md)       | Sentiment extraction pipeline       | Draft       |
-| [0005](./0005-events.md)          | Events extraction pipeline          | Draft       |
-| [0006](./0006-latency.md)         | Latency waterfall extraction        | Draft       |
-| [0007](./0007-report.md)          | Report output (JSON + HTML summary) | In progress |
-| [0008](./0008-regression-gate.md) | Baseline + regression gate (CI)     | In progress |
+| [0001](./0001-mediainfo.md)       | MediaInfo extraction                | Shipped     |
+| [0002](./0002-transcript.md)      | Transcript and diarization pipeline | Shipped     |
+| [0003](./0003-quality.md)         | Quality extraction pipeline         | Shipped     |
+| [0004](./0004-sentiment.md)       | Sentiment extraction pipeline       | Shipped     |
+| [0005](./0005-events.md)          | Events extraction pipeline          | Shipped     |
+| [0006](./0006-latency.md)         | Latency waterfall extraction        | Shipped     |
+| [0007](./0007-report.md)          | Report output (JSON + HTML summary) | Shipped     |
+| [0008](./0008-regression-gate.md) | Baseline + regression gate (CI)     | Shipped     |
 | [0009](./0009-drift-gating.md)    | Drift gating (provenance + PSI/KL)  | Draft       |
 | [0010](./0010-simulated-callers.md) | Simulated callers (pre-release)   | Draft       |
 | [0011](./0011-production-replay.md) | Production replay (regressions)   | Draft       |

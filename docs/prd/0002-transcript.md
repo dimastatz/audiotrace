@@ -1,6 +1,6 @@
 # PRD 0002 — Transcript and Diarization pipeline
 
-**Status:** Draft
+**Status:** Shipped
 **Owner:** Dima Statz
 **Related:** [roadmap Phase 1](../roadmap.md)
 
