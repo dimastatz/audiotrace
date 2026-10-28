@@ -17,9 +17,10 @@ from audiotrace.events import extract_events
 from audiotrace.extractors import extract_media_info
 from audiotrace.latency import extract_waterfall
 from audiotrace.models import CallReport, Latency
+from audiotrace.provenance import collect_provenance
 from audiotrace.quality import extract_quality
 from audiotrace.sentiment import extract_sentiment
-from audiotrace.transcripts import extract_transcript
+from audiotrace.transcripts import diarization_method, extract_transcript
 
 AudioInput = Union[str, Path]
 
@@ -96,4 +97,5 @@ def analyze(
         cost=cost,
         events=events,
         latency=latency,
+        provenance=collect_provenance(diarization_method(diarize, num_speakers)),
     )

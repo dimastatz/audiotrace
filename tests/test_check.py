@@ -14,7 +14,16 @@ from audiotrace.check import (
     load_baseline,
     write_baseline,
 )
-from audiotrace.models import CallReport, Cost, Events, MediaInfo, Quality, Sentiment
+from audiotrace.models import (
+    CallReport,
+    Cost,
+    Events,
+    MediaInfo,
+    Provenance,
+    Quality,
+    Sentiment,
+)
+from audiotrace.provenance import ProvenanceChange
 
 
 def _report(
@@ -188,3 +197,47 @@ def test_format_result_reports_skipped():
 def test_num_trims_whole_numbers():
     assert _num(5.0) == "5"
     assert _num(0.05) == "0.05"
+
+
+# --- provenance ---
+
+
+def test_check_no_stack_change_when_provenance_matches():
+    prov = Provenance(whisper_model="base")
+    base = _report().model_copy(update={"provenance": prov})
+    result = check({"a": base}, {"a": base})
+    assert result.provenance_changes == {}
+    assert result.stack_changed is False
+
+
+def test_check_labels_stack_change_without_failing():
+    base = _report().model_copy(update={"provenance": Provenance(whisper_model="base")})
+    cur = _report().model_copy(update={"provenance": Provenance(whisper_model="small")})
+    result = check({"a": cur}, {"a": base})
+    assert result.passed is True
+    assert result.stack_changed is True
+    assert result.provenance_changes == {"a": [ProvenanceChange("whisper_model", "base", "small")]}
+
+
+def test_check_result_default_has_no_stack_change():
+    assert CheckResult(regressions=[], checked=0, skipped=[]).stack_changed is False
+
+
+def test_format_result_notes_stack_change_once_per_change():
+    change = ProvenanceChange("whisper_model", "base", "small")
+    unknown = ProvenanceChange("torch_version", "", "2.5.0")
+    result = CheckResult(
+        regressions=[],
+        checked=2,
+        skipped=[],
+        provenance_changes={"a": [change, unknown], "b": [change]},
+    )
+    out = format_result(result)
+    assert "extraction stack differs from baseline" in out
+    assert "whisper_model: base → small (2 call(s))" in out
+    assert "torch_version: ? → 2.5.0 (1 call(s))" in out
+
+
+def test_format_result_no_stack_note_when_unchanged():
+    out = format_result(CheckResult(regressions=[], checked=1, skipped=[]))
+    assert "extraction stack" not in out

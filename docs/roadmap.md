@@ -88,7 +88,7 @@ closed) — that decides whether Phase 4 is the managed cloud or a compliance pa
       `events.py`; [PRD 0013](./prd/0013-compliance-detection.md) defines done
 - [ ] Custom webhook adapter — [PRD 0014](./prd/0014-webhook-adapter.md)
 - [ ] Docs site + examples — [PRD 0015](./prd/0015-docs-site.md)
-- [ ] **Extractor provenance stamping** — record the extraction stack
+- [x] **Extractor provenance stamping** — record the extraction stack
       (audiotrace + Whisper/pyannote/sentiment/Librosa versions) on every
       `CallReport` so drift is attributable to the agent vs. the measurement —
       [PRD 0009 Part A](./prd/0009-drift-gating.md)

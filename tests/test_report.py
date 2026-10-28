@@ -9,11 +9,13 @@ from audiotrace.models import (
     Latency,
     LatencySpan,
     MediaInfo,
+    Provenance,
     Quality,
     Sentiment,
     Transcript,
     Turn,
 )
+from audiotrace.provenance import ProvenanceChange
 from audiotrace.report import (
     Delta,
     Metric,
@@ -28,6 +30,8 @@ from audiotrace.report import (
     _initials,
     _response_p95_ms,
     _sentiment_svg,
+    _stack_banner,
+    _stack_footer,
     _status_class,
     _tile,
     _tile_delta,
@@ -473,3 +477,57 @@ def test_trim_drops_whole_number_decimal():
 
 def test_banner_no_baseline_is_empty():
     assert _banner(False, 0) == ""
+
+
+# --- provenance ---
+
+
+def _with_stack(report: CallReport, **fields: str) -> CallReport:
+    return report.model_copy(update={"provenance": Provenance(**fields)})
+
+
+def test_render_json_no_provenance_changes_without_baseline():
+    assert "provenance_changes" not in json.loads(render_json(_report()))
+
+
+def test_render_json_lists_provenance_changes_with_baseline():
+    base = _with_stack(_report(), whisper_model="base")
+    cur = _with_stack(_report(), whisper_model="small")
+    data = json.loads(render_json(cur, baseline=base))
+    assert data["provenance_changes"] == [
+        {"field": "whisper_model", "before": "base", "after": "small"}
+    ]
+    assert data["report"]["provenance"]["whisper_model"] == "small"
+
+
+def test_render_html_warns_when_stack_changed():
+    base = _with_stack(_report(), whisper_model="base")
+    cur = _with_stack(_report(), whisper_model="small")
+    out = render_html(cur, baseline=base)
+    assert "Extraction stack changed vs. baseline" in out
+    assert "whisper_model base → small" in out
+
+
+def test_render_html_no_stack_warning_when_unchanged():
+    base = _with_stack(_report(), whisper_model="base")
+    assert "Extraction stack changed" not in render_html(base, baseline=base)
+
+
+def test_stack_banner_empty_and_unknown_values():
+    assert _stack_banner([]) == ""
+    out = _stack_banner([ProvenanceChange("torch_version", "", "<2.5>")])
+    assert "torch_version ? → &lt;2.5&gt;" in out
+
+
+def test_stack_footer_names_stack_or_is_empty():
+    assert _stack_footer(None) == ""
+    prov = Provenance(whisper_model="base", diarization="pitch", sentiment_model="sst-2")
+    out = _stack_footer(prov)
+    assert "audiotrace ?" in out
+    assert "whisper base" in out
+    assert "diarization pitch" in out
+
+
+def test_render_html_footer_includes_stack():
+    out = render_html(_with_stack(_report(), audiotrace_version="9.9.9"))
+    assert "audiotrace 9.9.9" in out

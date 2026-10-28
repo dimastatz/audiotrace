@@ -12,10 +12,11 @@ Pure standard library + the existing models and report layer; no new deps.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from audiotrace.models import CallReport
+from audiotrace.provenance import ProvenanceChange, provenance_changes
 from audiotrace.report import diff
 
 
@@ -65,11 +66,19 @@ class CheckResult:
     regressions: list[Regression]
     checked: int
     skipped: list[str]
+    # Extraction-stack differences vs. the baseline, keyed by call id. These
+    # label the run (metric moves may be measurement drift); they don't fail it.
+    provenance_changes: dict[str, list[ProvenanceChange]] = field(default_factory=dict)
 
     @property
     def passed(self) -> bool:
         """True when no regression breached its tolerance."""
         return not self.regressions
+
+    @property
+    def stack_changed(self) -> bool:
+        """True when any call's extraction stack differs from its baseline."""
+        return bool(self.provenance_changes)
 
 
 def _allowed(threshold: Threshold, before: float) -> float:
@@ -100,6 +109,7 @@ def check(
     thr = thresholds if thresholds is not None else DEFAULT_THRESHOLDS
     regressions: list[Regression] = []
     skipped: list[str] = []
+    changes: dict[str, list[ProvenanceChange]] = {}
     checked = 0
     for call_id in sorted(current):
         base = baseline.get(call_id)
@@ -107,6 +117,9 @@ def check(
             skipped.append(call_id)
             continue
         checked += 1
+        stack = provenance_changes(base, current[call_id])
+        if stack:
+            changes[call_id] = stack
         for delta in diff(base, current[call_id]):
             if not delta.regressed:
                 continue
@@ -123,7 +136,12 @@ def check(
                         allowed=allowed,
                     )
                 )
-    return CheckResult(regressions=regressions, checked=checked, skipped=skipped)
+    return CheckResult(
+        regressions=regressions,
+        checked=checked,
+        skipped=skipped,
+        provenance_changes=changes,
+    )
 
 
 def write_baseline(reports: dict[str, CallReport], path: str | Path) -> Path:
@@ -158,6 +176,21 @@ def format_result(result: CheckResult) -> str:
         )
     if result.skipped:
         lines.append(f"  skipped (no baseline): {', '.join(result.skipped)}")
+    if result.stack_changed:
+        lines.append(
+            "  NOTE: extraction stack differs from baseline — metric moves may be "
+            "measurement drift, not the agent:"
+        )
+        # The stack is usually identical across calls; list each change once.
+        seen: dict[ProvenanceChange, int] = {}
+        for stack in result.provenance_changes.values():
+            for change in stack:
+                seen[change] = seen.get(change, 0) + 1
+        for change, calls in seen.items():
+            lines.append(
+                f"    {change.field}: {change.before or '?'} → {change.after or '?'} "
+                f"({calls} call(s))"
+            )
     return "\n".join(lines)
 
 

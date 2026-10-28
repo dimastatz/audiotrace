@@ -27,12 +27,14 @@ from audiotrace.models import (
     Latency,
     LatencySpan,
     MediaInfo,
+    Provenance,
     Quality,
     Sentiment,
     Transcript,
     Turn,
     Word,
 )
+from audiotrace.provenance import ProvenanceChange, collect_provenance, provenance_changes
 from audiotrace.report import (
     Delta,
     Metric,
@@ -62,6 +64,10 @@ __all__ = [
     "Threshold",
     "Regression",
     "CheckResult",
+    "collect_provenance",
+    "provenance_changes",
+    "ProvenanceChange",
+    "Provenance",
     "CallReport",
     "Cost",
     "Events",

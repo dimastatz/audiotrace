@@ -1,6 +1,6 @@
 # PRD 0009 — Trustworthy drift gating: extractor provenance + distributional checks
 
-**Status:** Draft
+**Status:** In progress — Part A shipped; Part B blocked on golden set
 **Owner:** Dima Statz
 **Source:** Design-partner feedback on the CI / signal-extraction article series.
 **Related:** [PRD 0007 (report)](./0007-report.md),

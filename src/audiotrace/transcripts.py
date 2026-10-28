@@ -11,6 +11,9 @@ from audiotrace.models import Transcript, Turn, Word
 
 logger = logging.getLogger(__name__)
 
+WHISPER_MODEL = "base"
+DIARIZATION_MODEL = "pyannote/speaker-diarization-3.1"
+
 # Global cache for models to avoid redundant reloads/network checks during a process lifetime
 _MODELS: dict[str, Any] = {}
 
@@ -36,7 +39,7 @@ def clear_model_cache() -> None:
     _MODELS.clear()
 
 
-def get_whisper_model(model_name: str = "base", device: str | None = None) -> Any:
+def get_whisper_model(model_name: str = WHISPER_MODEL, device: str | None = None) -> Any:
     """Load and cache a Whisper model."""
     import whisper  # type: ignore
 
@@ -48,7 +51,7 @@ def get_whisper_model(model_name: str = "base", device: str | None = None) -> An
 
 
 def get_diarization_pipeline(
-    model_name: str = "pyannote/speaker-diarization-3.1",
+    model_name: str = DIARIZATION_MODEL,
     use_auth_token: str | None = None,
 ) -> Any:
     """Load and cache a pyannote.audio diarization pipeline."""
@@ -74,8 +77,8 @@ def get_diarization_pipeline(
 def extract_transcript(
     audio_path: str | Path,
     hf_token: str | None = None,
-    whisper_model: str = "base",
-    diarization_model: str = "pyannote/speaker-diarization-3.1",
+    whisper_model: str = WHISPER_MODEL,
+    diarization_model: str = DIARIZATION_MODEL,
     num_speakers: int | None = None,
     speaker_labels: list[str] | None = None,
     diarize: bool = True,
@@ -159,6 +162,20 @@ def extract_transcript(
         language=language,
         diarization_confidence=diarization_confidence,
     )
+
+
+def diarization_method(
+    diarize: bool,
+    num_speakers: int | None,
+    diarization_model: str = DIARIZATION_MODEL,
+) -> str:
+    """Which diarization path :func:`extract_transcript` took, for provenance.
+
+    Call after extraction: the pyannote pipeline is only cached once it loaded.
+    """
+    if diarize and f"pyannote:{diarization_model}" in _MODELS:
+        return diarization_model
+    return "pitch" if num_speakers else "none"
 
 
 def _make_turn(seg: Any, speaker: str) -> Turn:

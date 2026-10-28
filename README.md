@@ -183,13 +183,25 @@ CallReport
 │   ├── tts_usd: float
 │   ├── telephony_usd: float
 │   └── total_usd: float
-└── events
-    ├── outcome: str
-    ├── drop_off: bool
-    ├── drop_off_turn: int | None
-    ├── intent_detected: str
-    ├── failure_type: str | None
-    └── compliance_flags: List[str]
+├── events
+│   ├── outcome: str
+│   ├── drop_off: bool
+│   ├── drop_off_turn: int | None
+│   ├── intent_detected: str
+│   ├── failure_type: str | None
+│   └── compliance_flags: List[str]
+└── provenance: Provenance | None   # extraction stack that produced this report; None if unrecorded
+    ├── audiotrace_version: str
+    ├── whisper_model: str
+    ├── diarization: str             # pyannote pipeline id, "pitch" fallback, or "none"
+    ├── sentiment_model: str
+    ├── intent_model: str
+    ├── python_version: str
+    ├── whisper_version: str
+    ├── pyannote_version: str
+    ├── librosa_version: str
+    ├── transformers_version: str
+    └── torch_version: str
 ```
 
 ---
@@ -288,6 +300,8 @@ audiotrace check tests/calls -b baseline.json --report audiotrace-report
 ```
 
 A metric only fails the build when it drifts past its tolerance (quality −0.05, sentiment −0.10, latency +15%, cost +20%; frustration / drop-off / compliance have zero slack). New recordings not in the baseline are skipped, not failed.
+
+Every report records the extraction stack that produced it (`provenance`: AudioTrace, Whisper, pyannote, sentiment model, Librosa, Transformers and Torch versions). When it differs from the baseline's, `audiotrace check` prints a note listing what changed, so a metric move after an extractor upgrade reads as *measurement drift* rather than an agent regression. The note doesn't fail the build; re-baseline after an intentional stack upgrade.
 
 ### GitHub Action
 
