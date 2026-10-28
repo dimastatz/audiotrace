@@ -98,3 +98,17 @@ closed) — that decides whether Phase 4 is the managed cloud or a compliance pa
       robust replacement for per-call assertions on noisy audio-derived signals.
       Blocked on growing the golden set past today's n=1, likely sourced from
       the first design-partner pilot — [PRD 0009 Part B](./prd/0009-drift-gating.md)
+
+## Phase 5 — Full voice QA loop
+
+Test before release, monitor in production, learn from failures — moves
+AudioTrace from an analysis library to the loop that replaces manual QA calls
+and ad-hoc transcript review (the budget a paid hosted tier would target).
+Source: [issue #48](https://github.com/dimastatz/audiotrace/issues/48).
+
+- [ ] **Simulated callers** — synthetic calls against a staging agent with
+      personas, noise profiles, YAML scenarios, and a task-completion verdict;
+      Vapi + Retell at launch, SIP fallback — [PRD 0010](./prd/0010-simulated-callers.md)
+- [ ] **Production replay** — capture failing production calls (S3/GCS/provider
+      APIs), dedupe, redact PII, human review, re-check on every release —
+      [PRD 0011](./prd/0011-production-replay.md)

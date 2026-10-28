@@ -23,3 +23,5 @@ of truth Claude Code and contributors build against.
 | [0007](./0007-report.md)          | Report output (JSON + HTML summary) | In progress |
 | [0008](./0008-regression-gate.md) | Baseline + regression gate (CI)     | In progress |
 | [0009](./0009-drift-gating.md)    | Drift gating (provenance + PSI/KL)  | Draft       |
+| [0010](./0010-simulated-callers.md) | Simulated callers (pre-release)   | Draft       |
+| [0011](./0011-production-replay.md) | Production replay (regressions)   | Draft       |
