@@ -1,6 +1,6 @@
 # PRD 0003 — Quality extraction pipeline
 
-**Status:** Draft
+**Status:** Shipped
 **Owner:** Dima Statz
 **Related:** [roadmap Phase 1](../roadmap.md)
 

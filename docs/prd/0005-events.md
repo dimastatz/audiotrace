@@ -1,6 +1,6 @@
 # PRD 0005 — Events extraction pipeline
 
-**Status:** Draft
+**Status:** Shipped
 **Owner:** Dima Statz
 **Related:** [roadmap Phase 1/3](../roadmap.md)
 

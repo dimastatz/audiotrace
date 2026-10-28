@@ -1,6 +1,6 @@
 # PRD 0004 — Sentiment extraction pipeline
 
-**Status:** Draft
+**Status:** Shipped
 **Owner:** Dima Statz
 **Related:** [roadmap Phase 2](../roadmap.md)
 
