@@ -46,7 +46,9 @@ real enough to prove willingness to pay.
 ### Workstream B — Payment rails (week 1, ~half a day)
 
 - [ ] Stripe payment link / invoicing set up
-- [ ] `COMMERCIAL-LICENSE.md` + a one-page pilot agreement (scope, price, term)
+- [x] Commercial terms + a one-page pilot agreement (scope, price, term) —
+      [`COMMERCIAL.md`](../COMMERCIAL.md) (library stays MIT; no separate license
+      needed) and [`pilot-agreement.md`](./pilot-agreement.md)
 - [ ] GitHub Sponsors enabled as a low-friction backstop
 
 ### Workstream C — Design-partner motion (weeks 1–6, in parallel)
