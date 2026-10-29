@@ -1,0 +1,18 @@
+title: Wants to cancel, accepts a retention offer
+intent: cancellation
+agent: {voice: af_heart}
+caller: {voice: am_michael, speed: 0.95}
+line: clean
+expect: {consent: true, pii: false, frustration: false, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Thank you for calling Brightline. This call may be recorded for quality purposes. How can I help you today?
+  - caller: Hi. I'd like to cancel my internet service. I found a cheaper plan with another provider.
+  - agent: I'm sorry to hear you're thinking of leaving. May I ask what price they offered you?
+  - caller: Forty five dollars a month for similar speed.
+  - agent: I understand. I can offer you our loyalty rate of forty four dollars a month for the next twelve months, with the same speed you have now.
+  - caller: Oh, really? That's actually a little lower.
+  - agent: Yes, and you wouldn't need to change any equipment or schedule an installation.
+  - caller: Okay, in that case I'll stay.
+  - agent: Wonderful. I've applied the new rate starting with your next bill.
+  - caller: Great, thank you.
+  - agent: Thank you for staying with Brightline. Have a great day.

@@ -1,0 +1,18 @@
+title: Pays balance by reading out a card number
+intent: billing
+agent: {voice: am_eric}
+caller: {voice: af_bella}
+line: phone
+expect: {consent: true, pii: true, frustration: false, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Hello, you've reached Brightline billing. This call is recorded for training. What can I do for you?
+  - caller: Hi, I'd like to pay off my balance today. I think it's about eighty dollars.
+  - agent: Let me check. Your current balance is eighty two dollars and forty cents. How would you like to pay?
+  - caller: By credit card. The number is 4111 1111 1111 1111, and it expires in May of next year.
+  - agent: Thank you. And the three digit security code on the back?
+  - caller: It's 737.
+  - agent: Thanks. The payment of eighty two dollars and forty cents went through. You'll get a confirmation by text.
+  - caller: Great, that was easy.
+  - agent: Is there anything else I can help with today?
+  - caller: No, that's it. Thanks so much.
+  - agent: You're welcome. Have a nice evening.

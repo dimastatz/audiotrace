@@ -1,0 +1,21 @@
+title: Long general inquiry on a noisy line with one barge-in
+intent: general inquiry
+agent: {voice: af_heart}
+caller: {voice: am_fenrir}
+line: noisy
+expect: {consent: true, pii: false, frustration: false, interruptions: 1, slow_agent: false, drop_off: false}
+turns:
+  - agent: Thank you for calling Brightline. This call may be recorded for quality purposes. How can I help you today?
+  - caller: Hi. I have a few questions about my account and the new app.
+  - agent: Of course. What would you like to know?
+  - caller: First, can I see my data usage in the app?
+  - agent: Yes. On the home screen, tap usage, and you'll see your data for the current month, broken down by day and by device, along with a forecast for the rest of the billing cycle.
+  - caller: Got it, I see it.
+    gap_ms: -1300
+  - agent: Great. What else can I help with?
+  - caller: Can I change my wifi password from the app too?
+  - agent: Yes. Go to the network tab, tap your wifi name, and choose change password. Your devices will need to reconnect afterwards.
+  - caller: Okay. And last thing, can I get paper bills instead of email?
+  - agent: You can. In settings, tap billing preferences and turn on paper statements. There's no extra charge.
+  - caller: Perfect, that covers everything. Thanks.
+  - agent: You're welcome. Have a great day.

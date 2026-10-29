@@ -1,0 +1,18 @@
+title: Internet down, fixed by a router restart
+intent: technical support
+agent: {voice: af_heart}
+caller: {voice: am_puck}
+line: phone
+expect: {consent: true, pii: false, frustration: false, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Thank you for calling Brightline support. This call may be recorded. How can I help?
+  - caller: Hi, my internet stopped working about an hour ago. The lights on the router are blinking orange.
+  - agent: Thanks for letting me know. There's no outage in your area, so let's try a restart. Can you unplug the router for thirty seconds?
+  - caller: Okay, unplugging it now.
+  - agent: Great. Now plug it back in and wait for the light to turn solid white. It can take about two minutes.
+  - caller: Alright, it's coming back. Okay, the light is white now.
+  - agent: Perfect. Can you try loading a website?
+  - caller: Yes, it's working again. Thank you.
+  - agent: Wonderful. If it happens again, you can also restart it from the Brightline app.
+  - caller: Good to know. Thanks for the help.
+  - agent: Anytime. Have a great day.

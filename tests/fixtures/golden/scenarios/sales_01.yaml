@@ -1,0 +1,18 @@
+title: Upgrades to faster internet
+intent: sales
+agent: {voice: af_heart}
+caller: {voice: am_michael}
+line: clean
+expect: {consent: true, pii: false, frustration: false, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Thank you for calling Brightline. This call may be recorded for quality purposes. How can I help you today?
+  - caller: Hi, I'm interested in a faster internet plan. We have three people working from home now.
+  - agent: That's a great reason to upgrade. You're on the two hundred megabit plan today. Our gigabit plan is ten times faster.
+  - caller: How much more would that cost?
+  - agent: It's twenty dollars more per month, and the first three months are at your current price.
+  - caller: That sounds reasonable. Do I need new equipment?
+  - agent: Your router already supports gigabit speeds, so no new equipment is needed. The upgrade happens remotely.
+  - caller: Great, let's do it.
+  - agent: Wonderful. Your plan is upgraded and the new speed will be active within the hour.
+  - caller: Excellent, thank you so much.
+  - agent: My pleasure. Enjoy the faster internet.

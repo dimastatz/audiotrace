@@ -40,6 +40,7 @@ dev = [
     "pytest-cov>=5",
     "ruff>=0.6",
     "mypy>=1.10",
+    "pyyaml>=6",
 ]
 
 [project.scripts]
@@ -48,6 +49,12 @@ audiotrace = "audiotrace.cli:main"
 [project.urls]
 Homepage = "https://github.com/audiotrace/audiotrace"
 Repository = "https://github.com/audiotrace/audiotrace"
+
+[tool.hatch.build.targets.sdist]
+# Keep the source distribution lean: the golden call set (~3 MB of audio),
+# doc images, and local Claude settings aren't needed to build or test the
+# library from source.
+exclude = ["tests/fixtures/golden", "docs/imgs", ".claude"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/audiotrace"]

@@ -1,0 +1,18 @@
+title: Reads out a full social security number
+intent: cancellation
+agent: {voice: am_eric}
+caller: {voice: af_jessica}
+line: phone
+expect: {consent: true, pii: true, frustration: false, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Thank you for calling Brightline. This call may be recorded. How can I help you?
+  - caller: Hi. I'm moving abroad next month, so I need to cancel my phone and internet.
+  - agent: I can help with that. To verify your identity, can you tell me the last four digits of your social security number?
+  - caller: Sure, my social is 123-45-6789.
+  - agent: Thank you, I only need the last four, but that's verified. I see both services on your account.
+  - caller: Okay. Can they end on the thirtieth?
+  - agent: Yes. I've scheduled both to end on the thirtieth. You'll get a prepaid box to return the router.
+  - caller: Great. Will I get a final bill?
+  - agent: Yes, it will be prorated to the thirtieth and sent to your email.
+  - caller: Perfect, thanks for your help.
+  - agent: You're welcome, and good luck with your move.

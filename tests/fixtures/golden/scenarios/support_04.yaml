@@ -1,0 +1,25 @@
+title: Email setup walkthrough with long agent pauses
+intent: technical support
+agent: {voice: am_eric}
+caller: {voice: af_nicole}
+line: clean
+expect: {consent: true, pii: false, frustration: false, interruptions: 0, slow_agent: true, drop_off: false}
+turns:
+  - agent: Thanks for calling Brightline support. This call may be monitored for quality. What can I help with?
+  - caller: Hi. I got a new phone and I can't get my Brightline email working on it.
+  - agent: I can help with that. Are you using the built in mail app or a different one?
+    gap_ms: 3100
+  - caller: The built in one, on an Android phone.
+  - agent: Okay. Open the mail app, tap add account, and choose other.
+    gap_ms: 3500
+  - caller: Okay, I see that. It's asking for a server name.
+  - agent: For incoming mail, use mail dot brightline dot net, and choose port nine nine three.
+    gap_ms: 4000
+  - caller: Got it. And the outgoing server?
+  - agent: It's the same server name, with port four six five.
+    gap_ms: 3300
+  - caller: It says the account is set up. I can see my inbox now.
+  - agent: Great. Is there anything else I can do for you?
+    gap_ms: 2800
+  - caller: No, that's everything. Thank you.
+  - agent: You're welcome. Goodbye.

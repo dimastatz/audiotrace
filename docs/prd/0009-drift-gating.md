@@ -1,6 +1,6 @@
 # PRD 0009 — Trustworthy drift gating: extractor provenance + distributional checks
 
-**Status:** In progress — Part A shipped; Part B blocked on golden set
+**Status:** In progress — Part A shipped; Part B not started (open questions below)
 **Owner:** Dima Statz
 **Source:** Design-partner feedback on the CI / signal-extraction article series.
 **Related:** [PRD 0007 (report)](./0007-report.md),
@@ -60,7 +60,7 @@ stack that produced it, so drift is attributable.
 
 ---
 
-## Part B — Distributional drift gate (Phase 4; blocked on golden set)
+## Part B — Distributional drift gate (Phase 4)
 
 **Goal:** complement per-call tolerance gating with a **run-level distributional
 check** for continuous, noisy signals.
@@ -75,11 +75,17 @@ check** for continuous, noisy signals.
 - New module (e.g. `drift.py`), wired into `check.py` as a run-level result
   alongside the existing per-call `Regression` list.
 
-**Hard prerequisite — a golden call set of meaningful size.** Today the golden
-set is **n = 1** (`tests/fixtures/paradise_hotel_booking_60s`), so PSI/KL are
-undefined/unstable. Part B needs ~20+ representative calls, plausibly sourced
-from the **first design-partner pilot** — which is why it sequences to Phase 4,
-after the first paid dollar, not before.
+**Prerequisite — a golden call set of meaningful size.** Part B needs ~20+
+calls; PSI/KL are undefined on the original n = 1 fixture. A 20-call synthetic
+set now exists in [`tests/fixtures/golden`](../../tests/fixtures/golden/README.md)
+(Kokoro TTS, planted defects, committed baseline), which is enough to build and
+test Part B.
+
+Caveat: re-analyzing **fixed** recordings can only detect *measurement* drift
+(extractor changes) — the audio doesn't change when the agent does. Gating
+*agent* drift on distributions needs fresh calls from the new agent on every
+run: simulated callers ([PRD 0010](./0010-simulated-callers.md)) replaying
+these scenarios, or real calls from the first design-partner pilot.
 
 **Open questions**
 

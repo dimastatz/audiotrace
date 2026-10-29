@@ -1,0 +1,14 @@
+title: Store hours and outage check
+intent: general inquiry
+agent: {voice: af_heart}
+caller: {voice: am_puck}
+line: clean
+expect: {consent: true, pii: false, frustration: false, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Thank you for calling Brightline. This call may be recorded for quality purposes. How can I help?
+  - caller: Hi. What time does the store on Main Street close today?
+  - agent: The Main Street store is open until eight tonight, and from ten to six on Sunday.
+  - caller: Thanks. Also, is there any planned maintenance in my area this week?
+  - agent: Let me check. There's a short maintenance window on Wednesday night between one and three in the morning.
+  - caller: Okay, that's fine. That's all I wanted to know.
+  - agent: Great. Thanks for calling, and have a nice day.

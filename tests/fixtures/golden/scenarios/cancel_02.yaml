@@ -1,0 +1,20 @@
+title: Furious cancellation with interruptions
+intent: cancellation
+agent: {voice: af_sarah}
+caller: {voice: am_adam}
+line: clean
+expect: {consent: true, pii: false, frustration: true, interruptions: 2, slow_agent: false, drop_off: false}
+turns:
+  - agent: Thank you for calling Brightline. This call may be recorded for quality purposes. How can I help you today?
+  - caller: I want to cancel everything. Your service has been terrible for months and I'm done.
+  - agent: I'm very sorry to hear that. Before we proceed, I'd like to understand what went wrong, and I may be able to offer you a discount on your current plan.
+  - caller: I don't want a discount. I want out. This is the worst company I have ever dealt with.
+    gap_ms: -1500
+  - agent: I understand. I'll start the cancellation now. There is an early termination fee of one hundred and twenty dollars, because your contract runs until March.
+  - caller: That's outrageous. You failed to deliver the service and now you want to charge me for leaving?
+    gap_ms: -1300
+  - agent: Given the outages on your account, I can waive the fee.
+  - caller: Fine. Just cancel it.
+  - agent: Done. Your service will end on the last day of this billing cycle, and there is no fee.
+  - caller: Okay.
+  - agent: Thank you for being a customer. Goodbye.
