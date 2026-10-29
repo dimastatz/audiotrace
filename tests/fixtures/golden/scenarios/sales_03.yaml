@@ -1,0 +1,18 @@
+title: Pushy TV bundle upsell without a disclosure
+intent: sales
+agent: {voice: am_liam}
+caller: {voice: af_kore}
+line: clean
+expect: {consent: false, pii: false, frustration: false, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Hi, thanks for calling Brightline. What can I do for you today?
+  - caller: Hi. I'm thinking about adding a streaming TV package to my internet service.
+  - agent: Great choice. Our premium bundle includes over two hundred channels, sports, and movies for forty nine dollars a month.
+  - caller: That's more than I wanted. Is there something smaller?
+  - agent: There's a basic package for twenty dollars, but most customers find the premium bundle a much better value.
+  - caller: I really only watch the news and a few shows. I think basic is enough.
+  - agent: I understand. If you add premium today, I can include the sports channels free for six months.
+  - caller: No thank you. Just the basic package, please.
+  - agent: No problem. I've added the basic package. It will be active by tomorrow morning.
+  - caller: Thanks.
+  - agent: Thank you for choosing Brightline. Goodbye.

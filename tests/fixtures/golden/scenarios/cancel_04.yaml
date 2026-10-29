@@ -1,0 +1,16 @@
+title: Caller's question goes unanswered and the call ends
+intent: cancellation
+agent: {voice: af_nova}
+caller: {voice: am_liam}
+line: clean
+end_silence_ms: 6500
+expect: {consent: true, pii: false, frustration: false, interruptions: 0, slow_agent: false, drop_off: true}
+turns:
+  - agent: Thank you for calling Brightline. This call may be recorded for quality purposes. How can I help?
+  - caller: Hi, I want to cancel my landline but keep the internet.
+  - agent: Sure. I can see the landline on your account. It's ten dollars a month.
+  - caller: Right. If I cancel it, does the internet price go up?
+  - agent: Let me check whether your bundle discount depends on the landline.
+  - caller: Okay.
+  - agent: One moment while I look into that.
+  - caller: Hello? Are you still there?

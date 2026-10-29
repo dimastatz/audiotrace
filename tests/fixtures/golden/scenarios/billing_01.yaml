@@ -1,0 +1,20 @@
+title: Double charge refunded
+intent: billing
+agent: {voice: af_heart}
+caller: {voice: am_michael}
+line: clean
+expect: {consent: true, pii: false, frustration: false, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Thank you for calling Brightline. This call may be recorded for quality purposes. My name is Aria. How can I help you today?
+  - caller: Hi Aria. I was looking at my statement and it looks like I was charged twice for this month's internet bill.
+  - agent: I'm sorry about that. Let me take a look. Can you confirm the name on the account?
+  - caller: Sure, it's Daniel Brooks.
+  - agent: Thank you, Daniel. I can see two payments of fifty nine dollars on the third of the month. That second one is a duplicate.
+  - caller: Okay, good. So can I get that money back?
+  - agent: Yes. I've issued a refund for the duplicate payment. It should be back on your card within three to five business days.
+  - caller: That's great, thank you. Will this happen again next month?
+  - agent: It shouldn't. The duplicate came from a payment system retry, and that has been fixed. I've also added a note to your account.
+  - caller: Perfect. That's all I needed.
+  - agent: Glad I could help. Thanks for being a Brightline customer, and have a great day.
+  - caller: You too, bye.
+  - agent: Goodbye.

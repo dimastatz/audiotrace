@@ -301,6 +301,8 @@ audiotrace check tests/calls -b baseline.json --report audiotrace-report
 
 A metric only fails the build when it drifts past its tolerance (quality −0.05, sentiment −0.10, latency +15%, cost +20%; frustration / drop-off / compliance have zero slack). New recordings not in the baseline are skipped, not failed.
 
+For a worked example, [`tests/fixtures/golden`](tests/fixtures/golden/README.md) has 20 synthetic calls with planted defects (missing disclosure, PII, frustrated callers, barge-ins, slow replies, dropped calls), the scenario scripts that generated them, and a committed baseline.
+
 Every report records the extraction stack that produced it (`provenance`: AudioTrace, Whisper, pyannote, sentiment model, Librosa, Transformers and Torch versions). When it differs from the baseline's, `audiotrace check` prints a note listing what changed, so a metric move after an extractor upgrade reads as *measurement drift* rather than an agent regression. The note doesn't fail the build; re-baseline after an intentional stack upgrade.
 
 ### GitHub Action

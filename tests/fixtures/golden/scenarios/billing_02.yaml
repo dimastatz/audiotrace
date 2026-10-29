@@ -1,0 +1,20 @@
+title: Angry about a late fee
+intent: billing
+agent: {voice: af_heart}
+caller: {voice: am_adam}
+line: clean
+expect: {consent: true, pii: false, frustration: true, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Thank you for calling Brightline. This call may be recorded for quality purposes. How can I help you today?
+  - caller: I'm really angry. You charged me a twenty five dollar late fee and I paid on time. This is ridiculous.
+  - agent: I'm sorry to hear that. Let me look into the payment date for you.
+  - caller: This is the third time this has happened. Your billing system is terrible and I'm sick of wasting my time on these calls.
+  - agent: I understand how frustrating that is. I can see your payment arrived one day after the due date because of a bank holiday.
+  - caller: That is not my fault. I hate dealing with this company. Nobody ever fixes anything.
+  - agent: You're right that the holiday wasn't in your control. I've removed the late fee as a one time courtesy.
+  - caller: Fine. But it shouldn't take an angry phone call to get a basic mistake fixed.
+  - agent: That's fair feedback, and I'll pass it on. I can also set up automatic payments so the date never slips again.
+  - caller: No, just leave it. I'll handle it myself.
+  - agent: Understood. The fee is removed and you'll see it on your next statement. Is there anything else?
+  - caller: No. Goodbye.
+  - agent: Thank you for calling. Goodbye.

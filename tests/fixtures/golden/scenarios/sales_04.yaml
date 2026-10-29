@@ -1,0 +1,18 @@
+title: Hotel booking from a noisy cafe
+intent: sales
+agent: {voice: af_heart}
+caller: {voice: am_echo}
+line: noisy
+expect: {consent: true, pii: false, frustration: false, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Good afternoon, thank you for calling Paradise Hotel. This call may be recorded. How may I help you?
+  - caller: Hi, sorry, I'm in a busy cafe. I'd like to book a room for two nights next weekend.
+  - agent: No problem. For Friday and Saturday, we have a king room with a garden view or a suite with an ocean view.
+  - caller: Sorry, could you repeat the price of the garden view room?
+  - agent: Of course. The garden view king room is one hundred and eighty dollars per night, including breakfast.
+  - caller: Okay, I'll take the garden view room.
+  - agent: Wonderful. May I have the name for the reservation?
+  - caller: Yes, it's Samuel Ortiz.
+  - agent: Thank you, Mister Ortiz. You're booked for Friday and Saturday in a garden view king room. You'll receive a confirmation by text.
+  - caller: Perfect, thank you.
+  - agent: We look forward to welcoming you. Have a lovely day.

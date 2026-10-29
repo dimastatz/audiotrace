@@ -1,0 +1,24 @@
+title: Plan price question with a slow agent and no disclosure
+intent: billing
+agent: {voice: af_heart}
+caller: {voice: am_liam}
+line: clean
+expect: {consent: false, pii: false, frustration: false, interruptions: 0, slow_agent: true, drop_off: false}
+turns:
+  - agent: Thanks for calling Brightline. How can I help?
+  - caller: Hi. My bill went up by ten dollars this month and I'm not sure why.
+    gap_ms: 500
+  - agent: Let me check your account. One moment please.
+    gap_ms: 3200
+  - caller: Sure.
+  - agent: It looks like your promotional discount ended last month, so the price went back to the standard rate.
+    gap_ms: 3600
+  - caller: Oh, I didn't know it was only for a year. Is there any way to get a discount again?
+  - agent: There is a loyalty discount of five dollars a month if you agree to a twelve month term.
+    gap_ms: 2900
+  - caller: Okay, let's do that.
+  - agent: Done. Your new monthly price is fifty four dollars starting next cycle.
+    gap_ms: 3400
+  - caller: Thanks for your help.
+  - agent: You're welcome. Have a good day.
+    gap_ms: 2600

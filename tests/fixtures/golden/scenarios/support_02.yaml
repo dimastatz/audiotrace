@@ -1,0 +1,21 @@
+title: Impatient caller keeps cutting in
+intent: technical support
+agent: {voice: af_heart}
+caller: {voice: am_fenrir}
+line: clean
+expect: {consent: true, pii: false, frustration: false, interruptions: 3, slow_agent: false, drop_off: false}
+turns:
+  - agent: Thank you for calling Brightline support. This call may be recorded for quality purposes. Before we begin, may I please have your full name and the address on the account?
+  - caller: Yeah, it's Marcus Hill. My wifi keeps dropping every few minutes.
+    gap_ms: -1400
+  - agent: Thank you, Marcus. I'm sorry about the trouble. Let me run a quick diagnostic on your connection, which usually takes about a minute while I check the signal levels.
+  - caller: I already restarted the router twice, that didn't help.
+    gap_ms: -1600
+  - agent: Understood, thanks for trying that. The diagnostic shows a weak signal on the five gigahertz band, which often happens when the router is far away from the devices you use most.
+  - caller: So what do I do?
+    gap_ms: -1200
+  - agent: I can switch your router to a different channel remotely. That usually fixes interference. It will reconnect in about thirty seconds.
+  - caller: Okay, go ahead.
+  - agent: Done. Your connection should be stable now. If it drops again, call us back and we'll send a technician.
+  - caller: Alright, thanks.
+  - agent: You're welcome. Have a good day.

@@ -24,3 +24,10 @@ The same call encoded as Opus mono at 24 kbps (~178 KB) — ~5.7x smaller than
 the MP3 with no perceptible loss for speech. Decodes natively through the
 pipeline (FFmpeg/Whisper/librosa). Provided as a compact demo input; the test
 suite's media/format assertions use the MP3 variant.
+
+## `golden/`
+
+A 20-call golden set (about 19 minutes of Opus audio, ~3 MB) for the
+regression gate and distributional drift checks. Fully synthetic, generated
+by `scripts/gen_golden.py` from the scenario files. See
+[`golden/README.md`](./golden/README.md).

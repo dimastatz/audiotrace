@@ -1,0 +1,20 @@
+title: Coverage question, slow agent, no disclosure
+intent: general inquiry
+agent: {voice: am_onyx}
+caller: {voice: af_bella}
+line: clean
+expect: {consent: false, pii: false, frustration: false, interruptions: 0, slow_agent: true, drop_off: false}
+turns:
+  - agent: Hello, Brightline, how can I help you?
+  - caller: Hi. I'm thinking about moving to Lakeview. Is your fiber service available there?
+  - agent: Let me look that up for you.
+    gap_ms: 2700
+  - caller: Thanks.
+  - agent: Yes, fiber is available in most of Lakeview, including the neighborhoods near the lake.
+    gap_ms: 3800
+  - caller: Great. And is the price the same as in the city?
+  - agent: It is. The plans and prices are the same across our whole service area.
+    gap_ms: 3100
+  - caller: Good to know. Thanks for the information.
+  - agent: You're welcome. Good luck with the move.
+    gap_ms: 2500

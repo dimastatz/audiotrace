@@ -1,0 +1,16 @@
+title: Fed up with outages, hangs up mid-call
+intent: technical support
+agent: {voice: am_adam}
+caller: {voice: af_sarah}
+line: noisy
+end_silence_ms: 7000
+expect: {consent: true, pii: false, frustration: true, interruptions: 0, slow_agent: false, drop_off: true}
+turns:
+  - agent: Brightline support, this call may be recorded. How can I help you?
+  - caller: My internet has gone out four times this week. I work from home and this is costing me money.
+  - agent: I'm sorry to hear that. Let me check your line for problems.
+  - caller: I've already called twice and nothing happened. This is awful service and I'm completely fed up.
+  - agent: I can see two earlier tickets. Our records show the line has some noise on it. I'd like to book a technician visit.
+  - caller: The earliest you people ever have is next week. That's useless to me.
+  - agent: The first available slot is Thursday morning. Would that work for you?
+  - caller: No, it absolutely does not. Forget it, this is a waste of my time.

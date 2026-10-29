@@ -1,0 +1,16 @@
+title: British voices asking about roaming
+intent: general inquiry
+agent: {voice: bf_emma}
+caller: {voice: bm_george}
+line: phone
+expect: {consent: true, pii: false, frustration: false, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Good morning, Brightline mobile. Calls are recorded for training purposes. How can I help?
+  - caller: Morning. I'm travelling to France next week and wondered how roaming works on my plan.
+  - agent: Your plan includes roaming in Europe at no extra cost, so you can use your minutes, texts and data as you do at home.
+  - caller: Lovely. Is there a limit on data?
+  - agent: There's a fair use limit of twenty gigabytes a month while abroad, which is more than enough for most people.
+  - caller: Brilliant. Do I need to switch anything on?
+  - agent: No, it's already enabled. Just turn on data roaming in your phone settings when you arrive.
+  - caller: Perfect. Thanks very much.
+  - agent: You're welcome. Have a wonderful trip.

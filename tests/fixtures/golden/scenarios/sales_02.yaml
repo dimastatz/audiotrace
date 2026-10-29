@@ -1,0 +1,18 @@
+title: New mobile line, caller spells out an email address
+intent: sales
+agent: {voice: af_bella}
+caller: {voice: am_onyx}
+line: clean
+expect: {consent: true, pii: true, frustration: false, interruptions: 0, slow_agent: false, drop_off: false}
+turns:
+  - agent: Hello and welcome to Brightline mobile. This call is recorded for quality and training. How can I help?
+  - caller: Hi. I'd like to add a mobile line for my daughter to our family plan.
+  - agent: Happy to help. Adding a line is fifteen dollars a month and includes unlimited talk and text with ten gigabytes of data.
+  - caller: That works. Can you send the details to my email?
+  - agent: Of course. What email address should I use?
+  - caller: It's jordan.lee@example.com.
+  - agent: Thank you. I've sent the order summary to that address. The SIM card will arrive in two to three days.
+  - caller: Perfect. Can she keep her old number?
+  - agent: Yes. Once the SIM arrives, she can transfer her number in the Brightline app in a few minutes.
+  - caller: Great, thanks for your help.
+  - agent: You're welcome. Have a wonderful day.
