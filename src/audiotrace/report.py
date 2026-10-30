@@ -27,6 +27,7 @@ from audiotrace.models import (
     Turn,
 )
 from audiotrace.provenance import ProvenanceChange, provenance_changes
+from audiotrace.transcripts import speaker_role
 
 
 @dataclass(frozen=True)
@@ -375,7 +376,7 @@ def _initials(speaker: str) -> str:
 
 
 def _bubble(turn: Turn) -> str:
-    side = "agent" if "agent" in turn.speaker.lower() else "caller"
+    side = "agent" if speaker_role(turn.speaker) == "agent" else "caller"
     return (
         f'<div class="bubble {side}"><div class="avatar">{_initials(turn.speaker)}</div>'
         f'<div class="bubble-body"><div class="bubble-head">{html.escape(turn.speaker)} '
