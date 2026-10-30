@@ -1,6 +1,6 @@
 # PRD 0010 — Simulated callers (pre-release testing)
 
-**Status:** In progress — framework + mock target shipped; Vapi, Retell, SIP adapters and the Action `scenarios` input not started
+**Status:** Shipped except Retell and SIP targets (blocked, see Implementation notes)
 **Owner:** Dima Statz
 **Source:** [Issue #48](https://github.com/dimastatz/audiotrace/issues/48)
 **Related:** [PRD 0008 (regression gate)](./0008-regression-gate.md),
@@ -114,8 +114,25 @@ Resolved 2026-10-30 (were open questions):
   labels `agent`/`caller` in order of appearance.
 - `heavy_accent` uses a slower British Kokoro voice: Kokoro has no strongly
   accented English voices. A different `Speech` backend can do better.
-- Remaining: Vapi and Retell adapters (need live accounts to verify), SIP,
-  the Action `scenarios` input, and a measured time-to-first-run.
+- **Vapi target (shipped):** `--target vapi:<assistant_id>` starts a call
+  with `transport.provider = "vapi.websocket"` (16 kHz PCM16 both ways),
+  streams caller audio in real-time 20 ms frames plus 600 ms of trailing
+  silence, ends the agent's turn after 1.2 s of quiet following speech (or
+  15 s with no speech), reports the agent's response delay, and hangs up with
+  `{"type": "end-call"}`. Tested against a scripted fake socket, **not yet
+  against a live Vapi assistant**.
+- **Action (shipped):** `scenarios`, `target`, `scenarios-baseline` inputs;
+  `calls` is now optional (one of the two is required). Inputs reach the
+  shell through environment variables, not template interpolation.
+- **Retell target (blocked):** Retell web calls (`POST /v3/create-web-call`)
+  return an access token for Retell's WebRTC client SDK; there's no
+  documented raw-audio interface to drive from Python. Options: a phone/SIP
+  route (below), or wrapping Retell's JS client in a headless browser.
+- **SIP fallback (blocked):** needs a SIP user agent with RTP media (e.g.
+  pjsua2 or a hosted SIP-to-WebSocket bridge) — a separate dependency and
+  infrastructure decision. Until then, custom stacks plug in via
+  `module:factory`.
+- Time-to-first-run hasn't been measured with real users yet.
 
 ## Success metrics
 

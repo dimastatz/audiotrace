@@ -136,11 +136,9 @@ def _simulate_cmd(args: argparse.Namespace) -> int:
     try:
         suite = sim.load_suite(args.scenarios_dir)
         speech = KokoroSpeech()
-        factory = (
-            sim.mock_target_factory(speech)
-            if args.target == "mock"
-            else sim.load_target_factory(args.target)
-        )
+        from audiotrace.simulate_targets import resolve_target
+
+        factory = resolve_target(args.target, speech)
         simulator = sim.Simulator(
             caller=ClaudeCaller(model=args.caller_model),
             speech=speech,
@@ -213,7 +211,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     simu.add_argument("--init", action="store_true", help="Write example scenarios and exit.")
     simu.add_argument(
-        "--target", default="mock", help="'mock' (each scenario's mock script) or module:factory."
+        "--target",
+        default="mock",
+        help="'mock' (each scenario's mock script), vapi:<assistant_id>, or module:factory.",
     )
     simu.add_argument(
         "-o", "--output", default="simulations", help="Directory for recordings and reports."
