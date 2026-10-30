@@ -9,7 +9,8 @@ from pathlib import Path
 import pytest
 
 from audiotrace.check import load_baseline
-from audiotrace.events import CONSENT_KEYWORDS, DEFAULT_INTENT_LABELS
+from audiotrace.compliance import CONSENT_KEYWORDS
+from audiotrace.events import DEFAULT_INTENT_LABELS
 
 yaml = pytest.importorskip("yaml")
 

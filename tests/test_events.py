@@ -3,9 +3,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from audiotrace.compliance import CompliancePolicy, compliance_flags, find_compliance_issues
 from audiotrace.events import (
     DEFAULT_INTENT_LABELS,
-    _check_compliance,
     _classify_intent,
     _detect_drop_off,
     clear_model_cache,
@@ -159,46 +159,51 @@ def test_get_zero_shot_pipeline_caches():
     mock_transformers.pipeline.assert_called_once()
 
 
-# --- _check_compliance ---
+# --- compliance (full-text-only transcripts still work) ---
+
+
+def _flags(transcript, requires_consent):
+    policy = CompliancePolicy(requires_consent=requires_consent)
+    return compliance_flags(find_compliance_issues(transcript, policy))
 
 
 def test_check_compliance_missing_consent():
     transcript = Transcript(full_text="hello how can I help you today")
-    flags = _check_compliance(transcript, requires_consent=True)
+    flags = _flags(transcript, True)
     assert "missing_consent" in flags
 
 
 def test_check_compliance_consent_present():
     transcript = Transcript(full_text="this call may be recorded for quality")
-    flags = _check_compliance(transcript, requires_consent=True)
+    flags = _flags(transcript, True)
     assert "missing_consent" not in flags
 
 
 def test_check_compliance_consent_not_required():
     transcript = Transcript(full_text="hello there")
-    flags = _check_compliance(transcript, requires_consent=False)
+    flags = _flags(transcript, False)
     assert "missing_consent" not in flags
 
 
 def test_check_compliance_pii_ssn():
     transcript = Transcript(full_text="this is recorded. my ssn is 123-45-6789")
-    flags = _check_compliance(transcript, requires_consent=True)
+    flags = _flags(transcript, True)
     assert "pii_exposed" in flags
 
 
 def test_check_compliance_pii_email():
     transcript = Transcript(full_text="recorded. email me at john@example.com")
-    flags = _check_compliance(transcript, requires_consent=True)
+    flags = _flags(transcript, True)
     assert "pii_exposed" in flags
 
 
 def test_check_compliance_pii_credit_card():
     transcript = Transcript(full_text="recorded. card 4111 1111 1111 1111 please")
-    flags = _check_compliance(transcript, requires_consent=True)
+    flags = _flags(transcript, True)
     assert "pii_exposed" in flags
 
 
 def test_check_compliance_clean_call():
     transcript = Transcript(full_text="this call is recorded for quality purposes")
-    flags = _check_compliance(transcript, requires_consent=True)
+    flags = _flags(transcript, True)
     assert flags == []

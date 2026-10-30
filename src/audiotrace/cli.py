@@ -21,29 +21,33 @@ from pathlib import Path
 
 import audiotrace
 from audiotrace.check import check, format_result, load_baseline, write_baseline
+from audiotrace.compliance import load_policy
 from audiotrace.models import CallReport
+
+POLICY_HELP = "Compliance policy YAML (consent window, PII regions); see audiotrace.compliance."
 
 # Extensions FFmpeg-readable enough to treat as call recordings.
 AUDIO_EXTS = {".wav", ".mp3", ".m4a", ".flac", ".ogg", ".aac", ".opus"}
 
 
-def _analyze_dir(calls_dir: str) -> dict[str, CallReport]:
+def _analyze_dir(calls_dir: str, policy_file: str | None = None) -> dict[str, CallReport]:
     """Analyze every recording in a directory, keyed by file stem."""
     directory = Path(calls_dir)
     if not directory.is_dir():
         raise SystemExit(f"Not a directory: {directory}")
+    policy = load_policy(policy_file) if policy_file else None
     reports: dict[str, CallReport] = {}
     for path in sorted(directory.iterdir()):
         if path.suffix.lower() in AUDIO_EXTS:
             print(f"Analyzing {path.name} ...", file=sys.stderr)
-            reports[path.stem] = audiotrace.analyze(path, num_speakers=2)
+            reports[path.stem] = audiotrace.analyze(path, num_speakers=2, compliance_policy=policy)
     if not reports:
         raise SystemExit(f"No recordings found in {directory}")
     return reports
 
 
 def _baseline_cmd(args: argparse.Namespace) -> int:
-    reports = _analyze_dir(args.calls_dir)
+    reports = _analyze_dir(args.calls_dir, args.policy)
     out = write_baseline(reports, args.output)
     print(f"Wrote baseline for {len(reports)} call(s) → {out}")
     return 0
@@ -51,7 +55,7 @@ def _baseline_cmd(args: argparse.Namespace) -> int:
 
 def _check_cmd(args: argparse.Namespace) -> int:
     baseline = load_baseline(args.baseline)
-    current = _analyze_dir(args.calls_dir)
+    current = _analyze_dir(args.calls_dir, args.policy)
 
     if args.report:
         for call_id, report in current.items():
@@ -125,12 +129,14 @@ def main(argv: list[str] | None = None) -> int:
     base = sub.add_parser("baseline", help="Analyze a folder of calls and write a baseline.")
     base.add_argument("calls_dir", help="Directory of call recordings.")
     base.add_argument("-o", "--output", default="baseline.json", help="Baseline file to write.")
+    base.add_argument("--policy", metavar="FILE", default=None, help=POLICY_HELP)
     base.set_defaults(func=_baseline_cmd)
 
     chk = sub.add_parser("check", help="Gate a folder of calls against a baseline.")
     chk.add_argument("calls_dir", help="Directory of call recordings.")
     chk.add_argument("-b", "--baseline", default="baseline.json", help="Baseline file to read.")
     chk.add_argument("--report", metavar="DIR", default=None, help="Write per-call reports here.")
+    chk.add_argument("--policy", metavar="FILE", default=None, help=POLICY_HELP)
     chk.set_defaults(func=_check_cmd)
 
     simu = sub.add_parser("simulate", help="Place simulated calls against an agent.")

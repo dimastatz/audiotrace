@@ -86,8 +86,8 @@ closed) — that decides whether Phase 4 is the managed cloud or a compliance pa
 
 ## Phase 3 — Compliance & polish
 
-- [ ] Compliance flag detection (PII, consent gaps) — first version ships in
-      `events.py`; [PRD 0013](./prd/0013-compliance-detection.md) defines done
+- [x] Compliance flag detection (PII, consent gaps) — located, masked
+      findings with configurable policies — [PRD 0013](./prd/0013-compliance-detection.md)
 - [ ] Custom webhook adapter — [PRD 0014](./prd/0014-webhook-adapter.md)
 - [ ] Docs site + examples — [PRD 0015](./prd/0015-docs-site.md)
 - [x] **Extractor provenance stamping** — record the extraction stack

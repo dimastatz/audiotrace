@@ -19,6 +19,7 @@ from pathlib import Path
 
 from audiotrace.models import (
     CallReport,
+    ComplianceFinding,
     Latency,
     Provenance,
     Sentiment,
@@ -151,7 +152,7 @@ def render_html(report: CallReport, baseline: CallReport | None = None) -> str:
     waterfall = _waterfall_html(report.latency)
     sentiment_svg = _sentiment_svg(report.sentiment)
     sentiment_block = f'<h3 class="card-sub">Sentiment</h3>{sentiment_svg}' if sentiment_svg else ""
-    flags_list = _flags_list(report.events.compliance_flags)
+    flags_list = _flags_list(report.events.compliance_flags, report.events.compliance_findings)
 
     return f"""<!doctype html>
 <html lang="en">
@@ -336,12 +337,28 @@ def _flags_badge(flags: list[str]) -> str:
     return f'<span class="flags-badge">⚠ {len(flags)} {noun}</span>'
 
 
-def _flags_list(flags: list[str]) -> str:
-    """A labelled list of compliance flags, empty when there are none."""
-    if not flags:
+def _flags_list(flags: list[str], findings: list[ComplianceFinding] | None = None) -> str:
+    """A labelled list of compliance findings (linked to their turns), falling
+    back to the bare flags for reports made before findings were recorded."""
+    if findings:
+        items = "\n".join(_finding_item(f) for f in findings)
+    elif flags:
+        items = "\n".join(f"<li>⚠ {html.escape(flag)}</li>" for flag in flags)
+    else:
         return ""
-    items = "\n".join(f"<li>⚠ {html.escape(flag)}</li>" for flag in flags)
     return f'<h3 class="card-sub">Flags</h3><ul class="flags">\n{items}\n</ul>'
+
+
+def _finding_item(finding: ComplianceFinding) -> str:
+    if finding.type == "pii":
+        label = f"PII ({finding.pii_type}) said by {finding.speaker or 'unknown speaker'}"
+    else:
+        label = finding.type.replace("_", " ").capitalize()
+    where = _format_ts(finding.start_ms)
+    if finding.turn_index is not None:
+        where = f'<a href="#turn-{finding.turn_index}">{where}</a>'
+    detail = f" — {html.escape(finding.detail)}" if finding.detail else ""
+    return f"<li>⚠ {html.escape(label)} at {where}{detail}</li>"
 
 
 def _tile_value(metric: Metric) -> str:
@@ -375,10 +392,11 @@ def _initials(speaker: str) -> str:
     return html.escape(letters or "?")
 
 
-def _bubble(turn: Turn) -> str:
+def _bubble(turn: Turn, index: int | None = None) -> str:
     side = "agent" if speaker_role(turn.speaker) == "agent" else "caller"
+    anchor = f' id="turn-{index}"' if index is not None else ""
     return (
-        f'<div class="bubble {side}"><div class="avatar">{_initials(turn.speaker)}</div>'
+        f'<div class="bubble {side}"{anchor}><div class="avatar">{_initials(turn.speaker)}</div>'
         f'<div class="bubble-body"><div class="bubble-head">{html.escape(turn.speaker)} '
         f'<span class="ts">{_format_ts(turn.start_ms)}</span></div>'
         f'<div class="bubble-text">{html.escape(turn.text)}</div></div></div>'
@@ -390,7 +408,7 @@ def _transcript_html(transcript: Transcript) -> str:
     turns = transcript.turns
     if not turns:
         return f'<p class="empty">{html.escape(transcript.full_text or "(no transcript)")}</p>'
-    return "\n".join(_bubble(turn) for turn in turns)
+    return "\n".join(_bubble(turn, i) for i, turn in enumerate(turns))
 
 
 _LATENCY_STAGES = (

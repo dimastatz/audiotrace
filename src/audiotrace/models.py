@@ -100,6 +100,25 @@ class Cost(BaseModel):
     total_usd: float = 0.0
 
 
+class ComplianceFinding(BaseModel):
+    """One compliance issue, located in the call (PRD 0013).
+
+    ``type`` is ``"missing_consent"`` or ``"pii"``. For PII, ``detail`` is the
+    matched value *masked* (only its last two characters kept), so reports never
+    repeat what they found; for missing consent it says what was required.
+    """
+
+    type: str
+    pii_type: str | None = None
+    detail: str = ""
+    speaker: str = ""
+    # "agent", "caller", or "" when the speaker label has no known role.
+    role: str = ""
+    turn_index: int | None = None
+    start_ms: int = 0
+    end_ms: int = 0
+
+
 class Events(BaseModel):
     outcome: str = "completed"
     drop_off: bool = False
@@ -107,6 +126,8 @@ class Events(BaseModel):
     intent_detected: str = ""
     failure_type: str | None = None
     compliance_flags: list[str] = Field(default_factory=list)
+    # The located findings behind ``compliance_flags``.
+    compliance_findings: list[ComplianceFinding] = Field(default_factory=list)
 
 
 class Provenance(BaseModel):

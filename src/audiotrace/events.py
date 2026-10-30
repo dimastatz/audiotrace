@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import logging
-import re
 from typing import Any
 
+from audiotrace.compliance import (
+    CompliancePolicy,
+    compliance_flags,
+    find_compliance_issues,
+)
 from audiotrace.models import Events, Transcript, Turn
 from audiotrace.transcripts import speaker_role
 
@@ -22,16 +26,6 @@ DEFAULT_INTENT_LABELS = (
     "sales",
     "cancellation",
     "general inquiry",
-)
-
-# Substrings that satisfy a recording/consent disclosure.
-CONSENT_KEYWORDS = ("record", "recorded", "recording", "consent", "monitored")
-
-# Patterns whose presence in the transcript indicates exposed PII.
-_PII_PATTERNS = (
-    re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),  # US SSN
-    re.compile(r"\b\d(?:[ -]?\d){12,15}\b"),  # 13-16 digit card number
-    re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b"),  # email address
 )
 
 _MODELS: dict[str, Any] = {}
@@ -58,6 +52,7 @@ def extract_events(
     intent_labels: tuple[str, ...] = DEFAULT_INTENT_LABELS,
     requires_consent: bool = True,
     model_name: str = INTENT_MODEL,
+    compliance_policy: CompliancePolicy | None = None,
 ) -> Events:
     """Derive call-level outcome signals from the transcript and audio.
 
@@ -70,7 +65,9 @@ def extract_events(
         duration_ms: Total duration of the call, from MediaInfo.
         intent_labels: Candidate intent labels for zero-shot classification.
         requires_consent: When True, flag calls lacking a consent disclosure.
+            Ignored when ``compliance_policy`` is given.
         model_name: HuggingFace model identifier for intent classification.
+        compliance_policy: Consent and PII rules (see :mod:`audiotrace.compliance`).
 
     Returns:
         A populated :class:`~audiotrace.models.Events`.
@@ -81,7 +78,8 @@ def extract_events(
     drop_off, drop_off_turn = _detect_drop_off(transcript.turns, duration_ms)
     outcome = "dropped" if drop_off else "completed"
     intent = _classify_intent(transcript, intent_labels, model_name)
-    compliance_flags = _check_compliance(transcript, requires_consent)
+    policy = compliance_policy or CompliancePolicy(requires_consent=requires_consent)
+    findings = find_compliance_issues(transcript, policy)
 
     return Events(
         outcome=outcome,
@@ -89,7 +87,8 @@ def extract_events(
         drop_off_turn=drop_off_turn,
         intent_detected=intent,
         failure_type=None,
-        compliance_flags=compliance_flags,
+        compliance_flags=compliance_flags(findings),
+        compliance_findings=findings,
     )
 
 
@@ -122,17 +121,3 @@ def _classify_intent(
     pipe = get_zero_shot_pipeline(model_name)
     result = pipe(caller_text, list(labels))
     return str(result["labels"][0])
-
-
-def _check_compliance(transcript: Transcript, requires_consent: bool) -> list[str]:
-    """Flag a missing consent disclosure and any exposed PII in the transcript."""
-    flags: list[str] = []
-
-    text_lower = transcript.full_text.lower()
-    if requires_consent and not any(k in text_lower for k in CONSENT_KEYWORDS):
-        flags.append("missing_consent")
-
-    if any(pattern.search(transcript.full_text) for pattern in _PII_PATTERNS):
-        flags.append("pii_exposed")
-
-    return flags

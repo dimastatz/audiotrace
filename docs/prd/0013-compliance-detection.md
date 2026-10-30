@@ -1,6 +1,6 @@
 # PRD 0013 — Compliance flag detection (PII, consent)
 
-**Status:** Draft
+**Status:** Shipped
 **Owner:** Dima Statz
 **Related:** [roadmap Phase 3](../roadmap.md),
 [PRD 0005 (events)](./0005-events.md),
@@ -53,15 +53,39 @@ roadmap item.
 - **Redacting audio or transcripts** — that belongs to production replay.
 - **Sending data to a hosted PII service by default.** Detection runs locally.
 
-## Open questions
+## Decisions
 
-- Keep `compliance_flags: list[str]` and add a separate detailed list, or
-  change the field's shape? The second is a breaking `models.py` change.
-- Regex/rules only, or an optional local NER model for names and addresses
-  (better recall, heavier install)?
-- Which regions to support first beyond the US?
-- Should the regression gate treat any new compliance finding as a failure
-  (today: any regression in this metric fails)?
+Resolved 2026-10-30 (were open questions; chosen as the conservative option,
+reversible in review):
+
+- **Contract: additive.** `compliance_flags: list[str]` is unchanged and still
+  holds `missing_consent` / `pii_exposed`. The located findings are a new
+  `Events.compliance_findings: list[ComplianceFinding]` (type, pii_type,
+  masked detail, speaker, role, turn index, time range).
+- **Rules only, no NER model.** Keeps the install light and the results
+  deterministic. Names are therefore not detected; addresses are matched by a
+  number + street-suffix pattern, dates of birth only next to "born" / "date of
+  birth" / "birthday".
+- **Regions: US (default), UK, EU.** Presets add SSN + phone (US), National
+  Insurance number + postcode + phone (UK), IBAN + phone (EU) on top of the
+  universal types (card, email, date of birth, address, account).
+- **Gate behaviour unchanged.** The regression gate still counts
+  `compliance_flags` with zero tolerance; findings add detail, not new gate
+  semantics.
+
+## Implementation notes
+
+- `audiotrace.compliance`: `CompliancePolicy` (code or YAML via
+  `load_policy`, CLI `--policy`), `find_compliance_issues()`, `normalize()`
+  (spoken digits, "double"/"triple", spoken email), Luhn check, masking.
+- Consent must be in an *agent* turn starting inside `consent_window_ms`
+  (default 30 s; `null` = anywhere). If no turn has a recognizable agent label,
+  any speaker counts, since roles are unknown.
+- Masked values keep only the last two characters, so reports never repeat
+  the PII they found. Production replay can reuse the turn/time ranges for
+  redaction.
+- Known gap (golden set): Whisper sometimes writes spoken digits with a stray
+  digit or drops "dot" from spoken emails; those still slip through.
 
 ## Acceptance criteria
 
