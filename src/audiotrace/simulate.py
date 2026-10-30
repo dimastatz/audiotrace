@@ -507,7 +507,7 @@ class Simulator:
 
         path = Path(out_dir) / f"{safe_name(scenario.name)}.wav"
         write_stereo_wav(path, caller, channels["agent"])
-        labels = [role for role in ("agent", "caller") if role == pieces[0][0]]
+        labels: list[str] = [role for role in ("agent", "caller") if role == pieces[0][0]]
         labels += [role for role in ("agent", "caller") if role not in labels]
         report = self.analyzer(path, labels)
 
