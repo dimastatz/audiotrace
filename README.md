@@ -235,7 +235,30 @@ Adapters use plain HTTPS from the standard library, so no extra install is neede
 | Twilio | `TwilioAdapter` | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | ✅ recordings (ids are `RE...` Recording SIDs) |
 | ElevenLabs | — | — | Not planned as an adapter (usage/pricing import at most) |
 | Deepgram | — | — | Not planned as an adapter (usage/pricing import at most) |
-| Custom webhook | `CustomAdapter` | — | Planned ([PRD 0014](docs/prd/0014-webhook-adapter.md)) |
+| Custom webhook | `CustomAdapter` | your own (static header) | ✅ any payload shape via a field mapping; optional `audiotrace serve` receiver |
+
+**Custom stacks** (self-hosted LiveKit or Pipecat, your own SIP, …): map your end-of-call event with `CustomAdapter`.
+
+```yaml
+# mapping.yaml
+provider: livekit
+recording_headers:
+  Authorization: Bearer ${RECORDINGS_TOKEN}   # read from the environment
+fields:
+  recording_url: $.data.recording.files[0].location   # required
+  call_id: $.data.id                                  # required
+  agent_version: $.data.metadata.agent_version        # optional: skipped when missing
+  started_at: $.data.started_at
+```
+
+```python
+from audiotrace.adapters import CustomAdapter
+
+call = CustomAdapter.from_yaml("mapping.yaml").parse(event_json)  # from your own handler
+report = audiotrace.analyze(call.audio, call.metadata)
+```
+
+Or run the bundled receiver: `AUDIOTRACE_WEBHOOK_SECRET=... audiotrace serve --mapping mapping.yaml --out reports/`. It accepts POSTs signed with `X-AudioTrace-Signature: sha256=<HMAC-SHA256 of the body>`, answers `202` immediately, and writes `<call_id>.json`/`.html` reports from a background worker. It binds to `127.0.0.1` by default; put it behind your own HTTPS proxy. It's meant for modest volume (one worker, no retries).
 
 The adapters are tested against the providers' documented response shapes, not live accounts yet; please open an issue if a field comes back different.
 

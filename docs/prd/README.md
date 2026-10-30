@@ -27,5 +27,5 @@ of truth Claude Code and contributors build against.
 | [0011](./0011-production-replay.md) | Production replay (regressions)   | Draft       |
 | [0012](./0012-provider-adapters.md) | Provider adapters                 | Shipped       |
 | [0013](./0013-compliance-detection.md) | Compliance detection (PII, consent) | Shipped  |
-| [0014](./0014-webhook-adapter.md)   | Custom webhook adapter            | Draft       |
+| [0014](./0014-webhook-adapter.md)   | Custom webhook adapter            | Shipped       |
 | [0015](./0015-docs-site.md)         | Docs site and examples            | Draft       |

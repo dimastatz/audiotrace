@@ -6,6 +6,7 @@
     audiotrace check    --provider retell --since 2026-10-01 --limit 50 -b baseline.json
     audiotrace simulate <scenarios_dir> --target mock [-b baseline.json]
     audiotrace simulate --init [scenarios_dir]
+    audiotrace serve --mapping mapping.yaml --out reports/ [--port 8080]
 
 ``baseline`` analyzes every recording in ``calls_dir`` and writes a committed
 baseline. ``check`` re-analyzes, compares each call against the baseline, writes
@@ -165,6 +166,29 @@ def _simulate_cmd(args: argparse.Namespace) -> int:
     return 0 if passed else 1
 
 
+def _serve_cmd(args: argparse.Namespace) -> int:
+    import os
+
+    from audiotrace.adapters import AdapterError, CustomAdapter
+    from audiotrace.webhook import WebhookApp, serve
+
+    secret = os.environ.get(args.secret_env)
+    if not secret:
+        raise SystemExit(f"audiotrace serve: set {args.secret_env} to the shared webhook secret")
+    try:
+        adapter = CustomAdapter.from_yaml(args.mapping)
+    except AdapterError as exc:
+        raise SystemExit(f"audiotrace serve: {exc}") from exc
+    app = WebhookApp(
+        adapter=adapter,
+        secret=secret,
+        out_dir=Path(args.out),
+        signature_header=args.signature_header,
+    )
+    serve(app, args.host, args.port)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="audiotrace",
@@ -199,6 +223,19 @@ def main(argv: list[str] | None = None) -> int:
     simu.add_argument("--caller-model", default="claude-opus-5-5", help="Claude model for callers.")
     simu.add_argument("--judge-model", default="claude-opus-5-5", help="Claude model for judging.")
     simu.set_defaults(func=_simulate_cmd)
+
+    srv = sub.add_parser("serve", help="Receive end-of-call webhooks and write reports.")
+    srv.add_argument("--mapping", required=True, help="CustomAdapter field mapping (YAML).")
+    srv.add_argument("--out", default="reports", help="Directory for per-call reports.")
+    srv.add_argument("--host", default="127.0.0.1", help="Interface to bind (default: local).")
+    srv.add_argument("--port", type=int, default=8080)
+    srv.add_argument(
+        "--secret-env",
+        default="AUDIOTRACE_WEBHOOK_SECRET",
+        help="Env var holding the shared secret used to verify signatures.",
+    )
+    srv.add_argument("--signature-header", default="X-AudioTrace-Signature")
+    srv.set_defaults(func=_serve_cmd)
 
     args = parser.parse_args(argv)
     return int(args.func(args))
