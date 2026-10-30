@@ -116,6 +116,10 @@ def test_consent_can_be_disabled_and_keywords_changed():
         ("date of birth 04/03/1990", "dob"),
         ("I live at 42 Maple Street", "address"),
         ("my account number is 88213456", "account"),
+        # Speech-recognition damage seen on the golden set.
+        ("by credit card, the number is 41 11 11 11 11 11 11 11 11 11", "card"),
+        ("Sure, my social is 12340-56789.", "ssn"),
+        ("It's Jordan Lay at Example Com.", "email"),
         ("account 5551234567", "account"),
     ],
 )
@@ -130,6 +134,8 @@ def test_detects_us_pii_in_digit_and_spoken_forms(text, pii_type):
         "your appointment is March 4th, 2026",  # a date, but not a birth date
         "that'll be 25 dollars",
         "order 123456789",  # nine digits without SSN context or format
+        "ticket 41111111111111111111",  # card-like digits in a long run, no card context
+        "meet at the mall com",
         "press 1 for billing",
     ],
 )

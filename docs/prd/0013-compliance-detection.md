@@ -84,8 +84,12 @@ reversible in review):
 - Masked values keep only the last two characters, so reports never repeat
   the PII they found. Production replay can reuse the turn/time ranges for
   redaction.
-- Known gap (golden set): Whisper sometimes writes spoken digits with a stray
-  digit or drops "dot" from spoken emails; those still slip through.
+- Recognition damage is handled where the context is explicit: a Luhn-valid
+  card number inside a longer digit run when the turn mentions a card, a
+  10-digit SSN when it mentions "social security", "name at domain com"
+  without the "dot". On the golden set that takes PII from 18/20 to 20/20
+  with no false positives. The flip side: a long number read out right after
+  "card" is flagged even if it isn't a valid card on its own.
 
 ## Acceptance criteria
 

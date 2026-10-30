@@ -104,6 +104,7 @@ _NUMBER_WORDS = {
     "nine": "9",
 }
 _REPEAT = {"double": 2, "triple": 3}
+_TLDS = "com|net|org|edu|gov|io"
 _TOKEN = re.compile(r"[A-Za-z]+|\d+|[^\sA-Za-z\d]+|\s+")
 
 
@@ -146,6 +147,10 @@ def normalize(text: str) -> str:
     joined = "".join(out)
     joined = re.sub(r"\s+dot\s+(?=[A-Za-z0-9])", ".", joined, flags=re.I)
     joined = re.sub(r"(?<=[A-Za-z0-9])\s+at\s+(?=[A-Za-z0-9-]+\.[A-Za-z])", "@", joined, flags=re.I)
+    # Speech recognition often drops the "dot": "jo at example com".
+    joined = re.sub(
+        rf"(?<=[A-Za-z0-9])\s+at\s+([A-Za-z0-9-]+)\s+({_TLDS})\b", r"@\1.\2", joined, flags=re.I
+    )
     return joined
 
 
@@ -170,6 +175,8 @@ _NI_NUMBER = re.compile(r"\b[A-CEGHJ-PR-TW-Z]{2}\s?\d{2}\s?\d{2}\s?\d{2}\s?[A-D]
 _POSTCODE = re.compile(r"\b[A-Z]{1,2}\d[A-Z\d]?\s+\d[A-Z]{2}\b")
 _IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]{4}){2,7}(?:\s?[A-Z0-9]{1,4})?\b")
 
+_CARD_CONTEXT = re.compile(r"\bcard\b|\bcredit\b|\bdebit\b|\bvisa\b|mastercard|\bamex\b", re.I)
+_CARD_CONTEXT = re.compile(r"\bcard\b|\bcredit\b|\bdebit\b|\bvisa\b|mastercard|\bamex\b", re.I)
 _SSN_CONTEXT = re.compile(r"social security|\bssn\b|\bsocial\b", re.I)
 _DOB_CONTEXT = re.compile(r"\bborn\b|birth|\bdob\b|birthday", re.I)
 _ACCOUNT_CONTEXT = re.compile(
@@ -189,15 +196,32 @@ def luhn_valid(digits: str) -> bool:
     return total % 10 == 0
 
 
+def _is_card(digits: str, text: str) -> bool:
+    """A Luhn-valid 13–19 digit run. When the turn talks about a card, also accept
+    a Luhn-valid card number inside a slightly longer run: recognition often
+    garbles the grouping of a spoken card number and adds digits."""
+    n = len(digits)
+    if 13 <= n <= 19 and luhn_valid(digits):
+        return True
+    if not (13 <= n <= 24 and _CARD_CONTEXT.search(text)):
+        return False
+    return any(
+        digits[i] in "3456" and luhn_valid(digits[i : i + size])
+        for size in (16, 15, 19, 14, 13)
+        for i in range(n - size + 1)
+    )
+
+
 def _classify_digits(digits: str, raw: str, text: str, enabled: set[str]) -> str | None:
     """Name the PII type of one digit run, given the turn's text for context."""
     n = len(digits)
-    if 13 <= n <= 19 and "card" in enabled and luhn_valid(digits):
+    if "card" in enabled and _is_card(digits, text):
         return "card"
-    if (
-        "ssn" in enabled
-        and n == 9
-        and (re.fullmatch(r"\d{3}-\d{2}-\d{4}", raw.strip()) or _SSN_CONTEXT.search(text))
+    ssn_format = re.fullmatch(r"\d{3}-\d{2}-\d{4}", raw.strip())
+    # Recognition sometimes adds a digit to a spoken SSN; trust explicit context.
+    if "ssn" in enabled and (
+        (n == 9 and (ssn_format or _SSN_CONTEXT.search(text)))
+        or (n == 10 and _SSN_CONTEXT.search(text))
     ):
         return "ssn"
     if "phone" in enabled and (
