@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 from typing import Union
 
+from audiotrace.compliance import CompliancePolicy
 from audiotrace.cost import PricingTable, extract_cost
 from audiotrace.events import extract_events
 from audiotrace.extractors import extract_media_info
@@ -33,6 +34,7 @@ def analyze(
     num_speakers: int | None = None,
     speaker_labels: list[str] | None = None,
     diarize: bool = True,
+    compliance_policy: CompliancePolicy | None = None,
 ) -> CallReport:
     """Analyze a single call recording and return a structured report.
 
@@ -48,6 +50,8 @@ def analyze(
             appearance instead of the defaults.
         diarize: When False, skip loading the pyannote diarization model and
             infer speakers by pitch instead.
+        compliance_policy: Consent and PII rules for the compliance findings;
+            ``None`` uses the defaults (US PII, agent disclosure within 30 s).
 
     Returns:
         A populated :class:`~audiotrace.models.CallReport`.
@@ -79,7 +83,7 @@ def analyze(
     cost = extract_cost(media, transcript, pricing)
 
     # 6. Event extraction (outcome, drop-off, intent, compliance)
-    events = extract_events(transcript, media.duration_ms)
+    events = extract_events(transcript, media.duration_ms, compliance_policy=compliance_policy)
 
     total_duration_ms = int((time.perf_counter() - start_time) * 1000)
 

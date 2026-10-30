@@ -72,7 +72,7 @@ against the `expect` blocks:
 |---|---|---|
 | Consent disclosure | 20/20 | — |
 | Dropped call | 20/20 | — |
-| PII | 18/20 | Whisper writes the SSN as `12340-56789` and the email as "Jordan Lay at Example Com", which the regexes don't match ([PRD 0013](../../../docs/prd/0013-compliance-detection.md)) |
+| PII | 20/20 | Caught despite recognition damage: the card comes out as 20 digits, the SSN as `12340-56789`, the email as "Jordan Lay at Example Com" ([PRD 0013](../../../docs/prd/0013-compliance-detection.md)) |
 | Barge-in present | 17/20 | Interruptions are counted from overlapping turns, but Whisper segments never overlap on mono audio, so it's always 0 |
 | Frustrated caller | 10/20 | All 3 frustrated calls are caught, but 10 calm ones are flagged too: the SST-2 sentiment model scores neutral questions ("what time does the store close?") near −1, and Whisper often splits one sentence into two turns, so "two negative caller turns in a row" fires easily. No streak length separates the classes on this set (3 in a row: 3/3 caught, 5 false alarms; 4: 2/3, none) — it needs a better model, not a tuned threshold |
 | Intent | 12/20 | Most sales and support calls read as `general inquiry` |

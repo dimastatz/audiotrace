@@ -192,7 +192,14 @@ CallReport
 │   ├── drop_off_turn: int | None
 │   ├── intent_detected: str
 │   ├── failure_type: str | None
-│   └── compliance_flags: List[str]
+│   ├── compliance_flags: List[str]      # "missing_consent", "pii_exposed"
+│   └── compliance_findings: List[ComplianceFinding]
+│       ├── type: str                    # "missing_consent" | "pii"
+│       ├── pii_type: str | None         # ssn, card, email, phone, dob, address, account, ...
+│       ├── detail: str                  # masked value (last 2 chars) or the rule that failed
+│       ├── speaker: str / role: str     # who said it; role "agent" | "caller" | ""
+│       ├── turn_index: int | None
+│       └── start_ms / end_ms: int
 ├── provenance: Provenance | None   # extraction stack that produced this report; None if unrecorded
 │   ├── audiotrace_version: str
 │   ├── whisper_model: str
@@ -313,6 +320,8 @@ A metric only fails the build when it drifts past its tolerance (quality −0.05
 
 For a worked example, [`tests/fixtures/golden`](tests/fixtures/golden/README.md) has 20 synthetic calls with planted defects (missing disclosure, PII, frustrated callers, barge-ins, slow replies, dropped calls), the scenario scripts that generated them, and a committed baseline.
 
+On top of the per-call tolerances, `audiotrace check` compares each continuous metric's *distribution* across the run (quality, sentiment, pace, response latency, cost) with the baseline using the Population Stability Index, and fails when PSI exceeds 0.25. That catches a whole run drifting a little in the same direction, which no single call would trip. It needs at least 10 calls present in both runs; smaller runs are gated per call only.
+
 Every report records the extraction stack that produced it (`provenance`: AudioTrace, Whisper, pyannote, sentiment model, Librosa, Transformers and Torch versions). When it differs from the baseline's, `audiotrace check` prints a note listing what changed, so a metric move after an extractor upgrade reads as *measurement drift* rather than an agent regression. The note doesn't fail the build; re-baseline after an intentional stack upgrade.
 
 ### GitHub Action
@@ -333,6 +342,29 @@ jobs:
           calls: tests/calls
           baseline: baseline.json
 ```
+
+## Compliance checks
+
+Every report checks two things, locally and with rules only:
+
+- **Recording disclosure:** the *agent* must mention recording, monitoring or consent within the first 30 seconds. A caller asking "is this recorded?" doesn't count.
+- **Exposed PII:** card numbers (Luhn-checked), SSNs, phone numbers, emails, dates of birth, street addresses and account numbers, including spoken forms such as "four one one one…" or "jo dot lee at example dot com". UK (`ni_number`, `postcode`) and EU (`iban`) presets are available.
+
+Each finding records the speaker, their role, the turn and the time range. The matched value is masked (last two characters kept), so the report never repeats the PII it found. `compliance_flags` still carries the summary (`missing_consent`, `pii_exposed`), and the HTML report links each finding to its turn.
+
+Rules are configurable from code (`CompliancePolicy`) or YAML (`audiotrace baseline|check --policy policy.yaml`):
+
+```yaml
+consent_window_ms: 15000        # null = anywhere in the call
+consent_keywords: [record, recorded, recording, monitored, consent]
+regions: [us, uk]               # us | uk | eu
+disabled_pii: [address]
+flag_caller_pii: false          # only flag PII the agent says
+```
+
+AudioTrace flags signals; it doesn't certify HIPAA, PCI-DSS or GDPR compliance.
+
+---
 
 ## Simulated callers
 

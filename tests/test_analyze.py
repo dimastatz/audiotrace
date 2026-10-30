@@ -66,7 +66,7 @@ def test_analyze_media_info(
         report.media, mock_extract_transcript.return_value, None
     )
     mock_extract_events.assert_called_once_with(
-        mock_extract_transcript.return_value, report.media.duration_ms
+        mock_extract_transcript.return_value, report.media.duration_ms, compliance_policy=None
     )
 
 

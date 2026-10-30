@@ -15,6 +15,7 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from audiotrace.drift import DriftResult, drift
 from audiotrace.models import CallReport
 from audiotrace.provenance import ProvenanceChange, provenance_changes
 from audiotrace.report import diff
@@ -69,11 +70,19 @@ class CheckResult:
     # Extraction-stack differences vs. the baseline, keyed by call id. These
     # label the run (metric moves may be measurement drift); they don't fail it.
     provenance_changes: dict[str, list[ProvenanceChange]] = field(default_factory=dict)
+    # Run-level distribution drift of continuous metrics (PRD 0009 Part B);
+    # ``None`` when the run is too small to score.
+    drift: list[DriftResult] | None = None
+
+    @property
+    def drifted(self) -> list[DriftResult]:
+        """Metrics whose distribution moved past its PSI threshold."""
+        return [d for d in self.drift or [] if d.drifted]
 
     @property
     def passed(self) -> bool:
-        """True when no regression breached its tolerance."""
-        return not self.regressions
+        """True when no regression breached its tolerance and nothing drifted."""
+        return not self.regressions and not self.drifted
 
     @property
     def stack_changed(self) -> bool:
@@ -90,6 +99,7 @@ def check(
     current: dict[str, CallReport],
     baseline: dict[str, CallReport],
     thresholds: dict[str, Threshold] | None = None,
+    drift_thresholds: dict[str, float] | None = None,
 ) -> CheckResult:
     """Gate a run of analyzed calls against a baseline run.
 
@@ -102,6 +112,9 @@ def check(
         current: Freshly analyzed reports, keyed by call id.
         baseline: The committed baseline reports, keyed by call id.
         thresholds: Per-metric tolerances; ``None`` uses DEFAULT_THRESHOLDS.
+        drift_thresholds: Per-metric PSI limits for the run-level distribution
+            check over the calls present in both runs; ``None`` uses
+            :data:`audiotrace.drift.DEFAULT_DRIFT_THRESHOLDS`, ``{}`` turns it off.
 
     Returns:
         A :class:`CheckResult`.
@@ -136,11 +149,16 @@ def check(
                         allowed=allowed,
                     )
                 )
+    shared = [call_id for call_id in current if call_id in baseline]
+    run_drift = drift(
+        {c: current[c] for c in shared}, {c: baseline[c] for c in shared}, drift_thresholds
+    )
     return CheckResult(
         regressions=regressions,
         checked=checked,
         skipped=skipped,
         provenance_changes=changes,
+        drift=run_drift,
     )
 
 
@@ -164,15 +182,20 @@ def format_result(result: CheckResult) -> str:
     if result.passed:
         head = f"PASS — {result.checked} call(s) checked, no regressions"
     else:
-        head = (
-            f"FAIL — {len(result.regressions)} regression(s) "
-            f"across {result.checked} call(s) checked"
-        )
+        problems = [f"{len(result.regressions)} regression(s)"]
+        if result.drifted:
+            problems.append(f"{len(result.drifted)} drifted metric(s)")
+        head = f"FAIL — {' and '.join(problems)} across {result.checked} call(s) checked"
     lines = [head]
     for reg in result.regressions:
         lines.append(
             f"  {reg.call_id}: {reg.label} {_num(reg.before)} → {_num(reg.after)} "
             f"(allowed ±{_num(reg.allowed)})"
+        )
+    for d in result.drifted:
+        lines.append(
+            f"  drift: {d.key} distribution moved (PSI {d.psi:.2f} > {d.threshold:g}; "
+            f"mean {_num(round(d.baseline_mean, 4))} → {_num(round(d.current_mean, 4))})"
         )
     if result.skipped:
         lines.append(f"  skipped (no baseline): {', '.join(result.skipped)}")

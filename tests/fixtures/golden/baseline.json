@@ -1145,7 +1145,8 @@
       "drop_off_turn": null,
       "intent_detected": "billing",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -2375,7 +2376,8 @@
       "drop_off_turn": null,
       "intent_detected": "billing",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -3197,6 +3199,18 @@
       "failure_type": null,
       "compliance_flags": [
         "pii_exposed"
+      ],
+      "compliance_findings": [
+        {
+          "type": "pii",
+          "pii_type": "card",
+          "detail": "******************11",
+          "speaker": "Customer",
+          "role": "caller",
+          "turn_index": 3,
+          "start_ms": 18500,
+          "end_ms": 26780
+        }
       ]
     },
     "provenance": {
@@ -3978,6 +3992,18 @@
       "failure_type": null,
       "compliance_flags": [
         "missing_consent"
+      ],
+      "compliance_findings": [
+        {
+          "type": "missing_consent",
+          "pii_type": null,
+          "detail": "no recording disclosure by the agent in the first 30s",
+          "speaker": "",
+          "role": "",
+          "turn_index": null,
+          "start_ms": 0,
+          "end_ms": 30000
+        }
       ]
     },
     "provenance": {
@@ -4848,7 +4874,8 @@
       "drop_off_turn": null,
       "intent_detected": "cancellation",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -5868,7 +5895,8 @@
       "drop_off_turn": null,
       "intent_detected": "cancellation",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -6750,7 +6778,21 @@
       "drop_off_turn": null,
       "intent_detected": "cancellation",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [
+        "pii_exposed"
+      ],
+      "compliance_findings": [
+        {
+          "type": "pii",
+          "pii_type": "ssn",
+          "detail": "********89",
+          "speaker": "Customer",
+          "role": "caller",
+          "turn_index": 3,
+          "start_ms": 18200,
+          "end_ms": 22100
+        }
+      ]
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -7308,7 +7350,8 @@
       "drop_off_turn": 7,
       "intent_detected": "cancellation",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -7931,7 +7974,8 @@
       "drop_off_turn": null,
       "intent_detected": "general inquiry",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -8541,6 +8585,18 @@
       "failure_type": null,
       "compliance_flags": [
         "missing_consent"
+      ],
+      "compliance_findings": [
+        {
+          "type": "missing_consent",
+          "pii_type": null,
+          "detail": "no recording disclosure by the agent in the first 30s",
+          "speaker": "",
+          "role": "",
+          "turn_index": null,
+          "start_ms": 0,
+          "end_ms": 30000
+        }
       ]
     },
     "provenance": {
@@ -9335,7 +9391,8 @@
       "drop_off_turn": null,
       "intent_detected": "general inquiry",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -10451,7 +10508,8 @@
       "drop_off_turn": null,
       "intent_detected": "general inquiry",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -11333,7 +11391,8 @@
       "drop_off_turn": null,
       "intent_detected": "general inquiry",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -12307,7 +12366,21 @@
       "drop_off_turn": null,
       "intent_detected": "general inquiry",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [
+        "pii_exposed"
+      ],
+      "compliance_findings": [
+        {
+          "type": "pii",
+          "pii_type": "email",
+          "detail": "***********om",
+          "speaker": "Customer",
+          "role": "caller",
+          "turn_index": 10,
+          "start_ms": 30960,
+          "end_ms": 33160
+        }
+      ]
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -13160,6 +13233,18 @@
       "failure_type": null,
       "compliance_flags": [
         "missing_consent"
+      ],
+      "compliance_findings": [
+        {
+          "type": "missing_consent",
+          "pii_type": null,
+          "detail": "no recording disclosure by the agent in the first 30s",
+          "speaker": "",
+          "role": "",
+          "turn_index": null,
+          "start_ms": 0,
+          "end_ms": 30000
+        }
       ]
     },
     "provenance": {
@@ -14057,7 +14142,8 @@
       "drop_off_turn": null,
       "intent_detected": "general inquiry",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -14940,7 +15026,8 @@
       "drop_off_turn": null,
       "intent_detected": "general inquiry",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -16076,7 +16163,8 @@
       "drop_off_turn": null,
       "intent_detected": "technical support",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -16942,7 +17030,8 @@
       "drop_off_turn": 16,
       "intent_detected": "general inquiry",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",
@@ -17842,7 +17931,8 @@
       "drop_off_turn": null,
       "intent_detected": "general inquiry",
       "failure_type": null,
-      "compliance_flags": []
+      "compliance_flags": [],
+      "compliance_findings": []
     },
     "provenance": {
       "audiotrace_version": "1.3.0",

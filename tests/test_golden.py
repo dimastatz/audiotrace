@@ -9,7 +9,8 @@ from pathlib import Path
 import pytest
 
 from audiotrace.check import load_baseline
-from audiotrace.events import CONSENT_KEYWORDS, DEFAULT_INTENT_LABELS
+from audiotrace.compliance import CONSENT_KEYWORDS
+from audiotrace.events import DEFAULT_INTENT_LABELS
 
 yaml = pytest.importorskip("yaml")
 
@@ -67,3 +68,14 @@ def test_baseline_covers_every_call_with_provenance():
     assert set(baseline) == {p.stem for p in SCENARIOS}
     for report in baseline.values():
         assert report.provenance is not None
+
+
+def test_golden_baseline_gates_cleanly_against_itself():
+    # Same calls, same stack: no regressions and zero distribution drift.
+    from audiotrace.check import check
+
+    baseline = load_baseline(GOLDEN / "baseline.json")
+    result = check(baseline, baseline)
+    assert result.passed
+    assert result.drift is not None
+    assert all(d.psi == pytest.approx(0.0) for d in result.drift)

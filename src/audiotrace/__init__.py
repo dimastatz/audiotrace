@@ -17,10 +17,13 @@ from audiotrace.check import (
     load_baseline,
     write_baseline,
 )
+from audiotrace.compliance import CompliancePolicy, find_compliance_issues, load_policy
 from audiotrace.core import analyze
 from audiotrace.cost import PricingTable
+from audiotrace.drift import DriftResult, drift
 from audiotrace.models import (
     CallReport,
+    ComplianceFinding,
     Cost,
     Events,
     Gap,
@@ -65,11 +68,17 @@ __all__ = [
     "Threshold",
     "Regression",
     "CheckResult",
+    "drift",
+    "DriftResult",
     "collect_provenance",
     "provenance_changes",
     "ProvenanceChange",
     "Provenance",
     "CallReport",
+    "ComplianceFinding",
+    "CompliancePolicy",
+    "find_compliance_issues",
+    "load_policy",
     "Cost",
     "Events",
     "Gap",

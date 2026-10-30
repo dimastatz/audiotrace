@@ -22,10 +22,10 @@ of truth Claude Code and contributors build against.
 | [0006](./0006-latency.md)         | Latency waterfall extraction        | Shipped     |
 | [0007](./0007-report.md)          | Report output (JSON + HTML summary) | Shipped     |
 | [0008](./0008-regression-gate.md) | Baseline + regression gate (CI)     | Shipped     |
-| [0009](./0009-drift-gating.md)    | Drift gating (provenance + PSI/KL)  | In progress |
+| [0009](./0009-drift-gating.md)    | Drift gating (provenance + PSI/KL)  | Shipped     |
 | [0010](./0010-simulated-callers.md) | Simulated callers (pre-release)   | In progress |
 | [0011](./0011-production-replay.md) | Production replay (regressions)   | Draft       |
 | [0012](./0012-provider-adapters.md) | Provider adapters                 | Draft       |
-| [0013](./0013-compliance-detection.md) | Compliance detection (PII, consent) | Draft  |
+| [0013](./0013-compliance-detection.md) | Compliance detection (PII, consent) | Shipped  |
 | [0014](./0014-webhook-adapter.md)   | Custom webhook adapter            | Draft       |
 | [0015](./0015-docs-site.md)         | Docs site and examples            | Draft       |
