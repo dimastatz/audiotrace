@@ -6,6 +6,7 @@ import logging
 from typing import Any
 
 from audiotrace.models import Sentiment, Transcript, Turn
+from audiotrace.transcripts import speaker_role
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ def _detect_caller_frustration(turns: list[Turn], scores: list[float]) -> bool:
     """Return True when caller has FRUSTRATION_CONSECUTIVE consecutive negative turns."""
     consecutive = 0
     for turn, score in zip(turns, scores):
-        if turn.speaker != "caller":
+        if speaker_role(turn.speaker) != "caller":
             continue
         if score < FRUSTRATION_THRESHOLD:
             consecutive += 1

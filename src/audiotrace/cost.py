@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from audiotrace.models import Cost, MediaInfo, Transcript
+from audiotrace.transcripts import speaker_role
 
 # AWS Transcribe — standard streaming (us-east-1), per minute
 _AWS_TRANSCRIBE_PER_MINUTE = 0.024
@@ -90,8 +91,8 @@ def extract_cost(
 
 def _speaker_char_counts(transcript: Transcript) -> tuple[int, int]:
     """Return (agent_chars, caller_chars), falling back to even split if labels unknown."""
-    agent_chars = sum(len(t.text) for t in transcript.turns if t.speaker == "agent")
-    caller_chars = sum(len(t.text) for t in transcript.turns if t.speaker == "caller")
+    agent_chars = sum(len(t.text) for t in transcript.turns if speaker_role(t.speaker) == "agent")
+    caller_chars = sum(len(t.text) for t in transcript.turns if speaker_role(t.speaker) == "caller")
 
     if agent_chars == 0 and caller_chars == 0:
         total = len(transcript.full_text)

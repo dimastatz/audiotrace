@@ -21,6 +21,23 @@ _MODELS: dict[str, Any] = {}
 # explicit labels are passed. Two speakers map to an agent/customer support call.
 DEFAULT_TWO_SPEAKER_LABELS = ("AI Agent", "Customer")
 
+# Speaker labels (lower-cased) that the extractors treat as each side of the
+# call. Covers the defaults above, the plain "agent"/"caller" labels, and
+# common provider transcript roles.
+AGENT_LABELS = frozenset({"agent", "ai agent", "assistant", "bot"})
+CALLER_LABELS = frozenset({"caller", "customer", "user"})
+
+
+def speaker_role(label: str) -> str | None:
+    """Map a speaker label to ``"agent"``, ``"caller"``, or ``None`` if unknown."""
+    key = label.strip().lower()
+    if key in AGENT_LABELS:
+        return "agent"
+    if key in CALLER_LABELS:
+        return "caller"
+    return None
+
+
 # Pitch range (Hz) for per-segment fundamental-frequency estimation used by the
 # no-diarization fallback. Spans typical adult speech (~C2 to C7).
 PITCH_FMIN_HZ = 65.0

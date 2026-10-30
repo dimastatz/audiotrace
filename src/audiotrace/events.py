@@ -7,6 +7,7 @@ import re
 from typing import Any
 
 from audiotrace.models import Events, Transcript, Turn
+from audiotrace.transcripts import speaker_role
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +100,7 @@ def _detect_drop_off(turns: list[Turn], duration_ms: int) -> tuple[bool, int | N
 
     if duration_ms - last.end_ms >= DROP_OFF_TRAILING_SILENCE_MS:
         return True, last_index
-    if last.speaker == "caller":
+    if speaker_role(last.speaker) == "caller":
         return True, last_index
     return False, None
 
@@ -110,7 +111,9 @@ def _classify_intent(
     model_name: str,
 ) -> str:
     """Classify caller intent with a local zero-shot model, or "" when no text."""
-    caller_text = " ".join(t.text for t in transcript.turns if t.speaker == "caller").strip()
+    caller_text = " ".join(
+        t.text for t in transcript.turns if speaker_role(t.speaker) == "caller"
+    ).strip()
     if not caller_text:
         caller_text = transcript.full_text.strip()
     if not caller_text:

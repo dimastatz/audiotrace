@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from audiotrace.models import LatencySpan, Transcript
+from audiotrace.transcripts import speaker_role
 
 # Gaps at or below this many milliseconds are conversational micro-pauses (or
 # overlapping barge-in, i.e. a negative gap) rather than agent response latency,
@@ -26,7 +27,7 @@ def extract_waterfall(transcript: Transcript) -> list[LatencySpan]:
     """
     spans: list[LatencySpan] = []
     for caller, agent in zip(transcript.turns, transcript.turns[1:]):
-        if caller.speaker != "caller" or agent.speaker != "agent":
+        if speaker_role(caller.speaker) != "caller" or speaker_role(agent.speaker) != "agent":
             continue
         gap_ms = agent.start_ms - caller.end_ms
         if gap_ms <= RESPONSE_NOISE_FLOOR_MS:
