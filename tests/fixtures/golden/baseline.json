@@ -1091,28 +1091,59 @@
         13,
         17
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 20138,
+      "stt_ms": 20490,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 38060,
-      "waterfall": []
+      "total_ms": 38481,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 16079,
+          "duration_ms": 1441
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 24600,
+          "duration_ms": 1360
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 36880,
+          "duration_ms": 1440
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 49200,
+          "duration_ms": 1200
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 60400,
+          "duration_ms": 1580
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 68160,
+          "duration_ms": 1700
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.028741,
-      "llm_usd": 8.8e-05,
-      "tts_usd": 0.007472,
+      "llm_usd": 0.000106,
+      "tts_usd": 0.01024,
       "telephony_usd": 0.0,
-      "total_usd": 0.0363
+      "total_usd": 0.039087
     },
     "events": {
       "outcome": "completed",
       "drop_off": false,
       "drop_off_turn": null,
-      "intent_detected": "general inquiry",
+      "intent_detected": "billing",
       "failure_type": null,
       "compliance_flags": []
     },
@@ -1128,7 +1159,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "billing_02": {
     "media": {
@@ -2289,28 +2321,59 @@
         10,
         12
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 14786,
+      "stt_ms": 14755,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 28223,
-      "waterfall": []
+      "total_ms": 27857,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 14100,
+          "duration_ms": 1720
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 26380,
+          "duration_ms": 1640
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 41600,
+          "duration_ms": 1720
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 54200,
+          "duration_ms": 1600
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 65459,
+          "duration_ms": 1821
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 74100,
+          "duration_ms": 1760
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.03155,
-      "llm_usd": 0.0001,
-      "tts_usd": 0.008528,
+      "llm_usd": 0.000111,
+      "tts_usd": 0.010144,
       "telephony_usd": 0.0,
-      "total_usd": 0.040178
+      "total_usd": 0.041804
     },
     "events": {
       "outcome": "completed",
       "drop_off": false,
       "drop_off_turn": null,
-      "intent_detected": "general inquiry",
+      "intent_detected": "billing",
       "failure_type": null,
       "compliance_flags": []
     },
@@ -2326,7 +2389,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "billing_03": {
     "media": {
@@ -3082,28 +3146,54 @@
         8,
         9
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 9680,
+      "stt_ms": 9608,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 19050,
-      "waterfall": []
+      "total_ms": 18805,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 10500,
+          "duration_ms": 1760
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 26780,
+          "duration_ms": 1280
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 33880,
+          "duration_ms": 1440
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 42860,
+          "duration_ms": 1600
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 49820,
+          "duration_ms": 1420
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.021656,
-      "llm_usd": 5.8e-05,
-      "tts_usd": 0.004928,
+      "llm_usd": 6.6e-05,
+      "tts_usd": 0.00616,
       "telephony_usd": 0.0,
-      "total_usd": 0.026641
+      "total_usd": 0.027882
     },
     "events": {
       "outcome": "completed",
       "drop_off": false,
       "drop_off_turn": null,
-      "intent_detected": "billing",
+      "intent_detected": "general inquiry",
       "failure_type": null,
       "compliance_flags": [
         "pii_exposed"
@@ -3121,7 +3211,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "billing_04": {
     "media": {
@@ -3839,19 +3930,45 @@
       "caller_frustration": false
     },
     "latency": {
-      "stt_ms": 8900,
+      "stt_ms": 8757,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 18679,
-      "waterfall": []
+      "total_ms": 18327,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 7980,
+          "duration_ms": 3640
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 15800,
+          "duration_ms": 3860
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 30080,
+          "duration_ms": 3920
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 41060,
+          "duration_ms": 4060
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 51500,
+          "duration_ms": 3520
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.023048,
-      "llm_usd": 5.2e-05,
-      "tts_usd": 0.004416,
+      "llm_usd": 6e-05,
+      "tts_usd": 0.005664,
       "telephony_usd": 0.0,
-      "total_usd": 0.027515
+      "total_usd": 0.028772
     },
     "events": {
       "outcome": "completed",
@@ -3875,7 +3992,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "cancel_01": {
     "media": {
@@ -4681,28 +4799,54 @@
         5,
         6
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 10917,
+      "stt_ms": 10793,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 20856,
-      "waterfall": []
+      "total_ms": 20381,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 13960,
+          "duration_ms": 1540
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 23900,
+          "duration_ms": 1320
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 37040,
+          "duration_ms": 1720
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 45800,
+          "duration_ms": 1700
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 52920,
+          "duration_ms": 1020
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.02319,
-      "llm_usd": 6.8e-05,
-      "tts_usd": 0.005776,
+      "llm_usd": 8.4e-05,
+      "tts_usd": 0.008096,
       "telephony_usd": 0.0,
-      "total_usd": 0.029033
+      "total_usd": 0.031369
     },
     "events": {
       "outcome": "completed",
       "drop_off": false,
       "drop_off_turn": null,
-      "intent_detected": "general inquiry",
+      "intent_detected": "cancellation",
       "failure_type": null,
       "compliance_flags": []
     },
@@ -4718,7 +4862,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "cancel_02": {
     "media": {
@@ -5674,22 +5819,48 @@
         3,
         9
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 12423,
+      "stt_ms": 11890,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 23484,
-      "waterfall": []
+      "total_ms": 22411,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 12920,
+          "duration_ms": 1840
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 27140,
+          "duration_ms": 1720
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 42480,
+          "duration_ms": 1900
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 50060,
+          "duration_ms": 1480
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 58400,
+          "duration_ms": 1820
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.025657,
-      "llm_usd": 8.1e-05,
-      "tts_usd": 0.006928,
+      "llm_usd": 9.6e-05,
+      "tts_usd": 0.009072,
       "telephony_usd": 0.0,
-      "total_usd": 0.032666
+      "total_usd": 0.034825
     },
     "events": {
       "outcome": "completed",
@@ -5711,7 +5882,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "cancel_03": {
     "media": {
@@ -6529,22 +6701,48 @@
         8,
         9
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 9789,
+      "stt_ms": 10250,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 18994,
-      "waterfall": []
+      "total_ms": 18995,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 9720,
+          "duration_ms": 1500
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 22100,
+          "duration_ms": 1720
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 31820,
+          "duration_ms": 1460
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 40740,
+          "duration_ms": 1560
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 48040,
+          "duration_ms": 1300
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.021095,
-      "llm_usd": 6.5e-05,
-      "tts_usd": 0.005568,
+      "llm_usd": 8e-05,
+      "tts_usd": 0.007776,
       "telephony_usd": 0.0,
-      "total_usd": 0.026728
+      "total_usd": 0.028952
     },
     "events": {
       "outcome": "completed",
@@ -6566,7 +6764,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "cancel_04": {
     "media": {
@@ -7070,22 +7269,38 @@
       "shift_points": [
         6
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 6356,
+      "stt_ms": 6217,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 13144,
-      "waterfall": []
+      "total_ms": 13237,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 10440,
+          "duration_ms": 1740
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 19680,
+          "duration_ms": 1560
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 27320,
+          "duration_ms": 800
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.015828,
-      "llm_usd": 3.8e-05,
-      "tts_usd": 0.003264,
+      "llm_usd": 4.4e-05,
+      "tts_usd": 0.00416,
       "telephony_usd": 0.0,
-      "total_usd": 0.01913
+      "total_usd": 0.020032
     },
     "events": {
       "outcome": "dropped",
@@ -7107,7 +7322,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "inquiry_01": {
     "media": {
@@ -7676,22 +7892,38 @@
       "shift_points": [
         5
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 7018,
+      "stt_ms": 6899,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 13288,
-      "waterfall": []
+      "total_ms": 13836,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 10200,
+          "duration_ms": 1840
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 21080,
+          "duration_ms": 1700
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 31280,
+          "duration_ms": 1780
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.014618,
-      "llm_usd": 4.6e-05,
-      "tts_usd": 0.003936,
+      "llm_usd": 5.4e-05,
+      "tts_usd": 0.005056,
       "telephony_usd": 0.0,
-      "total_usd": 0.0186
+      "total_usd": 0.019728
     },
     "events": {
       "outcome": "completed",
@@ -7713,7 +7945,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "inquiry_02": {
     "media": {
@@ -8265,19 +8498,40 @@
       "caller_frustration": false
     },
     "latency": {
-      "stt_ms": 6971,
+      "stt_ms": 7395,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 14972,
-      "waterfall": []
+      "total_ms": 15418,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 9460,
+          "duration_ms": 3220
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 16660,
+          "duration_ms": 4260
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 29780,
+          "duration_ms": 3680
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 41160,
+          "duration_ms": 3100
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.019111,
-      "llm_usd": 4.2e-05,
-      "tts_usd": 0.003568,
+      "llm_usd": 4.6e-05,
+      "tts_usd": 0.004192,
       "telephony_usd": 0.0,
-      "total_usd": 0.022721
+      "total_usd": 0.023349
     },
     "events": {
       "outcome": "completed",
@@ -8301,7 +8555,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "inquiry_03": {
     "media": {
@@ -9060,19 +9315,19 @@
       "caller_frustration": false
     },
     "latency": {
-      "stt_ms": 9226,
+      "stt_ms": 9051,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 17770,
+      "total_ms": 17976,
       "waterfall": []
     },
     "cost": {
       "stt_usd": 0.019883,
-      "llm_usd": 5.9e-05,
-      "tts_usd": 0.005024,
+      "llm_usd": 9.2e-05,
+      "tts_usd": 0.009824,
       "telephony_usd": 0.0,
-      "total_usd": 0.024966
+      "total_usd": 0.029799
     },
     "events": {
       "outcome": "completed",
@@ -9094,7 +9349,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "inquiry_04": {
     "media": {
@@ -10141,22 +10397,53 @@
         9,
         15
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 12562,
+      "stt_ms": 13554,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 23859,
-      "waterfall": []
+      "total_ms": 26005,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 11200,
+          "duration_ms": 1360
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 17680,
+          "duration_ms": 1400
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 30840,
+          "duration_ms": 340
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 36020,
+          "duration_ms": 1680
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 49420,
+          "duration_ms": 1480
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 60480,
+          "duration_ms": 1220
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.025926,
-      "llm_usd": 8.3e-05,
-      "tts_usd": 0.007056,
+      "llm_usd": 0.0001,
+      "tts_usd": 0.009616,
       "telephony_usd": 0.0,
-      "total_usd": 0.033065
+      "total_usd": 0.035642
     },
     "events": {
       "outcome": "completed",
@@ -10178,7 +10465,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "sales_01": {
     "media": {
@@ -10996,22 +11284,48 @@
         4,
         9
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 10943,
+      "stt_ms": 13976,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 21012,
-      "waterfall": []
+      "total_ms": 25726,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 13740,
+          "duration_ms": 1440
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 24840,
+          "duration_ms": 1579
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 35160,
+          "duration_ms": 1800
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 45440,
+          "duration_ms": 1540
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 54320,
+          "duration_ms": 960
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.023578,
-      "llm_usd": 7e-05,
-      "tts_usd": 0.005952,
+      "llm_usd": 8.6e-05,
+      "tts_usd": 0.008288,
       "telephony_usd": 0.0,
-      "total_usd": 0.029599
+      "total_usd": 0.031951
     },
     "events": {
       "outcome": "completed",
@@ -11033,7 +11347,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "sales_02": {
     "media": {
@@ -11946,19 +12261,45 @@
       "caller_frustration": false
     },
     "latency": {
-      "stt_ms": 10302,
+      "stt_ms": 11299,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 20497,
-      "waterfall": []
+      "total_ms": 22258,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 12380,
+          "duration_ms": 1860
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 25500,
+          "duration_ms": 1640
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 33160,
+          "duration_ms": 2359
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 44220,
+          "duration_ms": 1880
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 55480,
+          "duration_ms": 640
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.023659,
-      "llm_usd": 6.4e-05,
-      "tts_usd": 0.005488,
+      "llm_usd": 7.9e-05,
+      "tts_usd": 0.007632,
       "telephony_usd": 0.0,
-      "total_usd": 0.029211
+      "total_usd": 0.031369
     },
     "events": {
       "outcome": "completed",
@@ -11980,7 +12321,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "sales_03": {
     "media": {
@@ -12770,19 +13112,45 @@
       "caller_frustration": false
     },
     "latency": {
-      "stt_ms": 10872,
+      "stt_ms": 10272,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 20773,
-      "waterfall": []
+      "total_ms": 19674,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 9700,
+          "duration_ms": 1600
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 21080,
+          "duration_ms": 1600
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 33460,
+          "duration_ms": 1860
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 43680,
+          "duration_ms": 1800
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 51240,
+          "duration_ms": 1080
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.022463,
-      "llm_usd": 6.9e-05,
-      "tts_usd": 0.005856,
+      "llm_usd": 8e-05,
+      "tts_usd": 0.007504,
       "telephony_usd": 0.0,
-      "total_usd": 0.028388
+      "total_usd": 0.030047
     },
     "events": {
       "outcome": "completed",
@@ -12806,7 +13174,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "sales_04": {
     "media": {
@@ -13639,22 +14008,48 @@
         4,
         5
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 11470,
+      "stt_ms": 13786,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 21761,
-      "waterfall": []
+      "total_ms": 24546,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 12720,
+          "duration_ms": 1900
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 24900,
+          "duration_ms": 1399
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 35400,
+          "duration_ms": 1880
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 42600,
+          "duration_ms": 1780
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 53980,
+          "duration_ms": 1000
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.023698,
-      "llm_usd": 6.9e-05,
-      "tts_usd": 0.005856,
+      "llm_usd": 8.5e-05,
+      "tts_usd": 0.008176,
       "telephony_usd": 0.0,
-      "total_usd": 0.029622
+      "total_usd": 0.031958
     },
     "events": {
       "outcome": "completed",
@@ -13676,7 +14071,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "support_01": {
     "media": {
@@ -14495,28 +14891,54 @@
       "shift_points": [
         8
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 9706,
+      "stt_ms": 9865,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 18767,
-      "waterfall": []
+      "total_ms": 18830,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 11860,
+          "duration_ms": 1720
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 23080,
+          "duration_ms": 1660
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 33620,
+          "duration_ms": 1580
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 40000,
+          "duration_ms": 1540
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 48440,
+          "duration_ms": 1580
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.021082,
-      "llm_usd": 6.7e-05,
-      "tts_usd": 0.005696,
+      "llm_usd": 7.7e-05,
+      "tts_usd": 0.007248,
       "telephony_usd": 0.0,
-      "total_usd": 0.026845
+      "total_usd": 0.028408
     },
     "events": {
       "outcome": "completed",
       "drop_off": false,
       "drop_off_turn": null,
-      "intent_detected": "technical support",
+      "intent_detected": "general inquiry",
       "failure_type": null,
       "compliance_flags": []
     },
@@ -14532,7 +14954,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "support_02": {
     "media": {
@@ -15633,19 +16056,19 @@
       "caller_frustration": false
     },
     "latency": {
-      "stt_ms": 12629,
+      "stt_ms": 12636,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 23643,
+      "total_ms": 24645,
       "waterfall": []
     },
     "cost": {
       "stt_usd": 0.025208,
-      "llm_usd": 8.8e-05,
-      "tts_usd": 0.007536,
+      "llm_usd": 0.000138,
+      "tts_usd": 0.014736,
       "telephony_usd": 0.0,
-      "total_usd": 0.032833
+      "total_usd": 0.040083
     },
     "events": {
       "outcome": "completed",
@@ -15667,7 +16090,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "support_03": {
     "media": {
@@ -16479,28 +16903,44 @@
         10,
         12
       ],
-      "caller_frustration": false
+      "caller_frustration": true
     },
     "latency": {
-      "stt_ms": 9010,
+      "stt_ms": 10056,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 18713,
-      "waterfall": []
+      "total_ms": 20700,
+      "waterfall": [
+        {
+          "name": "agent_response",
+          "start_ms": 11500,
+          "duration_ms": 1400
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 23000,
+          "duration_ms": 1440
+        },
+        {
+          "name": "agent_response",
+          "start_ms": 36560,
+          "duration_ms": 1680
+        }
+      ]
     },
     "cost": {
       "stt_usd": 0.022247,
-      "llm_usd": 6e-05,
-      "tts_usd": 0.00512,
+      "llm_usd": 5.8e-05,
+      "tts_usd": 0.00488,
       "telephony_usd": 0.0,
-      "total_usd": 0.027427
+      "total_usd": 0.027185
     },
     "events": {
       "outcome": "dropped",
       "drop_off": true,
       "drop_off_turn": 16,
-      "intent_detected": "technical support",
+      "intent_detected": "general inquiry",
       "failure_type": null,
       "compliance_flags": []
     },
@@ -16516,7 +16956,8 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   },
   "support_04": {
     "media": {
@@ -17381,19 +17822,19 @@
       "caller_frustration": false
     },
     "latency": {
-      "stt_ms": 11687,
+      "stt_ms": 13478,
       "llm_first_token_ms": 0,
       "llm_full_response_ms": 0,
       "tts_ms": 0,
-      "total_ms": 24474,
+      "total_ms": 27007,
       "waterfall": []
     },
     "cost": {
       "stt_usd": 0.030819,
-      "llm_usd": 6.5e-05,
-      "tts_usd": 0.005568,
+      "llm_usd": 0.000103,
+      "tts_usd": 0.010944,
       "telephony_usd": 0.0,
-      "total_usd": 0.036452
+      "total_usd": 0.041866
     },
     "events": {
       "outcome": "completed",
@@ -17415,6 +17856,7 @@
       "librosa_version": "0.11.0",
       "transformers_version": "5.12.1",
       "torch_version": "2.12.0"
-    }
+    },
+    "simulation": null
   }
 }
