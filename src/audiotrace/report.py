@@ -17,7 +17,15 @@ import math
 from dataclasses import dataclass
 from pathlib import Path
 
-from audiotrace.models import CallReport, Latency, Provenance, Sentiment, Transcript, Turn
+from audiotrace.models import (
+    CallReport,
+    Latency,
+    Provenance,
+    Sentiment,
+    SimulationResult,
+    Transcript,
+    Turn,
+)
 from audiotrace.provenance import ProvenanceChange, provenance_changes
 
 
@@ -133,6 +141,7 @@ def render_html(report: CallReport, baseline: CallReport | None = None) -> str:
     banner = _banner(baseline is not None, regressions)
     if baseline is not None:
         banner += _stack_banner(provenance_changes(baseline, report))
+    banner = _simulation_banner(report.simulation) + banner
 
     tile_keys = ("outcome", "quality_score", "sentiment", "response_p95_ms", "cost_usd")
     tiles = "\n".join(_tile(metrics[k], deltas.get(k)) for k in tile_keys)
@@ -440,6 +449,17 @@ def _banner(has_baseline: bool, regressions: int) -> str:
         label = "regression" if regressions == 1 else "regressions"
         return f'<p class="banner bad">{regressions} {label} vs. baseline</p>'
     return '<p class="banner ok">No regressions vs. baseline</p>'
+
+
+def _simulation_banner(simulation: SimulationResult | None) -> str:
+    """The task-completion verdict of a simulated call, or nothing for real calls."""
+    if simulation is None:
+        return ""
+    status = ("ok", "Task completed") if simulation.task_completed else ("bad", "Task failed")
+    detail = html.escape(
+        f"{simulation.scenario} · {simulation.persona} · {simulation.noise} — {simulation.reason}"
+    )
+    return f'<p class="banner {status[0]}">{status[1]}: {detail}</p>'
 
 
 def _stack_banner(changes: list[ProvenanceChange]) -> str:

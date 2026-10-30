@@ -2,11 +2,15 @@
 
     audiotrace baseline <calls_dir> -o baseline.json
     audiotrace check    <calls_dir> -b baseline.json [--report DIR]
+    audiotrace simulate <scenarios_dir> --target mock [-b baseline.json]
+    audiotrace simulate --init [scenarios_dir]
 
 ``baseline`` analyzes every recording in ``calls_dir`` and writes a committed
 baseline. ``check`` re-analyzes, compares each call against the baseline, writes
 a per-call HTML+JSON report, and exits non-zero when a metric drifts past its
-tolerance (see :mod:`audiotrace.check`).
+tolerance (see :mod:`audiotrace.check`). ``simulate`` places scripted synthetic
+calls against an agent and fails when a scenario's task isn't completed (see
+:mod:`audiotrace.simulate`).
 """
 
 from __future__ import annotations
@@ -61,6 +65,56 @@ def _check_cmd(args: argparse.Namespace) -> int:
     return 0 if result.passed else 1
 
 
+def _simulate_cmd(args: argparse.Namespace) -> int:
+    from audiotrace import simulate as sim
+
+    if args.init:
+        written = sim.init_scenarios(args.scenarios_dir)
+        for path in written:
+            print(f"Wrote {path}")
+        print(f"Next: audiotrace simulate {args.scenarios_dir} --target mock")
+        return 0
+
+    from audiotrace.simulate_backends import (
+        ClaudeCaller,
+        ClaudeJudge,
+        KokoroSpeech,
+        WhisperListener,
+    )
+
+    try:
+        suite = sim.load_suite(args.scenarios_dir)
+        speech = KokoroSpeech()
+        factory = (
+            sim.mock_target_factory(speech)
+            if args.target == "mock"
+            else sim.load_target_factory(args.target)
+        )
+        simulator = sim.Simulator(
+            caller=ClaudeCaller(model=args.caller_model),
+            speech=speech,
+            listener=WhisperListener(),
+            judge=ClaudeJudge(model=args.judge_model) if suite.needs_judge() else None,
+        )
+        reports = sim.run_suite(suite, simulator, factory, args.output)
+    except sim.SimulationError as exc:
+        raise SystemExit(f"audiotrace simulate: {exc}") from exc
+
+    for name, report in reports.items():
+        audiotrace.write_report(report, args.output, stem=sim.safe_name(name))
+    print(f"Wrote recordings and reports → {args.output}")
+    if args.write_baseline:
+        print(f"Wrote baseline → {write_baseline(reports, args.write_baseline)}")
+
+    print(sim.format_verdicts(reports))
+    passed = not sim.failed_scenarios(reports)
+    if args.baseline:
+        result = check(reports, load_baseline(args.baseline))
+        print(format_result(result))
+        passed = passed and result.passed
+    return 0 if passed else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="audiotrace",
@@ -78,6 +132,23 @@ def main(argv: list[str] | None = None) -> int:
     chk.add_argument("-b", "--baseline", default="baseline.json", help="Baseline file to read.")
     chk.add_argument("--report", metavar="DIR", default=None, help="Write per-call reports here.")
     chk.set_defaults(func=_check_cmd)
+
+    simu = sub.add_parser("simulate", help="Place simulated calls against an agent.")
+    simu.add_argument(
+        "scenarios_dir", nargs="?", default="scenarios", help="Directory of scenario YAML files."
+    )
+    simu.add_argument("--init", action="store_true", help="Write example scenarios and exit.")
+    simu.add_argument(
+        "--target", default="mock", help="'mock' (each scenario's mock script) or module:factory."
+    )
+    simu.add_argument(
+        "-o", "--output", default="simulations", help="Directory for recordings and reports."
+    )
+    simu.add_argument("-b", "--baseline", default=None, help="Also gate against this baseline.")
+    simu.add_argument("--write-baseline", metavar="FILE", default=None, help="Write a baseline.")
+    simu.add_argument("--caller-model", default="claude-opus-5-5", help="Claude model for callers.")
+    simu.add_argument("--judge-model", default="claude-opus-5-5", help="Claude model for judging.")
+    simu.set_defaults(func=_simulate_cmd)
 
     args = parser.parse_args(argv)
     return int(args.func(args))

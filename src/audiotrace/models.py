@@ -131,6 +131,19 @@ class Provenance(BaseModel):
     torch_version: str = ""
 
 
+class SimulationResult(BaseModel):
+    """The task-completion verdict for a simulated call (PRD 0010)."""
+
+    scenario: str
+    persona: str
+    noise: str
+    task_completed: bool
+    # Why the verdict came out this way: the failed criteria, or that all held.
+    reason: str = ""
+    # Caller turns spoken before the call ended.
+    turns: int = 0
+
+
 class CallReport(BaseModel):
     """The full structured analysis of a single call."""
 
@@ -143,3 +156,5 @@ class CallReport(BaseModel):
     events: Events = Field(default_factory=Events)
     # ``None`` for reports produced before provenance was recorded.
     provenance: Provenance | None = None
+    # Set only for calls placed by ``audiotrace simulate``.
+    simulation: SimulationResult | None = None

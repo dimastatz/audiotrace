@@ -1,6 +1,6 @@
 # PRD 0010 — Simulated callers (pre-release testing)
 
-**Status:** Draft
+**Status:** In progress — framework + mock target shipped; Vapi, Retell, SIP adapters and the Action `scenarios` input not started
 **Owner:** Dima Statz
 **Source:** [Issue #48](https://github.com/dimastatz/audiotrace/issues/48)
 **Related:** [PRD 0008 (regression gate)](./0008-regression-gate.md),
@@ -83,14 +83,39 @@ LiveKit, or custom SIP stacks.
   `pip install audiotrace[simulate]` so the core library stays light.
 - Python 3.9+ compatible, like the rest of the library.
 
-## Open questions
+## Decisions
 
-- Which caller LLM/TTS by default — hosted (cost per run) vs. local (setup
-  time vs. the 15-minute target)?
-- Is the verdict rule-based only (the `success` block), or optionally
-  LLM-judged for fuzzy goals?
-- How do simulated calls interact with the baseline — separate baseline
-  file, or keyed by scenario name in the existing one?
+Resolved 2026-10-30 (were open questions):
+
+- **Caller stack: pluggable, Claude by default.** The caller LLM, TTS, agent
+  transcription, and judge are interfaces (`CallerModel`, `Speech`, `Listener`,
+  `Judge` in `audiotrace.simulate`). Defaults: Claude via the Anthropic API for
+  the caller (hosted, small per-run cost), Kokoro run locally for the voice
+  (the stack already used for the golden set), Whisper for transcription.
+  Everything heavy is in `audiotrace[simulate]`.
+- **Verdict: rules plus an optional LLM judge.** The `success` block's
+  `outcome`, `intent`, and `must_mention` are checked deterministically; a
+  scenario can add a free-text `judge:` criterion that Claude grades. The judge
+  only runs for scenarios that set one.
+- **Baseline: keyed by scenario name** in an ordinary baseline file, so
+  `audiotrace check` / `check()` gate simulated calls unchanged
+  (`audiotrace simulate -b FILE`, `--write-baseline FILE`).
+
+## Implementation notes (first increment)
+
+- `audiotrace simulate <dir> --target mock|module:factory`, `--init` scaffold.
+  `mock` plays a `mock:` script carried by each scenario (greeting, replies,
+  reply delay), so the loop can be run without a live agent.
+- The `Target` interface is turn-based (`start`, `respond(audio, text)`,
+  `close`); each reply carries its own `delay_ms` so adapters can report the
+  agent's real response time. Streaming adapters can buffer to this shape.
+- Barge-in personas start talking 600 ms before the agent finishes; the
+  recording is stereo (caller left, agent right) and analyzed with speaker
+  labels `agent`/`caller` in order of appearance.
+- `heavy_accent` uses a slower British Kokoro voice: Kokoro has no strongly
+  accented English voices. A different `Speech` backend can do better.
+- Remaining: Vapi and Retell adapters (need live accounts to verify), SIP,
+  the Action `scenarios` input, and a measured time-to-first-run.
 
 ## Success metrics
 
@@ -105,6 +130,6 @@ LiveKit, or custom SIP stacks.
   emits a `CallReport` per scenario with a populated task-completion verdict.
 - A failing verdict makes `audiotrace simulate` / the Action exit non-zero.
 - Vapi and Retell adapters covered by tests against recorded/mocked API
-  responses; SIP adapter covered at the interface level.
+  responses; SIP adapter covered at the interface level. *(not started)*
 - README `CallReport` tree updated for the new field.
 - `./scripts/test_local.sh test` passes with coverage ≥ 95%.

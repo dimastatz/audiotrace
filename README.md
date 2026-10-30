@@ -61,6 +61,9 @@ pip install audiotrace[vapi]
 pip install audiotrace[retell]
 pip install audiotrace[twilio]
 
+# Simulated callers (Claude + local Kokoro TTS; Python 3.10–3.12)
+pip install audiotrace[simulate]
+
 # Full install
 pip install audiotrace[all]
 ```
@@ -190,18 +193,25 @@ CallReport
 │   ├── intent_detected: str
 │   ├── failure_type: str | None
 │   └── compliance_flags: List[str]
-└── provenance: Provenance | None   # extraction stack that produced this report; None if unrecorded
-    ├── audiotrace_version: str
-    ├── whisper_model: str
-    ├── diarization: str             # pyannote pipeline id, "pitch" fallback, or "none"
-    ├── sentiment_model: str
-    ├── intent_model: str
-    ├── python_version: str
-    ├── whisper_version: str
-    ├── pyannote_version: str
-    ├── librosa_version: str
-    ├── transformers_version: str
-    └── torch_version: str
+├── provenance: Provenance | None   # extraction stack that produced this report; None if unrecorded
+│   ├── audiotrace_version: str
+│   ├── whisper_model: str
+│   ├── diarization: str             # pyannote pipeline id, "pitch" fallback, or "none"
+│   ├── sentiment_model: str
+│   ├── intent_model: str
+│   ├── python_version: str
+│   ├── whisper_version: str
+│   ├── pyannote_version: str
+│   ├── librosa_version: str
+│   ├── transformers_version: str
+│   └── torch_version: str
+└── simulation: SimulationResult | None  # set only for calls placed by `audiotrace simulate`
+    ├── scenario: str
+    ├── persona: str
+    ├── noise: str
+    ├── task_completed: bool
+    ├── reason: str                  # the failed success criteria, or that all held
+    └── turns: int                   # caller turns spoken
 ```
 
 ---
@@ -323,6 +333,33 @@ jobs:
           calls: tests/calls
           baseline: baseline.json
 ```
+
+## Simulated callers
+
+Test an agent *before* release by having AudioTrace call it. Each scenario file names the caller's goal, a persona (`neutral`, `frustrated`, `heavy_accent`, `interrupter`, `silent`, or your own), a line condition (`clean`, `cafe`, `street`, `car`, `bad_line`, or your own noise file), and the success criteria:
+
+```yaml
+name: reschedule-appointment
+goal: Move my Tuesday 3pm appointment to Thursday morning.
+persona: interrupter
+noise: cafe
+max_turns: 12
+success:
+  outcome: completed
+  must_mention: ["Thursday"]
+  judge: The agent confirmed a specific new time on Thursday morning.   # optional, graded by Claude
+```
+
+```bash
+pip install "audiotrace[simulate]"
+audiotrace simulate --init scenarios                 # example scenarios + a custom persona
+audiotrace simulate scenarios --target mock          # play each scenario's scripted mock agent
+audiotrace simulate scenarios --target my_agent:make_target -b sim-baseline.json
+```
+
+Claude plays the caller (set `ANTHROPIC_API_KEY`), Kokoro voices it locally, and the agent's replies are transcribed with Whisper when the target doesn't return text. Each call is recorded as stereo (caller left, agent right), analyzed like any other recording, and given a `simulation` verdict. The command exits non-zero when a scenario's task isn't completed or, with `-b`, when a metric regresses against the baseline (keyed by scenario name; write one with `--write-baseline`).
+
+`--target mock` replays the `mock:` script in each scenario. To test a real agent, point `--target` at a `module:factory` that takes a scenario and returns an object with `start(scenario)`, `respond(caller_audio, caller_text)` and `close()` (see `audiotrace.simulate.Target`). Vapi, Retell and SIP adapters are planned ([PRD 0010](docs/prd/0010-simulated-callers.md)).
 
 ---
 
