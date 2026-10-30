@@ -82,7 +82,7 @@ closed) — that decides whether Phase 4 is the managed cloud or a compliance pa
 
 ## Phase 2 — Providers & Intelligence
 
-- [ ] Provider adapters: Vapi, Retell, Twilio, Deepgram, ElevenLabs — [PRD 0012](./prd/0012-provider-adapters.md)
+- [x] Provider adapters: Vapi, Retell, Twilio (Deepgram/ElevenLabs: not as adapters) — [PRD 0012](./prd/0012-provider-adapters.md)
 
 ## Phase 3 — Compliance & polish
 

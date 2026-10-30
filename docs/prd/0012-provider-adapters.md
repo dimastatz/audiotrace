@@ -1,6 +1,6 @@
 # PRD 0012 — Provider adapters
 
-**Status:** Draft
+**Status:** Shipped (Vapi, Retell, Twilio); Deepgram/ElevenLabs not planned as adapters
 **Owner:** Dima Statz
 **Related:** [roadmap Phase 2](../roadmap.md),
 [PRD 0010 (simulated callers)](./0010-simulated-callers.md),
@@ -47,15 +47,43 @@ placeholders.
 - **Writing back** to providers (tags, annotations).
 - **Replacing AudioTrace's own analysis** with provider transcripts or scores.
 
-## Open questions
+## Decisions
 
-- Should provider-reported cost and transcripts populate `CallReport.cost` /
-  `transcript`, or stay in metadata alongside AudioTrace's own estimates? The
-  first is a `models.py` contract change.
-- Where are downloaded recordings cached, and for how long?
-- Plain HTTP client vs. each provider's SDK (fewer dependencies vs. less code)?
-- Is Deepgram/ElevenLabs support worth a full adapter, or just a pricing /
-  usage import?
+Resolved 2026-10-30 (were open questions; conservative choices, reversible in
+review):
+
+- **Provider cost and transcripts stay in metadata.** `ProviderCall.metadata`
+  carries `provider_cost_usd` etc.; `CallReport` is unchanged (no contract
+  change), and AudioTrace's own transcript and cost estimate stay the source
+  of truth in reports.
+- **Cache:** `~/.cache/audiotrace/recordings/<provider>/<call_id>.<ext>`
+  (`$AUDIOTRACE_CACHE` or `cache_dir=` overrides), kept until deleted;
+  `fetch_call(..., refresh=True)` re-downloads. Downloads are written to a
+  `.part` file and renamed, so a failed download never leaves a broken file.
+- **Plain HTTP (urllib), no SDKs.** No new dependencies; the `vapi`, `retell`,
+  `twilio`, `elevenlabs`, `deepgram` extras become no-op aliases.
+- **Deepgram / ElevenLabs: no adapter.** They don't hold call recordings; if
+  needed later, a usage/pricing import into `PricingTable` is enough.
+
+## Implementation notes
+
+- `audiotrace.adapters`: `BaseAdapter` (`fetch_call`, `list_calls`),
+  `VapiAdapter`, `RetellAdapter`, `TwilioAdapter`, `get_adapter`,
+  `fetch_calls`, `ProviderCall`, `AdapterError`, `METADATA_KEYS`.
+- Endpoints, from the providers' API references (checked 2026-10-30):
+  Vapi `GET /call/{id}`, `GET /call?createdAtGt&createdAtLt&limit` (paged
+  backwards by creation time, assuming newest-first order); Retell
+  `GET /v2/get-call/{id}`, `POST /v3/list-calls` (`items`, `has_more`,
+  `pagination_key`; cost in cents); Twilio Recording resource,
+  `Recordings.json?DateCreated>=&PageSize`, media at `<uri>.wav` with Basic
+  auth.
+- Vapi recording URL preference: `artifact.recording.mono.combinedUrl`, then
+  `stereoUrl`, then the deprecated `artifact.recordingUrl` /
+  `stereoRecordingUrl` / top-level `recordingUrl`.
+- CLI: `audiotrace baseline|check --provider vapi|retell|twilio` with
+  `--call-id` (repeatable) or `--since` / `--limit`; reports keyed by call id.
+- **Not verified against live accounts yet** — tests use the documented
+  response shapes.
 
 ## Acceptance criteria
 
