@@ -89,7 +89,7 @@ closed) — that decides whether Phase 4 is the managed cloud or a compliance pa
 - [x] Compliance flag detection (PII, consent gaps) — located, masked
       findings with configurable policies — [PRD 0013](./prd/0013-compliance-detection.md)
 - [x] Custom webhook adapter — [PRD 0014](./prd/0014-webhook-adapter.md)
-- [ ] Docs site + examples — [PRD 0015](./prd/0015-docs-site.md)
+- [x] Docs site + examples — [PRD 0015](./prd/0015-docs-site.md)
 - [x] **Extractor provenance stamping** — record the extraction stack
       (audiotrace + Whisper/pyannote/sentiment/Librosa versions) on every
       `CallReport` so drift is attributable to the agent vs. the measurement —

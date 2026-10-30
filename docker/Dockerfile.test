@@ -19,6 +19,7 @@ RUN pip install --no-cache-dir -e ".[dev]"
 
 # Tests and scripts change most often.
 COPY tests ./tests
+COPY examples ./examples
 COPY scripts ./scripts
 RUN chmod +x scripts/test_local.sh
 

@@ -1,0 +1,59 @@
+site_name: AudioTrace
+site_description: CI/CD for voice AI — turn call recordings into structured, gateable reports.
+site_url: https://dimastatz.github.io/audiotrace/
+repo_url: https://github.com/dimastatz/audiotrace
+repo_name: dimastatz/audiotrace
+edit_uri: edit/main/docs/site/
+# PRDs, vision docs and articles stay in docs/ as contributor material.
+docs_dir: docs/site
+strict: true
+
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - navigation.sections
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle: {icon: material/weather-night, name: Dark mode}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle: {icon: material/weather-sunny, name: Light mode}
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Guides:
+      - Regression gate in CI: guides/regression-gate.md
+      - Compliance checks: guides/compliance.md
+      - Providers and webhooks: guides/providers.md
+      - Simulated callers: guides/simulated-callers.md
+      - Production replay: guides/production-replay.md
+      - Pricing and speaker labels: guides/pricing-and-speakers.md
+  - Reference:
+      - CallReport: reference/callreport.md
+      - Python API: reference/api.md
+      - CLI: reference/cli.md
+  - Status: status.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: false
+            show_root_heading: true
+            heading_level: 3
+            members_order: source
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc: {permalink: true}
+  - pymdownx.highlight
+  - pymdownx.superfences

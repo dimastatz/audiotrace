@@ -7,25 +7,24 @@
 <img src="https://raw.githubusercontent.com/dimastatz/audiotrace/main/docs/imgs/auditrace.png" width="256px" alt="AudioTrace logo"> 
 </div>
 
+📖 **Docs:** https://dimastatz.github.io/audiotrace/ — getting started, guides, the full `CallReport` reference, and [what's shipped](https://dimastatz.github.io/audiotrace/status/).
+
 ## What is AudioTrace?
 
 Voice Agents AI plumbing tool every team rebuilds from scratch — until now.
-Drop in a call recording. Get back everything: transcript, quality scores, sentiment shifts, latency breakdown, cost attribution, compliance flags. Normalized. Structured. Queryable. Works with any provider, any stack.
+Drop in a call recording. Get back everything: transcript, quality scores, sentiment shifts, agent response latency, estimated cost, compliance findings. Normalized. Structured. Queryable. Works with any provider, any stack.
 One integration. Zero plumbing. Ship faster.
 
 ```python
 import audiotrace
 
-report = audiotrace.analyze(
-    audio    = "call_recording.wav",
-    metadata = {"agent_version": "v2.1", "provider": "vapi"}
-)
+report = audiotrace.analyze("call_recording.wav", num_speakers=2)
 
-print(report.quality.overall_score)        # 0.87
-print(report.sentiment.caller_frustration) # False
-print(report.latency.llm_first_token_ms)   # 420
-print(report.events.drop_off)              # False
-print(report.cost.total_usd)               # 0.063
+print(report.quality.overall_score)                          # 0.87
+print(report.sentiment.caller_frustration)                   # False
+print([s.duration_ms for s in report.latency.waterfall])     # agent response gaps: [640, 1210, ...]
+print(report.events.drop_off)                                # False
+print(report.cost.total_usd)                                 # 0.063 (estimated from list prices)
 ```
 
 📺 **Watch the demo:**
@@ -43,9 +42,10 @@ AudioTrace exists to be that shared layer. It handles the hard parts so you can 
 - Transcription with speaker diarization
 - Silence gaps, interruptions, speaking pace, and pitch analysis
 - Per-turn sentiment tracking and frustration detection
-- Per-stage latency breakdown (STT → LLM → TTS → telephony)
-- Unified cost calculation across any provider mix
-- Compliance flag detection (PII leakage, consent gaps)
+- Agent response latency for every caller → agent hand-off
+- Cost estimates from your own provider rates
+- Compliance findings (PII said on the call, missing recording disclosure), located and masked
+- A regression gate for CI, simulated callers, and production replay
 
 <img src="https://raw.githubusercontent.com/dimastatz/audiotrace/main/docs/imgs/dashboard.png" alt="AudioTrace dashboard"> 
 
@@ -80,52 +80,16 @@ docker run -it audiotrace
 ```python
 import audiotrace
 
-report = audiotrace.analyze(
-    audio    = "call.wav",
-    metadata = {
-        "call_id":       "abc123",
-        "agent_version": "v2.1",
-        "provider":      "vapi",
-        "campaign":      "healthcare_intake"
-    }
-)
+report = audiotrace.analyze("call.wav", num_speakers=2)   # labels speakers "AI Agent" / "Customer"
 
-# Media
-print(report.media.duration_ms)          # int
-print(report.media.codec)                # str
-
-# Transcript
-print(report.transcript.full_text)
 for turn in report.transcript.turns:
     print(f"{turn.speaker}: {turn.text}")
 
-# Quality
-print(report.quality.overall_score)       # float 0.0–1.0
-print(report.quality.interruptions)       # int
-print(report.quality.silence_gaps)        # List[Gap]
-print(report.quality.speaking_pace_wpm)   # float
-
-# Sentiment
-print(report.sentiment.overall)           # float -1.0 to 1.0
-print(report.sentiment.shift_points)      # List[int] — turn indices
-print(report.sentiment.caller_frustration)# bool
-
-# Latency
-print(report.latency.stt_ms)             # int
-print(report.latency.llm_first_token_ms) # int
-print(report.latency.tts_ms)             # int
-print(report.latency.total_ms)           # int
-
-# Cost
-print(report.cost.stt_usd)               # float
-print(report.cost.llm_usd)               # float
-print(report.cost.total_usd)             # float
-
-# Events
-print(report.events.outcome)             # "completed" | "dropped" | "failed"
-print(report.events.drop_off_turn)       # int | None
-print(report.events.compliance_flags)    # List[str]
+print(report.quality.overall_score, report.sentiment.overall, report.events.outcome)
+audiotrace.write_report(report, "out/")   # out/report.json + a self-contained out/report.html
 ```
+
+Every field, with units and how it's computed, is in the [CallReport reference](https://dimastatz.github.io/audiotrace/reference/callreport/). Runnable scripts live in [`examples/`](examples/).
 
 ### Use provider adapters
 
@@ -175,12 +139,12 @@ CallReport
 │   ├── shift_points: List[int]
 │   └── caller_frustration: bool
 ├── latency
-│   ├── stt_ms: int
-│   ├── llm_first_token_ms: int
-│   ├── llm_full_response_ms: int
-│   ├── tts_ms: int
-│   ├── total_ms: int
-│   └── waterfall: List[LatencySpan]
+│   ├── stt_ms: int                  # AudioTrace's own transcription time
+│   ├── llm_first_token_ms: int      # reserved: 0 (not measurable from audio)
+│   ├── llm_full_response_ms: int    # reserved: 0
+│   ├── tts_ms: int                  # reserved: 0
+│   ├── total_ms: int                # AudioTrace's own analysis time
+│   └── waterfall: List[LatencySpan] # agent_response gaps, one per caller → agent hand-off
 ├── cost
 │   ├── stt_usd: float
 │   ├── llm_usd: float
