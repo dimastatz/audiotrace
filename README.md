@@ -423,7 +423,27 @@ audiotrace simulate scenarios --target my_agent:make_target -b sim-baseline.json
 
 Claude plays the caller (set `ANTHROPIC_API_KEY`), Kokoro voices it locally, and the agent's replies are transcribed with Whisper when the target doesn't return text. Each call is recorded as stereo (caller left, agent right), analyzed like any other recording, and given a `simulation` verdict. The command exits non-zero when a scenario's task isn't completed or, with `-b`, when a metric regresses against the baseline (keyed by scenario name; write one with `--write-baseline`).
 
-`--target mock` replays the `mock:` script in each scenario. To test a real agent, point `--target` at a `module:factory` that takes a scenario and returns an object with `start(scenario)`, `respond(caller_audio, caller_text)` and `close()` (see `audiotrace.simulate.Target`). Vapi, Retell and SIP adapters are planned ([PRD 0010](docs/prd/0010-simulated-callers.md)).
+Targets:
+
+- `--target mock` replays the `mock:` script in each scenario (no agent needed).
+- `--target vapi:<assistant_id>` calls a Vapi assistant over Vapi's WebSocket transport (`VAPI_API_KEY`), streaming the caller's audio in real time.
+- `--target my_module:make_target` plugs in any other agent: a function that takes a scenario and returns an object with `start(scenario)`, `respond(caller_audio, caller_text)` and `close()` (see `audiotrace.simulate.Target`).
+
+Retell and SIP targets aren't available yet: Retell web calls only connect through Retell's WebRTC client, and SIP needs a full SIP/RTP stack ([PRD 0010](docs/prd/0010-simulated-callers.md)).
+
+In CI, the GitHub Action runs scenarios too:
+
+```yaml
+      - uses: dimastatz/audiotrace@v1
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          VAPI_API_KEY: ${{ secrets.VAPI_API_KEY }}
+        with:
+          scenarios: tests/scenarios
+          target: vapi:${{ vars.STAGING_ASSISTANT_ID }}
+          calls: tests/calls            # optional: also gate recorded calls
+          baseline: baseline.json
+```
 
 ---
 

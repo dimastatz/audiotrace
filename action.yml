@@ -1,7 +1,8 @@
 name: "AudioTrace regression gate"
 description: >-
   Fail the build when your voice agent's call quality regresses against a
-  committed baseline (latency, sentiment, cost).
+  committed baseline (latency, sentiment, cost), or when simulated callers
+  can't complete their tasks.
 author: "AudioTrace contributors"
 branding:
   icon: "activity"
@@ -9,12 +10,27 @@ branding:
 
 inputs:
   calls:
-    description: "Directory of golden call recordings to analyze."
-    required: true
+    description: "Directory of golden call recordings to analyze. Optional when `scenarios` is set."
+    required: false
+    default: ""
   baseline:
-    description: "Path to the committed baseline JSON (see `audiotrace baseline`)."
-    required: true
+    description: "Path to the committed baseline JSON for `calls` (see `audiotrace baseline`)."
+    required: false
     default: "baseline.json"
+  scenarios:
+    description: >-
+      Directory of simulated-caller scenarios (see `audiotrace simulate --init`).
+      Needs ANTHROPIC_API_KEY in the step's env (and VAPI_API_KEY for a Vapi target).
+    required: false
+    default: ""
+  target:
+    description: "Simulation target: 'mock', 'vapi:<assistant_id>', or 'module:factory'."
+    required: false
+    default: "mock"
+  scenarios-baseline:
+    description: "Optional baseline for simulated calls (keyed by scenario name)."
+    required: false
+    default: ""
   report-dir:
     description: "Directory to write per-call HTML + JSON reports into."
     required: false
@@ -24,13 +40,24 @@ inputs:
     required: false
     default: "audiotrace"
   python-version:
-    description: "Python version to run the gate on."
+    description: "Python version to run the gate on (simulation needs 3.10-3.12)."
     required: false
     default: "3.12"
 
 runs:
   using: "composite"
   steps:
+    - name: Check inputs
+      shell: bash
+      env:
+        CALLS: ${{ inputs.calls }}
+        SCENARIOS: ${{ inputs.scenarios }}
+      run: |
+        if [ -z "$CALLS" ] && [ -z "$SCENARIOS" ]; then
+          echo "::error::Set 'calls', 'scenarios', or both."
+          exit 1
+        fi
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -38,18 +65,50 @@ runs:
 
     - name: Install FFmpeg
       shell: bash
-      run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      env:
+        SCENARIOS: ${{ inputs.scenarios }}
+      run: |
+        sudo apt-get update
+        # espeak-ng is Kokoro's phonemizer fallback, needed for simulated callers.
+        if [ -n "$SCENARIOS" ]; then
+          sudo apt-get install -y ffmpeg espeak-ng
+        else
+          sudo apt-get install -y ffmpeg
+        fi
 
     - name: Install AudioTrace
       shell: bash
-      run: pip install "${{ inputs.version }}"
+      env:
+        REQUIREMENT: ${{ inputs.version }}
+        SCENARIOS: ${{ inputs.scenarios }}
+      run: |
+        pip install "$REQUIREMENT"
+        if [ -n "$SCENARIOS" ]; then
+          # The [simulate] extra's packages, spelled out so `version` can be any spec.
+          pip install "anthropic>=1" "kokoro>=0.9" "pyyaml>=6" "websockets>=12"
+        fi
 
     - name: Run regression gate
+      if: inputs.calls != ''
       shell: bash
-      run: >-
-        audiotrace check "${{ inputs.calls }}"
-        --baseline "${{ inputs.baseline }}"
-        --report "${{ inputs.report-dir }}"
+      env:
+        CALLS: ${{ inputs.calls }}
+        BASELINE: ${{ inputs.baseline }}
+        REPORT_DIR: ${{ inputs.report-dir }}
+      run: audiotrace check "$CALLS" --baseline "$BASELINE" --report "$REPORT_DIR"
+
+    - name: Run simulated callers
+      if: always() && inputs.scenarios != ''
+      shell: bash
+      env:
+        SCENARIOS: ${{ inputs.scenarios }}
+        TARGET: ${{ inputs.target }}
+        SIM_BASELINE: ${{ inputs.scenarios-baseline }}
+        REPORT_DIR: ${{ inputs.report-dir }}
+      run: |
+        args=(simulate "$SCENARIOS" --target "$TARGET" --output "$REPORT_DIR/simulations")
+        if [ -n "$SIM_BASELINE" ]; then args+=(--baseline "$SIM_BASELINE"); fi
+        audiotrace "${args[@]}"
 
     - name: Upload report
       if: always()
