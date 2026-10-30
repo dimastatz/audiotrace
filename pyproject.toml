@@ -42,7 +42,10 @@ simulate = [
     "pyyaml>=6",
     "websockets>=12",
 ]
-all = ["audiotrace[vapi,retell,twilio,elevenlabs,deepgram,simulate]"]
+# Production replay (PRD 0011): cloud sources are optional; local dirs and
+# provider adapters need nothing extra.
+replay = ["pyyaml>=6", "boto3>=1.28", "google-cloud-storage>=2"]
+all = ["audiotrace[vapi,retell,twilio,elevenlabs,deepgram,simulate,replay]"]
 # Everything needed to develop, test, lint, and type-check the library.
 dev = [
     "pytest>=8",

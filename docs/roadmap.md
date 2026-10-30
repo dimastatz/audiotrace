@@ -118,6 +118,6 @@ Source: [issue #48](https://github.com/dimastatz/audiotrace/issues/48).
   - [x] Vapi target (WebSocket transport) and the Action `scenarios` input
   - [ ] Retell target and SIP fallback — blocked: Retell needs its WebRTC
         client; SIP needs a SIP/RTP stack (see PRD 0010)
-- [ ] **Production replay** — capture failing production calls (S3/GCS/provider
+- [x] **Production replay** — capture failing production calls (S3/GCS/provider
       APIs), dedupe, redact PII, human review, re-check on every release —
       [PRD 0011](./prd/0011-production-replay.md)

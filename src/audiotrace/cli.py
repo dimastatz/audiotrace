@@ -7,6 +7,8 @@
     audiotrace simulate <scenarios_dir> --target mock [-b baseline.json]
     audiotrace simulate --init [scenarios_dir]
     audiotrace serve --mapping mapping.yaml --out reports/ [--port 8080]
+    audiotrace replay ingest --source s3://bucket/calls --rules rules.yaml
+    audiotrace replay review | approve CASE --reviewer NAME | discard CASE
 
 ``baseline`` analyzes every recording in ``calls_dir`` and writes a committed
 baseline. ``check`` re-analyzes, compares each call against the baseline, writes
@@ -187,6 +189,46 @@ def _serve_cmd(args: argparse.Namespace) -> int:
     return 0
 
 
+def _replay_cmd(args: argparse.Namespace) -> int:
+    from datetime import datetime
+
+    from audiotrace import replay
+
+    store = replay.Store(args.store)
+    try:
+        if args.action == "ingest":
+            policy = load_policy(args.policy) if args.policy else None
+            since = datetime.fromisoformat(args.since) if args.since else None
+            result = store.ingest(
+                replay.open_source(args.source, since, args.limit),
+                replay.load_rules(args.rules),
+                policy=policy,
+            )
+            print(
+                f"{result.seen} new call(s), {result.captured} rule hit(s): "
+                f"{len(result.new_cases)} new case(s), {len(result.updated_cases)} repeat(s)"
+            )
+            if result.refused:
+                print(f"Refused (PII survived redaction): {', '.join(result.refused)}")
+        elif args.action == "review":
+            cases = store.pending()
+            for case in cases:
+                print(f"{case['case']}  ×{case['count']}  {case['rule']}: {case['when']}")
+            print(f"{len(cases)} pending case(s) in {store.root / 'pending'}")
+        elif args.action == "approve":
+            wav = store.approve(args.case, args.reviewer)
+            print(
+                f"Approved → {wav} (gate it with: audiotrace check {wav.parent} "
+                f"-b {wav.parent / 'baseline.json'})"
+            )
+        else:
+            store.discard(args.case)
+            print(f"Discarded {args.case}")
+    except replay.ReplayError as exc:
+        raise SystemExit(f"audiotrace replay: {exc}") from exc
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="audiotrace",
@@ -236,6 +278,26 @@ def main(argv: list[str] | None = None) -> int:
     )
     srv.add_argument("--signature-header", default="X-AudioTrace-Signature")
     srv.set_defaults(func=_serve_cmd)
+
+    rep = sub.add_parser("replay", help="Turn failing production calls into test cases.")
+    rep_sub = rep.add_subparsers(dest="action", required=True)
+    ing = rep_sub.add_parser("ingest", help="Analyze new calls and capture rule hits.")
+    ing.add_argument(
+        "--source", required=True, help="DIR, s3://b/prefix, gs://b/prefix, or a provider."
+    )
+    ing.add_argument("--rules", required=True, help="Rules YAML (rules: [{name, when}]).")
+    ing.add_argument("--policy", metavar="FILE", default=None, help=POLICY_HELP)
+    ing.add_argument("--since", help="Provider sources: only calls after this ISO date/time.")
+    ing.add_argument("--limit", type=int, default=100, help="Provider sources: max calls.")
+    rep_sub.add_parser("review", help="List pending cases.")
+    apr = rep_sub.add_parser("approve", help="Add a pending case to the suite.")
+    apr.add_argument("case")
+    apr.add_argument("--reviewer", required=True)
+    dis = rep_sub.add_parser("discard", help="Delete a pending case.")
+    dis.add_argument("case")
+    for p in rep_sub.choices.values():
+        p.add_argument("--store", default="replay", help="Replay store directory.")
+    rep.set_defaults(func=_replay_cmd)
 
     args = parser.parse_args(argv)
     return int(args.func(args))

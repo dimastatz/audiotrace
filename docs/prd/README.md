@@ -24,8 +24,8 @@ of truth Claude Code and contributors build against.
 | [0008](./0008-regression-gate.md) | Baseline + regression gate (CI)     | Shipped     |
 | [0009](./0009-drift-gating.md)    | Drift gating (provenance + PSI/KL)  | Shipped     |
 | [0010](./0010-simulated-callers.md) | Simulated callers (pre-release)   | Shipped (Vapi; Retell/SIP blocked) |
-| [0011](./0011-production-replay.md) | Production replay (regressions)   | Draft       |
+| [0011](./0011-production-replay.md) | Production replay (regressions)   | Shipped       |
 | [0012](./0012-provider-adapters.md) | Provider adapters                 | Shipped       |
 | [0013](./0013-compliance-detection.md) | Compliance detection (PII, consent) | Shipped  |
 | [0014](./0014-webhook-adapter.md)   | Custom webhook adapter            | Shipped       |
-| [0015](./0015-docs-site.md)         | Docs site and examples            | Draft       |
+| [0015](./0015-docs-site.md)         | Docs site and examples            |\1Shipped\2       |

@@ -398,6 +398,35 @@ AudioTrace flags signals; it doesn't certify HIPAA, PCI-DSS or GDPR compliance.
 
 ---
 
+## Production replay
+
+Turn failing production calls into regression tests. Write rules over `CallReport` fields:
+
+```yaml
+# rules.yaml
+rules:
+  - name: low-quality
+    when: quality.overall_score < 0.6
+  - name: frustrated-caller
+    when: sentiment.caller_frustration
+  - name: compliance
+    when: events.compliance_flags
+```
+
+```bash
+pip install "audiotrace[replay]"          # only needed for S3 / GCS sources
+audiotrace replay ingest --source s3://my-bucket/calls --rules rules.yaml   # or a dir, gs://, vapi, retell, twilio
+audiotrace replay review                   # pending cases with occurrence counts
+audiotrace replay approve <case> --reviewer dana
+audiotrace check replay/suite -b replay/suite/baseline.json   # gate on the approved cases
+```
+
+Each run analyzes only calls it hasn't seen before. Calls that fail the same way (rule + failure type + intent) collapse into one case with a count. Before anything is written, every turn containing PII (card, SSN, phone, email, date of birth, address, account number) a self-introduced name ("my name is …"), or a short number given right after a request for a security code, CVV or PIN has its text replaced and its audio silenced, and the result is scanned again; a case that still shows PII isn't stored. Cases wait in `replay/pending/` until someone approves or discards them, and only approved cases reach `replay/suite/`, which you can point the GitHub Action's `calls` input at.
+
+Name detection is a heuristic: it catches people introducing themselves, not every name mentioned in passing.
+
+---
+
 ## Simulated callers
 
 Test an agent *before* release by having AudioTrace call it. Each scenario file names the caller's goal, a persona (`neutral`, `frustrated`, `heavy_accent`, `interrupter`, `silent`, or your own), a line condition (`clean`, `cafe`, `street`, `car`, `bad_line`, or your own noise file), and the success criteria:
