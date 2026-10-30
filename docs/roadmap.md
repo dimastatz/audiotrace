@@ -113,6 +113,9 @@ Source: [issue #48](https://github.com/dimastatz/audiotrace/issues/48).
 - [ ] **Simulated callers** — synthetic calls against a staging agent with
       personas, noise profiles, YAML scenarios, and a task-completion verdict;
       Vapi + Retell at launch, SIP fallback — [PRD 0010](./prd/0010-simulated-callers.md)
+  - [x] Framework: scenario/persona/noise YAML, Claude caller, Kokoro voice,
+        rule + LLM-judge verdict, `audiotrace simulate` with a mock target
+  - [ ] Vapi and Retell targets, SIP fallback, Action `scenarios` input
 - [ ] **Production replay** — capture failing production calls (S3/GCS/provider
       APIs), dedupe, redact PII, human review, re-check on every release —
       [PRD 0011](./prd/0011-production-replay.md)
