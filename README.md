@@ -320,6 +320,8 @@ A metric only fails the build when it drifts past its tolerance (quality −0.05
 
 For a worked example, [`tests/fixtures/golden`](tests/fixtures/golden/README.md) has 20 synthetic calls with planted defects (missing disclosure, PII, frustrated callers, barge-ins, slow replies, dropped calls), the scenario scripts that generated them, and a committed baseline.
 
+On top of the per-call tolerances, `audiotrace check` compares each continuous metric's *distribution* across the run (quality, sentiment, pace, response latency, cost) with the baseline using the Population Stability Index, and fails when PSI exceeds 0.25. That catches a whole run drifting a little in the same direction, which no single call would trip. It needs at least 10 calls present in both runs; smaller runs are gated per call only.
+
 Every report records the extraction stack that produced it (`provenance`: AudioTrace, Whisper, pyannote, sentiment model, Librosa, Transformers and Torch versions). When it differs from the baseline's, `audiotrace check` prints a note listing what changed, so a metric move after an extractor upgrade reads as *measurement drift* rather than an agent regression. The note doesn't fail the build; re-baseline after an intentional stack upgrade.
 
 ### GitHub Action
