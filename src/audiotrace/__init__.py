@@ -20,6 +20,7 @@ from audiotrace.check import (
 from audiotrace.compliance import CompliancePolicy, find_compliance_issues, load_policy
 from audiotrace.core import analyze
 from audiotrace.cost import PricingTable
+from audiotrace.drift import DriftResult, drift
 from audiotrace.models import (
     CallReport,
     ComplianceFinding,
@@ -67,6 +68,8 @@ __all__ = [
     "Threshold",
     "Regression",
     "CheckResult",
+    "drift",
+    "DriftResult",
     "collect_provenance",
     "provenance_changes",
     "ProvenanceChange",

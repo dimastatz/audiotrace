@@ -97,8 +97,8 @@ closed) — that decides whether Phase 4 is the managed cloud or a compliance pa
 
 ## Phase 4 — Trust & scale
 
-- [ ] **Distributional drift gate (PSI/KL)** over a golden call set — the
-      robust replacement for per-call assertions on noisy audio-derived signals.
+- [x] **Distributional drift gate (PSI/KL)** over a golden call set — the
+      robust complement to per-call assertions on noisy audio-derived signals.
       A 20-call synthetic golden set now exists (`tests/fixtures/golden`);
       gating *agent* drift also needs fresh calls per run (PRD 0010 or pilot
       calls) — [PRD 0009 Part B](./prd/0009-drift-gating.md)

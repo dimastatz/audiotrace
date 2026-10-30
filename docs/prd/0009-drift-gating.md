@@ -1,6 +1,6 @@
 # PRD 0009 — Trustworthy drift gating: extractor provenance + distributional checks
 
-**Status:** In progress — Part A shipped; Part B not started (open questions below)
+**Status:** Shipped
 **Owner:** Dima Statz
 **Source:** Design-partner feedback on the CI / signal-extraction article series.
 **Related:** [PRD 0007 (report)](./0007-report.md),
@@ -87,14 +87,27 @@ Caveat: re-analyzing **fixed** recordings can only detect *measurement* drift
 run: simulated callers ([PRD 0010](./0010-simulated-callers.md)) replaying
 these scenarios, or real calls from the first design-partner pilot.
 
-**Open questions**
+**Decisions** (resolved 2026-10-30; were open questions)
 
-- PSI vs KL vs both; binning strategy for small samples; minimum golden-set size
-  for a stable metric.
-- Threshold config location (mirror `DEFAULT_THRESHOLDS` in `check.py`).
-- Confirm augment-vs-replace once real distributions exist.
+- **PSI gates, KL is reported.** PSI is symmetric and has conventional
+  thresholds; KL(current ‖ baseline) is printed alongside for context only.
+- **Binning:** quantile edges fit to the baseline, about four calls per bin
+  (2–10 bins), half-a-call smoothing per bin so empty bins stay finite. A
+  constant baseline gets below / equal / above bins so any change shows.
+- **Minimum size:** runs with fewer than 10 shared calls aren't scored (the
+  statistic is noise); the per-call gate still runs.
+- **Threshold:** PSI 0.25 per metric (the conventional "significant shift"),
+  in `drift.DEFAULT_DRIFT_THRESHOLDS`, next to `check.DEFAULT_THRESHOLDS`;
+  `check(..., drift_thresholds=...)` overrides, `{}` turns it off.
+- **Augment, not replace.** The per-call gate is unchanged; drift is an extra
+  run-level failure, computed over the calls present in both runs.
 
-**Acceptance criteria (when unblocked)**
+**Implementation:** `audiotrace.drift` (`drift()`, `psi_kl()`, `DriftResult`);
+`CheckResult.drift` / `.drifted`; `format_result` prints each drifted metric
+with its PSI and the mean before → after. On the golden set, re-analysing the
+same calls with the same stack gives PSI 0 for every metric.
+
+**Acceptance criteria**
 
 - Given a golden set, `check()` computes per-metric PSI/KL (current vs baseline)
   and fails when drift exceeds threshold.
