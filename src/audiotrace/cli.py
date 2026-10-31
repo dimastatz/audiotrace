@@ -6,6 +6,9 @@
     audiotrace check    --provider retell --since 2026-10-01 --limit 50 -b baseline.json
     audiotrace simulate <scenarios_dir> --target mock [-b baseline.json]
     audiotrace simulate --init [scenarios_dir]
+    audiotrace serve --mapping mapping.yaml --out reports/ [--port 8080]
+    audiotrace replay ingest --source s3://bucket/calls --rules rules.yaml
+    audiotrace replay review | approve CASE --reviewer NAME | discard CASE
 
 ``baseline`` analyzes every recording in ``calls_dir`` and writes a committed
 baseline. ``check`` re-analyzes, compares each call against the baseline, writes
@@ -135,11 +138,9 @@ def _simulate_cmd(args: argparse.Namespace) -> int:
     try:
         suite = sim.load_suite(args.scenarios_dir)
         speech = KokoroSpeech()
-        factory = (
-            sim.mock_target_factory(speech)
-            if args.target == "mock"
-            else sim.load_target_factory(args.target)
-        )
+        from audiotrace.simulate_targets import resolve_target
+
+        factory = resolve_target(args.target, speech)
         simulator = sim.Simulator(
             caller=ClaudeCaller(model=args.caller_model),
             speech=speech,
@@ -163,6 +164,69 @@ def _simulate_cmd(args: argparse.Namespace) -> int:
         print(format_result(result))
         passed = passed and result.passed
     return 0 if passed else 1
+
+
+def _serve_cmd(args: argparse.Namespace) -> int:
+    import os
+
+    from audiotrace.adapters import AdapterError, CustomAdapter
+    from audiotrace.webhook import WebhookApp, serve
+
+    secret = os.environ.get(args.secret_env)
+    if not secret:
+        raise SystemExit(f"audiotrace serve: set {args.secret_env} to the shared webhook secret")
+    try:
+        adapter = CustomAdapter.from_yaml(args.mapping)
+    except AdapterError as exc:
+        raise SystemExit(f"audiotrace serve: {exc}") from exc
+    app = WebhookApp(
+        adapter=adapter,
+        secret=secret,
+        out_dir=Path(args.out),
+        signature_header=args.signature_header,
+    )
+    serve(app, args.host, args.port)
+    return 0
+
+
+def _replay_cmd(args: argparse.Namespace) -> int:
+    from datetime import datetime
+
+    from audiotrace import replay
+
+    store = replay.Store(args.store)
+    try:
+        if args.action == "ingest":
+            policy = load_policy(args.policy) if args.policy else None
+            since = datetime.fromisoformat(args.since) if args.since else None
+            result = store.ingest(
+                replay.open_source(args.source, since, args.limit),
+                replay.load_rules(args.rules),
+                policy=policy,
+            )
+            print(
+                f"{result.seen} new call(s), {result.captured} rule hit(s): "
+                f"{len(result.new_cases)} new case(s), {len(result.updated_cases)} repeat(s)"
+            )
+            if result.refused:
+                print(f"Refused (PII survived redaction): {', '.join(result.refused)}")
+        elif args.action == "review":
+            cases = store.pending()
+            for case in cases:
+                print(f"{case['case']}  ×{case['count']}  {case['rule']}: {case['when']}")
+            print(f"{len(cases)} pending case(s) in {store.root / 'pending'}")
+        elif args.action == "approve":
+            wav = store.approve(args.case, args.reviewer)
+            print(
+                f"Approved → {wav} (gate it with: audiotrace check {wav.parent} "
+                f"-b {wav.parent / 'baseline.json'})"
+            )
+        else:
+            store.discard(args.case)
+            print(f"Discarded {args.case}")
+    except replay.ReplayError as exc:
+        raise SystemExit(f"audiotrace replay: {exc}") from exc
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -189,7 +253,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     simu.add_argument("--init", action="store_true", help="Write example scenarios and exit.")
     simu.add_argument(
-        "--target", default="mock", help="'mock' (each scenario's mock script) or module:factory."
+        "--target",
+        default="mock",
+        help="'mock' (each scenario's mock script), vapi:<assistant_id>, or module:factory.",
     )
     simu.add_argument(
         "-o", "--output", default="simulations", help="Directory for recordings and reports."
@@ -199,6 +265,39 @@ def main(argv: list[str] | None = None) -> int:
     simu.add_argument("--caller-model", default="claude-opus-5-5", help="Claude model for callers.")
     simu.add_argument("--judge-model", default="claude-opus-5-5", help="Claude model for judging.")
     simu.set_defaults(func=_simulate_cmd)
+
+    srv = sub.add_parser("serve", help="Receive end-of-call webhooks and write reports.")
+    srv.add_argument("--mapping", required=True, help="CustomAdapter field mapping (YAML).")
+    srv.add_argument("--out", default="reports", help="Directory for per-call reports.")
+    srv.add_argument("--host", default="127.0.0.1", help="Interface to bind (default: local).")
+    srv.add_argument("--port", type=int, default=8080)
+    srv.add_argument(
+        "--secret-env",
+        default="AUDIOTRACE_WEBHOOK_SECRET",
+        help="Env var holding the shared secret used to verify signatures.",
+    )
+    srv.add_argument("--signature-header", default="X-AudioTrace-Signature")
+    srv.set_defaults(func=_serve_cmd)
+
+    rep = sub.add_parser("replay", help="Turn failing production calls into test cases.")
+    rep_sub = rep.add_subparsers(dest="action", required=True)
+    ing = rep_sub.add_parser("ingest", help="Analyze new calls and capture rule hits.")
+    ing.add_argument(
+        "--source", required=True, help="DIR, s3://b/prefix, gs://b/prefix, or a provider."
+    )
+    ing.add_argument("--rules", required=True, help="Rules YAML (rules: [{name, when}]).")
+    ing.add_argument("--policy", metavar="FILE", default=None, help=POLICY_HELP)
+    ing.add_argument("--since", help="Provider sources: only calls after this ISO date/time.")
+    ing.add_argument("--limit", type=int, default=100, help="Provider sources: max calls.")
+    rep_sub.add_parser("review", help="List pending cases.")
+    apr = rep_sub.add_parser("approve", help="Add a pending case to the suite.")
+    apr.add_argument("case")
+    apr.add_argument("--reviewer", required=True)
+    dis = rep_sub.add_parser("discard", help="Delete a pending case.")
+    dis.add_argument("case")
+    for p in rep_sub.choices.values():
+        p.add_argument("--store", default="replay", help="Replay store directory.")
+    rep.set_defaults(func=_replay_cmd)
 
     args = parser.parse_args(argv)
     return int(args.func(args))

@@ -1,6 +1,6 @@
 # PRD 0014 — Custom webhook adapter
 
-**Status:** Draft
+**Status:** Shipped
 **Owner:** Dima Statz
 **Related:** [roadmap Phase 3](../roadmap.md),
 [PRD 0012 (provider adapters)](./0012-provider-adapters.md),
@@ -46,13 +46,30 @@ lists it as `CustomAdapter` (TBD).
   heavy users call the library from their own workers.
 - **Recordings that need custom auth flows** beyond a static header/token.
 
-## Open questions
+## Decisions
 
-- Is the built-in receiver worth shipping at all, or is `parse()` plus an
-  example handler enough?
-- Field mapping syntax — JSONPath, dotted paths, or a Python callable?
-- Should `analyze()` run synchronously in the request, or should the receiver
-  answer immediately and analyze in the background?
+Resolved 2026-10-30 (were open questions; reversible in review):
+
+- **Ship the receiver, small.** `audiotrace serve` is standard library only
+  (`http.server`), one background worker, no retries or persistence. It's
+  optional; `CustomAdapter.parse()` from your own handler is the primary path.
+- **Mapping syntax: dotted paths, a JSONPath subset** (`$.a.b[0].c`, the `$.`
+  optional), plus Python callables when used from code. Full JSONPath (filters,
+  wildcards) isn't needed for "pick a field" and would add a dependency.
+- **Analyze in the background.** The receiver answers `202` after checking the
+  signature and that the required fields map; download + `analyze()` run in a
+  worker, because analysis takes far longer than webhook senders wait.
+
+## Implementation notes
+
+- `adapters.CustomAdapter(mapping, provider=, recording_headers=)`,
+  `.from_yaml()` (header values expand `${ENV}`), `.extract()` (no download),
+  `.parse()`; required `recording_url` and `call_id`, other keys optional.
+  Shares `BaseAdapter`'s cache and atomic download.
+- `webhook.WebhookApp` (`handle` → 401 bad/missing signature, 400 not JSON,
+  422 unmappable, 202 queued; `process`; `work`), `make_server`, `serve`,
+  `sign` / `verify` (HMAC-SHA256, constant-time compare). Bodies over 1 MB get
+  413. Binds `127.0.0.1` by default.
 
 ## Acceptance criteria
 

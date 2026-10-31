@@ -40,8 +40,14 @@ simulate = [
     "anthropic>=1; python_version >= '3.10'",
     "kokoro>=0.9; python_version >= '3.10' and python_version < '3.13'",
     "pyyaml>=6",
+    "websockets>=12",
 ]
-all = ["audiotrace[vapi,retell,twilio,elevenlabs,deepgram,simulate]"]
+# Production replay (PRD 0011): cloud sources are optional; local dirs and
+# provider adapters need nothing extra.
+replay = ["pyyaml>=6", "boto3>=1.28", "google-cloud-storage>=2"]
+all = ["audiotrace[vapi,retell,twilio,elevenlabs,deepgram,simulate,replay]"]
+# The docs site (PRD 0015): mkdocs build --strict
+docs = ["mkdocs-material>=9.5", "mkdocstrings[python]>=0.26"]
 # Everything needed to develop, test, lint, and type-check the library.
 dev = [
     "pytest>=8",
@@ -51,6 +57,7 @@ dev = [
     "pyyaml>=6",
     "types-PyYAML",
     "anthropic>=1; python_version >= '3.10'",
+    "websockets>=12",
 ]
 
 [project.scripts]
@@ -64,7 +71,7 @@ Repository = "https://github.com/audiotrace/audiotrace"
 # Keep the source distribution lean: the golden call set (~3 MB of audio),
 # doc images, and local Claude settings aren't needed to build or test the
 # library from source.
-exclude = ["tests/fixtures/golden", "docs/imgs", ".claude"]
+exclude = ["tests/fixtures/golden", "docs/imgs", ".claude", "site"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/audiotrace"]

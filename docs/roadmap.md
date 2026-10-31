@@ -88,8 +88,8 @@ closed) — that decides whether Phase 4 is the managed cloud or a compliance pa
 
 - [x] Compliance flag detection (PII, consent gaps) — located, masked
       findings with configurable policies — [PRD 0013](./prd/0013-compliance-detection.md)
-- [ ] Custom webhook adapter — [PRD 0014](./prd/0014-webhook-adapter.md)
-- [ ] Docs site + examples — [PRD 0015](./prd/0015-docs-site.md)
+- [x] Custom webhook adapter — [PRD 0014](./prd/0014-webhook-adapter.md)
+- [x] Docs site + examples — [PRD 0015](./prd/0015-docs-site.md)
 - [x] **Extractor provenance stamping** — record the extraction stack
       (audiotrace + Whisper/pyannote/sentiment/Librosa versions) on every
       `CallReport` so drift is attributable to the agent vs. the measurement —
@@ -115,7 +115,9 @@ Source: [issue #48](https://github.com/dimastatz/audiotrace/issues/48).
       Vapi + Retell at launch, SIP fallback — [PRD 0010](./prd/0010-simulated-callers.md)
   - [x] Framework: scenario/persona/noise YAML, Claude caller, Kokoro voice,
         rule + LLM-judge verdict, `audiotrace simulate` with a mock target
-  - [ ] Vapi and Retell targets, SIP fallback, Action `scenarios` input
-- [ ] **Production replay** — capture failing production calls (S3/GCS/provider
+  - [x] Vapi target (WebSocket transport) and the Action `scenarios` input
+  - [ ] Retell target and SIP fallback — blocked: Retell needs its WebRTC
+        client; SIP needs a SIP/RTP stack (see PRD 0010)
+- [x] **Production replay** — capture failing production calls (S3/GCS/provider
       APIs), dedupe, redact PII, human review, re-check on every release —
       [PRD 0011](./prd/0011-production-replay.md)

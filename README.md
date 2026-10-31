@@ -7,25 +7,24 @@
 <img src="https://raw.githubusercontent.com/dimastatz/audiotrace/main/docs/imgs/auditrace.png" width="256px" alt="AudioTrace logo"> 
 </div>
 
+📖 **Docs:** https://dimastatz.github.io/audiotrace/ — getting started, guides, the full `CallReport` reference, and [what's shipped](https://dimastatz.github.io/audiotrace/status/).
+
 ## What is AudioTrace?
 
 Voice Agents AI plumbing tool every team rebuilds from scratch — until now.
-Drop in a call recording. Get back everything: transcript, quality scores, sentiment shifts, latency breakdown, cost attribution, compliance flags. Normalized. Structured. Queryable. Works with any provider, any stack.
+Drop in a call recording. Get back everything: transcript, quality scores, sentiment shifts, agent response latency, estimated cost, compliance findings. Normalized. Structured. Queryable. Works with any provider, any stack.
 One integration. Zero plumbing. Ship faster.
 
 ```python
 import audiotrace
 
-report = audiotrace.analyze(
-    audio    = "call_recording.wav",
-    metadata = {"agent_version": "v2.1", "provider": "vapi"}
-)
+report = audiotrace.analyze("call_recording.wav", num_speakers=2)
 
-print(report.quality.overall_score)        # 0.87
-print(report.sentiment.caller_frustration) # False
-print(report.latency.llm_first_token_ms)   # 420
-print(report.events.drop_off)              # False
-print(report.cost.total_usd)               # 0.063
+print(report.quality.overall_score)                          # 0.87
+print(report.sentiment.caller_frustration)                   # False
+print([s.duration_ms for s in report.latency.waterfall])     # agent response gaps: [640, 1210, ...]
+print(report.events.drop_off)                                # False
+print(report.cost.total_usd)                                 # 0.063 (estimated from list prices)
 ```
 
 📺 **Watch the demo:**
@@ -43,9 +42,10 @@ AudioTrace exists to be that shared layer. It handles the hard parts so you can 
 - Transcription with speaker diarization
 - Silence gaps, interruptions, speaking pace, and pitch analysis
 - Per-turn sentiment tracking and frustration detection
-- Per-stage latency breakdown (STT → LLM → TTS → telephony)
-- Unified cost calculation across any provider mix
-- Compliance flag detection (PII leakage, consent gaps)
+- Agent response latency for every caller → agent hand-off
+- Cost estimates from your own provider rates
+- Compliance findings (PII said on the call, missing recording disclosure), located and masked
+- A regression gate for CI, simulated callers, and production replay
 
 <img src="https://raw.githubusercontent.com/dimastatz/audiotrace/main/docs/imgs/dashboard.png" alt="AudioTrace dashboard"> 
 
@@ -80,52 +80,16 @@ docker run -it audiotrace
 ```python
 import audiotrace
 
-report = audiotrace.analyze(
-    audio    = "call.wav",
-    metadata = {
-        "call_id":       "abc123",
-        "agent_version": "v2.1",
-        "provider":      "vapi",
-        "campaign":      "healthcare_intake"
-    }
-)
+report = audiotrace.analyze("call.wav", num_speakers=2)   # labels speakers "AI Agent" / "Customer"
 
-# Media
-print(report.media.duration_ms)          # int
-print(report.media.codec)                # str
-
-# Transcript
-print(report.transcript.full_text)
 for turn in report.transcript.turns:
     print(f"{turn.speaker}: {turn.text}")
 
-# Quality
-print(report.quality.overall_score)       # float 0.0–1.0
-print(report.quality.interruptions)       # int
-print(report.quality.silence_gaps)        # List[Gap]
-print(report.quality.speaking_pace_wpm)   # float
-
-# Sentiment
-print(report.sentiment.overall)           # float -1.0 to 1.0
-print(report.sentiment.shift_points)      # List[int] — turn indices
-print(report.sentiment.caller_frustration)# bool
-
-# Latency
-print(report.latency.stt_ms)             # int
-print(report.latency.llm_first_token_ms) # int
-print(report.latency.tts_ms)             # int
-print(report.latency.total_ms)           # int
-
-# Cost
-print(report.cost.stt_usd)               # float
-print(report.cost.llm_usd)               # float
-print(report.cost.total_usd)             # float
-
-# Events
-print(report.events.outcome)             # "completed" | "dropped" | "failed"
-print(report.events.drop_off_turn)       # int | None
-print(report.events.compliance_flags)    # List[str]
+print(report.quality.overall_score, report.sentiment.overall, report.events.outcome)
+audiotrace.write_report(report, "out/")   # out/report.json + a self-contained out/report.html
 ```
+
+Every field, with units and how it's computed, is in the [CallReport reference](https://dimastatz.github.io/audiotrace/reference/callreport/). Runnable scripts live in [`examples/`](examples/).
 
 ### Use provider adapters
 
@@ -175,12 +139,12 @@ CallReport
 │   ├── shift_points: List[int]
 │   └── caller_frustration: bool
 ├── latency
-│   ├── stt_ms: int
-│   ├── llm_first_token_ms: int
-│   ├── llm_full_response_ms: int
-│   ├── tts_ms: int
-│   ├── total_ms: int
-│   └── waterfall: List[LatencySpan]
+│   ├── stt_ms: int                  # AudioTrace's own transcription time
+│   ├── llm_first_token_ms: int      # reserved: 0 (not measurable from audio)
+│   ├── llm_full_response_ms: int    # reserved: 0
+│   ├── tts_ms: int                  # reserved: 0
+│   ├── total_ms: int                # AudioTrace's own analysis time
+│   └── waterfall: List[LatencySpan] # agent_response gaps, one per caller → agent hand-off
 ├── cost
 │   ├── stt_usd: float
 │   ├── llm_usd: float
@@ -235,7 +199,30 @@ Adapters use plain HTTPS from the standard library, so no extra install is neede
 | Twilio | `TwilioAdapter` | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | ✅ recordings (ids are `RE...` Recording SIDs) |
 | ElevenLabs | — | — | Not planned as an adapter (usage/pricing import at most) |
 | Deepgram | — | — | Not planned as an adapter (usage/pricing import at most) |
-| Custom webhook | `CustomAdapter` | — | Planned ([PRD 0014](docs/prd/0014-webhook-adapter.md)) |
+| Custom webhook | `CustomAdapter` | your own (static header) | ✅ any payload shape via a field mapping; optional `audiotrace serve` receiver |
+
+**Custom stacks** (self-hosted LiveKit or Pipecat, your own SIP, …): map your end-of-call event with `CustomAdapter`.
+
+```yaml
+# mapping.yaml
+provider: livekit
+recording_headers:
+  Authorization: Bearer ${RECORDINGS_TOKEN}   # read from the environment
+fields:
+  recording_url: $.data.recording.files[0].location   # required
+  call_id: $.data.id                                  # required
+  agent_version: $.data.metadata.agent_version        # optional: skipped when missing
+  started_at: $.data.started_at
+```
+
+```python
+from audiotrace.adapters import CustomAdapter
+
+call = CustomAdapter.from_yaml("mapping.yaml").parse(event_json)  # from your own handler
+report = audiotrace.analyze(call.audio, call.metadata)
+```
+
+Or run the bundled receiver: `AUDIOTRACE_WEBHOOK_SECRET=... audiotrace serve --mapping mapping.yaml --out reports/`. It accepts POSTs signed with `X-AudioTrace-Signature: sha256=<HMAC-SHA256 of the body>`, answers `202` immediately, and writes `<call_id>.json`/`.html` reports from a background worker. It binds to `127.0.0.1` by default; put it behind your own HTTPS proxy. It's meant for modest volume (one worker, no retries).
 
 The adapters are tested against the providers' documented response shapes, not live accounts yet; please open an issue if a field comes back different.
 
@@ -375,6 +362,35 @@ AudioTrace flags signals; it doesn't certify HIPAA, PCI-DSS or GDPR compliance.
 
 ---
 
+## Production replay
+
+Turn failing production calls into regression tests. Write rules over `CallReport` fields:
+
+```yaml
+# rules.yaml
+rules:
+  - name: low-quality
+    when: quality.overall_score < 0.6
+  - name: frustrated-caller
+    when: sentiment.caller_frustration
+  - name: compliance
+    when: events.compliance_flags
+```
+
+```bash
+pip install "audiotrace[replay]"          # only needed for S3 / GCS sources
+audiotrace replay ingest --source s3://my-bucket/calls --rules rules.yaml   # or a dir, gs://, vapi, retell, twilio
+audiotrace replay review                   # pending cases with occurrence counts
+audiotrace replay approve <case> --reviewer dana
+audiotrace check replay/suite -b replay/suite/baseline.json   # gate on the approved cases
+```
+
+Each run analyzes only calls it hasn't seen before. Calls that fail the same way (rule + failure type + intent) collapse into one case with a count. Before anything is written, every turn containing PII (card, SSN, phone, email, date of birth, address, account number) a self-introduced name ("my name is …"), or a short number given right after a request for a security code, CVV or PIN has its text replaced and its audio silenced, and the result is scanned again; a case that still shows PII isn't stored. Cases wait in `replay/pending/` until someone approves or discards them, and only approved cases reach `replay/suite/`, which you can point the GitHub Action's `calls` input at.
+
+Name detection is a heuristic: it catches people introducing themselves, not every name mentioned in passing.
+
+---
+
 ## Simulated callers
 
 Test an agent *before* release by having AudioTrace call it. Each scenario file names the caller's goal, a persona (`neutral`, `frustrated`, `heavy_accent`, `interrupter`, `silent`, or your own), a line condition (`clean`, `cafe`, `street`, `car`, `bad_line`, or your own noise file), and the success criteria:
@@ -400,7 +416,27 @@ audiotrace simulate scenarios --target my_agent:make_target -b sim-baseline.json
 
 Claude plays the caller (set `ANTHROPIC_API_KEY`), Kokoro voices it locally, and the agent's replies are transcribed with Whisper when the target doesn't return text. Each call is recorded as stereo (caller left, agent right), analyzed like any other recording, and given a `simulation` verdict. The command exits non-zero when a scenario's task isn't completed or, with `-b`, when a metric regresses against the baseline (keyed by scenario name; write one with `--write-baseline`).
 
-`--target mock` replays the `mock:` script in each scenario. To test a real agent, point `--target` at a `module:factory` that takes a scenario and returns an object with `start(scenario)`, `respond(caller_audio, caller_text)` and `close()` (see `audiotrace.simulate.Target`). Vapi, Retell and SIP adapters are planned ([PRD 0010](docs/prd/0010-simulated-callers.md)).
+Targets:
+
+- `--target mock` replays the `mock:` script in each scenario (no agent needed).
+- `--target vapi:<assistant_id>` calls a Vapi assistant over Vapi's WebSocket transport (`VAPI_API_KEY`), streaming the caller's audio in real time.
+- `--target my_module:make_target` plugs in any other agent: a function that takes a scenario and returns an object with `start(scenario)`, `respond(caller_audio, caller_text)` and `close()` (see `audiotrace.simulate.Target`).
+
+Retell and SIP targets aren't available yet: Retell web calls only connect through Retell's WebRTC client, and SIP needs a full SIP/RTP stack ([PRD 0010](docs/prd/0010-simulated-callers.md)).
+
+In CI, the GitHub Action runs scenarios too:
+
+```yaml
+      - uses: dimastatz/audiotrace@v1
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          VAPI_API_KEY: ${{ secrets.VAPI_API_KEY }}
+        with:
+          scenarios: tests/scenarios
+          target: vapi:${{ vars.STAGING_ASSISTANT_ID }}
+          calls: tests/calls            # optional: also gate recorded calls
+          baseline: baseline.json
+```
 
 ---
 

@@ -22,3 +22,16 @@ jobs:
 
       - name: Tests (pytest)
         run: docker run --rm audiotrace-test pytest
+
+  # Runs every example against the bundled call with the real models (slow:
+  # downloads Whisper and the classifiers), separately from the unit tests.
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build test image
+        run: docker build -f docker/Dockerfile.test -t audiotrace-test .
+
+      - name: Run examples
+        run: docker run --rm audiotrace-test python examples/run_all.py

@@ -1,6 +1,6 @@
 # PRD 0015 — Docs site and examples
 
-**Status:** Draft
+**Status:** Shipped (publishing needs GitHub Pages enabled; see below)
 **Owner:** Dima Statz
 **Related:** [roadmap Phase 3](../roadmap.md),
 [articles](../articles/)
@@ -41,12 +41,34 @@ This PRD covers a hosted docs site and an `examples/` folder.
 - **Moving PRDs, vision docs, or articles** to the site — they stay in
   `docs/` as contributor material.
 
-## Open questions
+## Decisions
 
-- Tooling — MkDocs (Material) + mkdocstrings, or Sphinx?
-- Hosting — GitHub Pages or Read the Docs, and on what domain?
-- Should examples run in the regular test suite (slower, model downloads) or
-  in a separate CI job?
+Resolved 2026-10-30 (were open questions; reversible in review):
+
+- **MkDocs Material + mkdocstrings**: Markdown like the rest of `docs/`, API
+  reference from the Google-style docstrings, `mkdocs build --strict`. Note:
+  Material for MkDocs reaches end of life on 2027-05-05; its successor,
+  Zensical, reads the same `mkdocs.yml`, so migrating later is cheap.
+- **GitHub Pages**, deployed by `.github/workflows/docs.yml` on every push to
+  `main`, at `https://dimastatz.github.io/audiotrace/` (no custom domain yet).
+- **Examples run in a separate CI job** (`examples` in `ci.yml`, real models
+  against the bundled call). The unit suite also executes every example with
+  `analyze()` stubbed, so wiring breaks fail fast.
+
+## Implementation notes
+
+- Site sources in `docs/site/` (PRDs, vision and articles stay in `docs/`):
+  home, getting started, six guides, `CallReport` / Python API / CLI
+  references, and a Status page (shipped vs. not).
+- `tests/test_docs.py` fails when a `CallReport` field, a public API name, or
+  a nav page is missing from the site.
+- `examples/`: `analyze_one_call.py`, `compare_two_calls.py`,
+  `gate_directory.py`, `custom_pricing.py`, `run_all.py`.
+- README: links the site, and no longer shows planned values as real
+  (`llm_first_token_ms: 420`, "STT → LLM → TTS breakdown"); the long
+  per-field quick start moved to the reference.
+- **One-time repo setting:** Settings → Pages → Source: *GitHub Actions*.
+  Until then the deploy job fails; the build job still validates every PR.
 
 ## Acceptance criteria
 

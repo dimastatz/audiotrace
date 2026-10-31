@@ -1,6 +1,6 @@
 # PRD 0011 — Production replay (regression capture)
 
-**Status:** Draft
+**Status:** Shipped
 **Owner:** Dima Statz
 **Source:** [Issue #48](https://github.com/dimastatz/audiotrace/issues/48)
 **Related:** [PRD 0008 (regression gate)](./0008-regression-gate.md),
@@ -87,19 +87,41 @@ calls.
   `case.yaml`.
 - Cloud SDKs behind `pip install audiotrace[replay]`.
 
-## Open questions
+## Decisions
 
-- Dedup signature: is rule + failure_type + intent enough, or do we need
-  transcript embeddings from day one?
-- Where does the pending queue live for teams that don't want cases in git
-  (bucket prefix vs. repo directory)?
-- Redaction recall target — what miss rate is acceptable before a case may be
-  stored?
+Resolved 2026-10-30 (were open questions; conservative choices, reversible in
+review):
 
-## Success metrics
+- **Dedup signature: rule + failure type + intent**, no transcript
+  embeddings. Deterministic and dependency-free; embeddings can refine it
+  later if real traffic over-merges or under-merges cases.
+- **The queue lives in a directory** (`--store`, default `replay/`), meant to
+  be committed next to the golden calls. A bucket-prefix store can come later;
+  ingestion already reads from buckets.
+- **Redaction bar: zero detectable PII.** Every turn with a detector hit, a
+  self-introduced name, or a short number answering a request for a security
+  code / CVV / PIN (found on the golden set: "It's $737.") is replaced wholesale and its audio silenced, and the
+  redacted transcript is re-scanned; any remaining finding refuses the case.
+  The residual risk is what the detector can't see (names said in passing,
+  PII forms PRD 0013 doesn't cover), stated in the README.
 
-- The test suite **grows automatically** from real failures.
-- Previously seen failure types **don't recur** in later releases.
+## Implementation notes
+
+- `audiotrace.replay`: `Rule` / `load_rules` (`<field.path>` or
+  `<field.path> <op> <literal>`, validated against the `CallReport` schema at
+  load time), sources (`LocalSource`, `S3Source`, `GCSSource`,
+  `ProviderSource`, `open_source`), `redact_transcript`, `redact_audio`,
+  `Store` (`ingest`, `pending`, `approve`, `discard`).
+- `state.json` records seen ids per source and is saved after every call.
+- One case per call: the first matching rule wins.
+- `approve` copies the redacted audio to `suite/<case>.wav` and adds the
+  redacted report to `suite/baseline.json`, so `audiotrace check replay/suite
+  -b replay/suite/baseline.json` (or the Action) gates on approved cases.
+  This is re-analysis mode (measurement drift); scenario replay through
+  PRD 0010 is not automated yet.
+- CLI: `audiotrace replay ingest | review | approve | discard`.
+- Cloud SDKs (`boto3`, `google-cloud-storage`) in `audiotrace[replay]`, loaded
+  only for S3/GCS sources; tests use fakes.
 
 ## Acceptance criteria
 

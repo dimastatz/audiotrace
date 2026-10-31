@@ -397,3 +397,116 @@ def fetch_calls(
     if not ids:
         raise AdapterError(f"{adapter.provider}: no calls found")
     return {call_id: adapter.fetch_call(call_id) for call_id in ids}
+
+
+# --- Custom webhook payloads (PRD 0014) ---------------------------------------------
+
+_PATH_PART = re.compile(r"([^.\[\]]+)|\[(\d+)\]")
+
+
+def resolve_path(payload: Any, path: str) -> Any:
+    """Look up a dotted path (JSONPath subset: ``$.a.b[0].c``) in a payload.
+    Returns ``None`` when any step is missing."""
+    node = payload
+    expr = path[1:] if path.startswith("$") else path
+    for key, index in _PATH_PART.findall(expr):
+        if key:
+            if not isinstance(node, dict) or key not in node:
+                return None
+            node = node[key]
+        else:
+            if not isinstance(node, list) or int(index) >= len(node):
+                return None
+            node = node[int(index)]
+    return node
+
+
+class CustomAdapter(BaseAdapter):
+    """Any stack's end-of-call event, via a field mapping instead of an API.
+
+    ``mapping`` maps output keys to paths in the payload (``$.data.recording.url``,
+    ``data.items[0].id``; a JSONPath subset) or to callables taking the payload.
+    ``recording_url`` and ``call_id`` are required; every other key (the
+    normalized :data:`METADATA_KEYS` or your own) is optional and skipped when
+    missing. ``recording_headers`` (e.g. a static token) are sent when
+    downloading the recording.
+
+        adapter = CustomAdapter.from_yaml("mapping.yaml")
+        call = adapter.parse(request_json)   # downloads the recording
+    """
+
+    REQUIRED = ("recording_url", "call_id")
+
+    def __init__(
+        self,
+        mapping: dict[str, Any],
+        provider: str = "custom",
+        recording_headers: dict[str, str] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(**kwargs)
+        missing = [k for k in self.REQUIRED if k not in mapping]
+        if missing:
+            raise AdapterError(f"Mapping must define: {', '.join(missing)}")
+        self.mapping = dict(mapping)
+        self.provider = provider
+        self._download_headers = dict(recording_headers or {})
+
+    @classmethod
+    def from_yaml(cls, path: str | Path, **kwargs: Any) -> CustomAdapter:
+        """Load ``{fields: {...}, provider: str, recording_headers: {...}}``, or a
+        bare ``{key: path}`` mapping. Header values like ``${TOKEN}`` are read
+        from the environment."""
+        import yaml
+
+        data = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+        if not isinstance(data, dict):
+            raise AdapterError(f"{path}: expected a mapping")
+        fields = data.get("fields", data)
+        headers = {
+            name: os.path.expandvars(str(value))
+            for name, value in (data.get("recording_headers") or {}).items()
+        }
+        provider = str(data.get("provider", "custom")) if "fields" in data else "custom"
+        return cls(fields, provider=provider, recording_headers=headers, **kwargs)
+
+    def extract(self, payload: Any) -> tuple[str, dict[str, Any]]:
+        """Map a payload to (recording URL, metadata) without downloading."""
+        values: dict[str, Any] = {}
+        for key, spec in self.mapping.items():
+            value = spec(payload) if callable(spec) else resolve_path(payload, str(spec))
+            if value is None:
+                if key in self.REQUIRED:
+                    raise AdapterError(f"Payload has no {key!r} at {spec!r}")
+                continue
+            values[key] = value
+        url = str(values.pop("recording_url"))
+        values["call_id"] = str(values["call_id"])
+        metadata: dict[str, Any] = dict.fromkeys(METADATA_KEYS)
+        metadata.update(values)
+        metadata["provider"] = self.provider
+        return url, metadata
+
+    def parse(self, payload: Any, refresh: bool = False) -> ProviderCall:
+        """Map the payload and download its recording."""
+        url, metadata = self.extract(payload)
+        return ProviderCall(
+            audio=self._download(metadata["call_id"], url, refresh), metadata=metadata
+        )
+
+    def _get_call(self, call_id: str) -> dict[str, Any]:
+        raise AdapterError("CustomAdapter has no API to fetch from; use parse(payload)")
+
+    def _list_page(
+        self, since: datetime | None, limit: int, cursor: str | None
+    ) -> tuple[list[str], str | None]:
+        return [], None
+
+    def _recording_url(self, raw: dict[str, Any]) -> str | None:
+        return self.extract(raw)[0]
+
+    def _metadata(self, raw: dict[str, Any]) -> dict[str, Any]:
+        return self.extract(raw)[1]
+
+    def _recording_headers(self) -> dict[str, str]:
+        return self._download_headers

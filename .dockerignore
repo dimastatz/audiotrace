@@ -1,8 +1,10 @@
 .git
 .github
-docs
+docs/*
+!docs/site
 *.md
 !README.md
+!docs/site/**
 .claude
 .venv
 venv
