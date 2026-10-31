@@ -2,6 +2,8 @@
 
     audiotrace baseline <calls_dir> -o baseline.json
     audiotrace check    <calls_dir> -b baseline.json [--report DIR]
+    audiotrace check    --provider vapi --call-id ID [--call-id ID ...] -b baseline.json
+    audiotrace check    --provider retell --since 2026-10-01 --limit 50 -b baseline.json
     audiotrace simulate <scenarios_dir> --target mock [-b baseline.json]
     audiotrace simulate --init [scenarios_dir]
 
@@ -46,8 +48,52 @@ def _analyze_dir(calls_dir: str, policy_file: str | None = None) -> dict[str, Ca
     return reports
 
 
+def _analyze_provider(args: argparse.Namespace) -> dict[str, CallReport]:
+    """Fetch calls from a provider (see audiotrace.adapters) and analyze them."""
+    from datetime import datetime
+
+    from audiotrace.adapters import AdapterError, fetch_calls, get_adapter
+
+    policy = load_policy(args.policy) if args.policy else None
+    since = datetime.fromisoformat(args.since) if args.since else None
+    try:
+        calls = fetch_calls(get_adapter(args.provider), args.call_id, since, args.limit)
+    except AdapterError as exc:
+        raise SystemExit(f"audiotrace: {exc}") from exc
+    reports: dict[str, CallReport] = {}
+    for call_id, call in calls.items():
+        print(f"Analyzing {args.provider} call {call_id} ...", file=sys.stderr)
+        reports[call_id] = audiotrace.analyze(
+            call.audio, call.metadata, num_speakers=2, compliance_policy=policy
+        )
+    return reports
+
+
+def _analyze(args: argparse.Namespace) -> dict[str, CallReport]:
+    if args.provider:
+        return _analyze_provider(args)
+    if not args.calls_dir:
+        raise SystemExit("audiotrace: give a calls directory or --provider")
+    return _analyze_dir(args.calls_dir, args.policy)
+
+
+def _add_source_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("calls_dir", nargs="?", help="Directory of call recordings.")
+    parser.add_argument("--policy", metavar="FILE", default=None, help=POLICY_HELP)
+    parser.add_argument(
+        "--provider",
+        choices=("vapi", "retell", "twilio"),
+        help="Fetch calls from a provider instead (credentials from env vars).",
+    )
+    parser.add_argument(
+        "--call-id", action="append", help="Provider call id; repeat for more (default: latest)."
+    )
+    parser.add_argument("--since", help="With --provider: only calls after this ISO date/time.")
+    parser.add_argument("--limit", type=int, default=100, help="With --provider: max calls.")
+
+
 def _baseline_cmd(args: argparse.Namespace) -> int:
-    reports = _analyze_dir(args.calls_dir, args.policy)
+    reports = _analyze(args)
     out = write_baseline(reports, args.output)
     print(f"Wrote baseline for {len(reports)} call(s) → {out}")
     return 0
@@ -55,7 +101,7 @@ def _baseline_cmd(args: argparse.Namespace) -> int:
 
 def _check_cmd(args: argparse.Namespace) -> int:
     baseline = load_baseline(args.baseline)
-    current = _analyze_dir(args.calls_dir, args.policy)
+    current = _analyze(args)
 
     if args.report:
         for call_id, report in current.items():
@@ -127,16 +173,14 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
 
     base = sub.add_parser("baseline", help="Analyze a folder of calls and write a baseline.")
-    base.add_argument("calls_dir", help="Directory of call recordings.")
+    _add_source_args(base)
     base.add_argument("-o", "--output", default="baseline.json", help="Baseline file to write.")
-    base.add_argument("--policy", metavar="FILE", default=None, help=POLICY_HELP)
     base.set_defaults(func=_baseline_cmd)
 
     chk = sub.add_parser("check", help="Gate a folder of calls against a baseline.")
-    chk.add_argument("calls_dir", help="Directory of call recordings.")
+    _add_source_args(chk)
     chk.add_argument("-b", "--baseline", default="baseline.json", help="Baseline file to read.")
     chk.add_argument("--report", metavar="DIR", default=None, help="Write per-call reports here.")
-    chk.add_argument("--policy", metavar="FILE", default=None, help=POLICY_HELP)
     chk.set_defaults(func=_check_cmd)
 
     simu = sub.add_parser("simulate", help="Place simulated calls against an agent.")

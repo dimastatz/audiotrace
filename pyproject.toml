@@ -27,12 +27,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Provider adapters — populated as each adapter lands (see docs/roadmap.md).
+# Provider adapters use the standard library (PRD 0012); these extras are kept
+# as no-op aliases so existing install commands keep working.
 vapi = []
 retell = []
-twilio = ["twilio>=8"]
+twilio = []
 elevenlabs = []
-deepgram = ["deepgram-sdk>=3"]
+deepgram = []
 # Simulated callers (PRD 0010): Claude plays the caller, Kokoro voices it.
 # The Anthropic SDK needs Python 3.10+; Kokoro supports 3.10-3.12.
 simulate = [

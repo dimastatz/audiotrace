@@ -56,11 +56,6 @@ AudioTrace exists to be that shared layer. It handles the hard parts so you can 
 ```bash
 pip install audiotrace
 
-# With specific provider adapter
-pip install audiotrace[vapi]
-pip install audiotrace[retell]
-pip install audiotrace[twilio]
-
 # Simulated callers (Claude + local Kokoro TTS; Python 3.10–3.12)
 pip install audiotrace[simulate]
 
@@ -135,12 +130,18 @@ print(report.events.compliance_flags)    # List[str]
 ### Use provider adapters
 
 ```python
-from audiotrace.adapters import VapiAdapter
+from audiotrace.adapters import VapiAdapter  # also RetellAdapter, TwilioAdapter
 
-adapter = VapiAdapter(api_key="...")
-call    = adapter.fetch_call(call_id="abc123")
-report  = audiotrace.analyze(call.audio, call.metadata)
+adapter = VapiAdapter()  # api_key=..., or VAPI_API_KEY from the environment
+call = adapter.fetch_call("abc123")  # downloads the recording once, then reuses it
+report = audiotrace.analyze(call.audio, call.metadata)
+
+call.metadata  # call_id, provider, agent_id, agent_version, started_at, ended_reason, provider_cost_usd
+for call_id in adapter.list_calls(limit=20):  # newest calls
+    ...
 ```
+
+Recordings are cached under `~/.cache/audiotrace/recordings/<provider>/` (or `$AUDIOTRACE_CACHE`) until you delete them. The CLI can gate provider calls directly: `audiotrace check --provider retell --since 2026-10-01 -b baseline.json`.
 
 ---
 
@@ -225,12 +226,20 @@ CallReport
 
 ## Provider support
 
-> **Provider adapters are TBD** — not yet implemented. The integrations below are
-> planned; today you pass a local audio file path to `analyze()` directly. The
-> adapter example above is illustrative of the intended API.
+Adapters use plain HTTPS from the standard library, so no extra install is needed (the extras below are kept as no-op aliases).
 
-| Provider | Adapter | Status |
-|---|---|---|
+| Provider | Adapter | Credentials | Status |
+|---|---|---|---|
+| Vapi | `VapiAdapter` | `VAPI_API_KEY` | ✅ calls + recordings, cost, end reason |
+| Retell | `RetellAdapter` | `RETELL_API_KEY` | ✅ calls + recordings, cost (converted from cents), agent version |
+| Twilio | `TwilioAdapter` | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | ✅ recordings (ids are `RE...` Recording SIDs) |
+| ElevenLabs | — | — | Not planned as an adapter (usage/pricing import at most) |
+| Deepgram | — | — | Not planned as an adapter (usage/pricing import at most) |
+| Custom webhook | `CustomAdapter` | — | Planned ([PRD 0014](docs/prd/0014-webhook-adapter.md)) |
+
+The adapters are tested against the providers' documented response shapes, not live accounts yet; please open an issue if a field comes back different.
+
+---|---|---|
 | Vapi | `audiotrace[vapi]` | TBD |
 | Retell | `audiotrace[retell]` | TBD |
 | Twilio | `audiotrace[twilio]` | TBD |
